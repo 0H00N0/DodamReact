@@ -1,0 +1,315 @@
+/* 헤더 기본 스타일 */
+.header {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
+  padding: 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-base);
+  transition: var(--transition-base);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 160px; /* 70px → 160px로 증가하여 큰 로고 수용 */
+  position: relative;
+}
+
+/* 로고 섹션 */
+.logoSection {
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.logoSection:hover {
+  transform: scale(1.05);
+}
+
+.logo {
+  height: 135px; /* 45px x 3 = 135px로 3배 증가 */
+  width: auto;
+  transition: opacity 0.2s ease;
+}
+
+.logoSection:hover .logo {
+  opacity: 0.8;
+}
+
+/* 모바일 햄버거 메뉴 버튼 */
+.mobileMenuButton {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1001;
+}
+
+.mobileMenuButton:hover {
+  background-color: var(--state-hover);
+}
+
+.mobileMenuButton:active {
+  transform: scale(0.95);
+}
+
+/* 햄버거 라인 스타일 */
+.hamburgerLine {
+  width: 20px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 1px;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  margin: 2px 0;
+}
+
+/* 햄버거 메뉴 활성화 시 X 모양으로 변환 */
+.hamburgerLine.active:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.hamburgerLine.active:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburgerLine.active:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* 유틸리티 섹션 */
+.utilitySection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.utilityButton {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px; /* 터치 친화적 크기 */
+  min-height: 44px;
+}
+
+.utilityButton:hover {
+  background-color: var(--state-hover);
+  color: var(--text-primary);
+}
+
+.utilityButton:active {
+  transform: scale(0.95);
+}
+
+.utilityButton.active {
+  background-color: var(--state-active);
+  color: var(--text-primary);
+}
+
+/* 장바구니 아이콘과 뱃지 */
+.cartIconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cartBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #dc2626;
+  color: var(--color-white);
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--bg-primary);
+  box-shadow: var(--shadow-base);
+}
+
+/* 포커스 스타일 - 접근성 */
+.mobileMenuButton:focus,
+.utilityButton:focus {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 2px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 16px;
+  }
+  
+  .utilitySection {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+    height: 120px; /* 60px → 120px로 증가하여 큰 로고 수용 */
+  }
+  
+  /* 모바일에서 햄버거 메뉴 버튼 표시 */
+  .mobileMenuButton {
+    display: flex;
+    order: -1; /* 로고보다 앞에 배치 */
+  }
+  
+  .logoSection {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin: 0 16px;
+  }
+  
+  .logo {
+    height: 96px; /* 32px x 3 = 96px로 3배 증가 */
+  }
+  
+  .utilitySection {
+    gap: 4px;
+  }
+  
+  .utilityButton {
+    padding: 6px;
+    min-width: 40px;
+    min-height: 40px;
+  }
+  
+  /* 모바일에서 유틸리티 버튼 일부 숨김 */
+  .utilityButton:nth-child(1) {
+    display: none; /* 검색 버튼 숨김 */
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+    height: 100px; /* 56px → 100px로 증가하여 큰 로고 수용 */
+  }
+  
+  .logo {
+    height: 84px; /* 28px x 3 = 84px로 3배 증가 */
+  }
+  
+  .utilitySection {
+    gap: 2px;
+  }
+  
+  .utilityButton {
+    padding: 4px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  
+  /* 작은 화면에서 마이페이지 버튼도 숨김 */
+  .utilityButton:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 8px;
+    height: 90px; /* 52px → 90px로 증가하여 큰 로고 수용 */
+  }
+  
+  .logo {
+    height: 72px; /* 24px x 3 = 72px로 3배 증가 */
+  }
+  
+  .mobileMenuButton {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .hamburgerLine {
+    width: 18px;
+  }
+}
+
+/* 고해상도 화면 최적화 */
+@media (min-width: 1400px) {
+  .container {
+    padding: 0 24px;
+    height: 170px; /* 76px → 170px로 증가하여 큰 로고 수용 */
+  }
+  
+  .logo {
+    height: 144px; /* 48px x 3 = 144px로 3배 증가 */
+  }
+  
+  .utilitySection {
+    gap: 16px;
+  }
+  
+  .utilityButton {
+    padding: 10px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
+/* 터치 기기 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .utilityButton,
+  .mobileMenuButton {
+    min-width: 48px;
+    min-height: 48px;
+  }
+}
+
+/* 미디어 쿼리 다크모드는 CSS 변수로 자동 처리됨 */
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .utilityButton,
+  .mobileMenuButton {
+    border: 1px solid;
+  }
+  
+  .hamburgerLine {
+    height: 3px;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .utilityButton,
+  .mobileMenuButton,
+  .hamburgerLine,
+  .logo {
+    transition: none;
+  }
+}

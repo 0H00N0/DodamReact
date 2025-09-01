@@ -1,0 +1,482 @@
+/* 그리드 컨테이너 */
+.gridContainer {
+  width: 100%;
+}
+
+/* 상품 그리드 */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--grid-gap, 20px);
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  align-items: stretch; /* 카드 높이 통일 */
+}
+
+/* 커스텀 컬럼 수가 지정된 경우 */
+.productGrid[style*="--grid-columns"] {
+  grid-template-columns: repeat(var(--grid-columns), 1fr);
+}
+
+/* 간격 변형 */
+.gapTight {
+  gap: 12px;
+}
+
+.gapNormal {
+  gap: 20px;
+}
+
+.gapWide {
+  gap: 32px;
+}
+
+/* 로딩 스켈레톤 */
+.skeletonCard {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeletonImage {
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonContent {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeletonTitle {
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonRating {
+  height: 16px;
+  width: 60%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonPrice {
+  height: 18px;
+  width: 40%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 빈 상태 */
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.emptyIcon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.emptyTitle {
+  font-size: 24px;
+  font-weight: 500;
+  color: #495057;
+  margin: 0 0 8px 0;
+}
+
+.emptyDescription {
+  font-size: 16px;
+  color: #6c757d;
+  margin: 0;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* 애니메이션 */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  
+  .gapTight {
+    gap: 8px;
+  }
+  
+  .gapNormal {
+    gap: 16px;
+  }
+  
+  .gapWide {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr); /* 모바일에서 2열 고정 */
+    gap: 12px;
+  }
+  
+  /* 커스텀 컬럼 수 무시하고 모바일에서는 2열 고정 */
+  .productGrid[style*="--grid-columns"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  .gapTight {
+    gap: 8px;
+  }
+  
+  .gapNormal {
+    gap: 12px;
+  }
+  
+  .gapWide {
+    gap: 16px;
+  }
+  
+  .skeletonImage {
+    height: 200px;
+  }
+  
+  .skeletonContent {
+    padding: 12px;
+    gap: 8px;
+  }
+  
+  .emptyState {
+    padding: 48px 16px;
+    grid-column: 1 / -1; /* 빈 상태는 전체 너비 */
+  }
+  
+  .emptyIcon {
+    font-size: 40px;
+  }
+  
+  .emptyTitle {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  
+  .emptyDescription {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr); /* 480px 이하에서도 2열 유지 */
+    gap: 8px;
+  }
+  
+  .gapTight {
+    gap: 6px;
+  }
+  
+  .gapNormal {
+    gap: 8px;
+  }
+  
+  .gapWide {
+    gap: 12px;
+  }
+  
+  .skeletonImage {
+    height: 180px;
+  }
+  
+  .skeletonContent {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .emptyState {
+    padding: 40px 12px;
+  }
+  
+  .emptyIcon {
+    font-size: 36px;
+  }
+  
+  .emptyTitle {
+    font-size: 16px;
+  }
+  
+  .emptyDescription {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 360px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr); /* 360px 이하에서도 2열 유지 */
+    gap: 6px;
+  }
+  
+  .gapTight {
+    gap: 4px;
+  }
+  
+  .gapNormal {
+    gap: 6px;
+  }
+  
+  .gapWide {
+    gap: 10px;
+  }
+  
+  .skeletonImage {
+    height: 160px;
+  }
+  
+  .skeletonContent {
+    padding: 8px;
+    gap: 4px;
+  }
+  
+  .skeletonTitle {
+    height: 16px;
+  }
+  
+  .skeletonRating {
+    height: 14px;
+  }
+  
+  .skeletonPrice {
+    height: 16px;
+  }
+  
+  .emptyState {
+    padding: 32px 8px;
+  }
+  
+  .emptyIcon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+  
+  .emptyTitle {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  
+  .emptyDescription {
+    font-size: 12px;
+  }
+}
+
+/* 매우 작은 화면에서만 단일 컬럼 (320px 이하) */
+@media (max-width: 320px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 고해상도 화면 최적화 */
+@media (min-width: 1400px) {
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+  
+  .gapTight {
+    gap: 16px;
+  }
+  
+  .gapNormal {
+    gap: 28px;
+  }
+  
+  .gapWide {
+    gap: 40px;
+  }
+  
+  .skeletonImage {
+    height: 280px;
+  }
+  
+  .skeletonContent {
+    padding: 18px;
+    gap: 12px;
+  }
+  
+  .skeletonTitle {
+    height: 22px;
+  }
+  
+  .skeletonRating {
+    height: 18px;
+  }
+  
+  .skeletonPrice {
+    height: 20px;
+  }
+  
+  .emptyState {
+    padding: 100px 32px;
+  }
+  
+  .emptyIcon {
+    font-size: 72px;
+    margin-bottom: 20px;
+  }
+  
+  .emptyTitle {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+  
+  .emptyDescription {
+    font-size: 18px;
+  }
+}
+
+/* 터치 기기 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .productGrid {
+    /* 터치 기기에서 그리드 간격 약간 증가 */
+    gap: calc(var(--grid-gap, 20px) + 4px);
+  }
+  
+  .gapTight {
+    gap: calc(var(--grid-gap, 12px) + 2px);
+  }
+  
+  .gapNormal {
+    gap: calc(var(--grid-gap, 20px) + 4px);
+  }
+  
+  .gapWide {
+    gap: calc(var(--grid-gap, 32px) + 6px);
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .gridContainer {
+    background: #1a1a1a;
+  }
+  
+  .skeletonCard {
+    background: #2a2a2a;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  
+  .skeletonImage {
+    background: linear-gradient(90deg, #333333 25%, #444444 50%, #333333 75%);
+  }
+  
+  .skeletonTitle,
+  .skeletonRating,
+  .skeletonPrice {
+    background: linear-gradient(90deg, #333333 25%, #444444 50%, #333333 75%);
+  }
+  
+  .emptyState {
+    color: #b0b0b0;
+  }
+  
+  .emptyTitle {
+    color: #ffffff;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .skeletonCard {
+    border: 2px solid;
+    box-shadow: none;
+  }
+  
+  .emptyTitle {
+    color: #000000;
+    font-weight: 800;
+  }
+  
+  .emptyDescription {
+    color: #333333;
+    font-weight: 500;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .skeletonCard,
+  .skeletonImage,
+  .skeletonTitle,
+  .skeletonRating,
+  .skeletonPrice {
+    animation: none;
+  }
+  
+  .skeletonImage,
+  .skeletonTitle,
+  .skeletonRating,
+  .skeletonPrice {
+    background: #f0f0f0;
+  }
+}
+
+/* 프린트 스타일 */
+@media print {
+  .productGrid {
+    display: block;
+    column-count: 2;
+    column-gap: 20px;
+  }
+  
+  .skeletonCard,
+  .emptyState {
+    display: none;
+  }
+  
+  .emptyTitle {
+    color: black;
+  }
+  
+  .emptyDescription {
+    color: black;
+  }
+}
