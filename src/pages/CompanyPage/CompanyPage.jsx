@@ -21,5 +21,14 @@ const CompanyPage = () => {
         </ul>
     );
 
-    
-}
+    return (
+        <div>
+            <h1>회사 소개</h1>
+            <CompanyOverview></CompanyOverview>
+            <h2>연혁</h2>
+            <CompantHistory></CompantHistory>
+        </div>
+    );  
+};
+
+export default CompanyPage;
