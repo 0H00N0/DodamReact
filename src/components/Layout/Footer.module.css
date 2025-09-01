@@ -1,0 +1,411 @@
+/* 푸터 기본 스타일 */
+.footer {
+  background-color: var(--color-gray-800);
+  color: var(--color-gray-100);
+  margin-top: auto;
+  padding: 48px 0 24px;
+  border-top: 4px solid #3498db;
+  transition: var(--transition-base);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* 메인 푸터 콘텐츠 */
+.footerContent {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+/* 섹션 타이틀 */
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #3498db;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* 회사 정보 섹션 */
+.companyInfo {
+  max-width: 300px;
+}
+
+.description {
+  color: var(--color-gray-300);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.address {
+  font-style: normal;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.address p {
+  margin-bottom: 8px;
+  color: var(--color-gray-300);
+}
+
+.address strong {
+  color: var(--color-gray-100);
+  font-weight: 600;
+}
+
+.address a {
+  color: #3498db;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  margin-left: 8px;
+}
+
+.address a:hover,
+.address a:focus {
+  color: #5dade2;
+  text-decoration: underline;
+}
+
+/* 네비게이션 */
+.footerNav {
+  min-width: 0;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.navList li {
+  margin-bottom: 12px;
+}
+
+.navList a {
+  color: var(--color-gray-300);
+  text-decoration: none;
+  font-size: 14px;
+  line-height: 1.5;
+  transition: color 0.2s ease;
+  display: block;
+  padding: 4px 0;
+}
+
+.navList a:hover,
+.navList a:focus {
+  color: #3498db;
+  text-decoration: underline;
+}
+
+/* 소셜 미디어 섹션 */
+.socialSection {
+  min-width: 0;
+}
+
+.socialLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-gray-300);
+  text-decoration: none;
+  font-size: 14px;
+  padding: 8px 0;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.socialLink:hover,
+.socialLink:focus {
+  color: #3498db;
+  transform: translateX(4px);
+}
+
+.socialIcon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.socialText {
+  font-weight: 500;
+}
+
+/* 법적 정보 */
+.legalInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 24px 0;
+  border-top: 1px solid var(--color-gray-700);
+  border-bottom: 1px solid var(--color-gray-700);
+  margin-bottom: 24px;
+}
+
+.businessInfo {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--color-gray-400);
+}
+
+.businessInfo p {
+  margin-bottom: 8px;
+}
+
+.businessInfo strong {
+  color: var(--color-gray-300);
+  font-weight: 600;
+}
+
+/* 인증마크 */
+.certifications {
+  display: flex;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.certItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: var(--color-gray-700);
+  border-radius: 8px;
+  min-width: 80px;
+  transition: background-color 0.2s ease;
+}
+
+.certItem:hover {
+  background-color: var(--color-gray-600);
+}
+
+.certIcon {
+  font-size: 20px;
+}
+
+.certText {
+  font-size: 10px;
+  color: var(--color-gray-300);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* 저작권 */
+.copyright {
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-gray-400);
+  line-height: 1.6;
+}
+
+.copyright p {
+  margin-bottom: 8px;
+}
+
+.disclaimer {
+  color: var(--color-gray-500);
+  font-style: italic;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 32px;
+  }
+
+  .companyInfo {
+    grid-column: 1 / -1;
+    max-width: none;
+    margin-bottom: 20px;
+  }
+
+  .socialSection {
+    grid-column: 1 / -1;
+    margin-top: 20px;
+  }
+
+  .socialLinks {
+    flex-direction: row;
+    justify-content: center;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 0 20px;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .companyInfo {
+    text-align: left;
+  }
+
+  .address {
+    text-align: left;
+  }
+
+  .legalInfo {
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+
+  .certifications {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .certItem {
+    min-width: 70px;
+    padding: 10px;
+  }
+
+  .socialLinks {
+    justify-content: center;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .footer {
+    padding: 32px 0 16px;
+  }
+
+  .footerContent {
+    gap: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+    margin-bottom: 16px;
+  }
+
+  .navList li {
+    margin-bottom: 10px;
+  }
+
+  .socialLinks {
+    gap: 16px;
+  }
+
+  .socialLink {
+    font-size: 13px;
+  }
+
+  .certifications {
+    gap: 12px;
+  }
+
+  .certItem {
+    min-width: 60px;
+    padding: 8px;
+  }
+
+  .certText {
+    font-size: 9px;
+  }
+}
+
+/* 포커스 스타일 - 접근성 */
+.navList a:focus,
+.socialLink:focus,
+.address a:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 미디어 쿼리 다크모드는 CSS 변수로 자동 처리됨 */
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .footer {
+    background-color: #000000;
+    color: #ffffff;
+    border-top-color: #ffffff;
+  }
+
+  .sectionTitle {
+    color: #ffffff;
+  }
+
+  .navList a,
+  .socialLink,
+  .address a {
+    color: #ffffff;
+  }
+
+  .certItem {
+    background-color: #333333;
+    border: 1px solid #ffffff;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .navList a,
+  .socialLink,
+  .address a,
+  .certItem {
+    transition: none;
+  }
+
+  .socialLink:hover,
+  .socialLink:focus {
+    transform: none;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .footer {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border-top: 1px solid #000000;
+    padding: 20px 0;
+  }
+
+  .socialLinks,
+  .certifications {
+    display: none;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .companyInfo {
+    grid-column: 1 / -1;
+  }
+}

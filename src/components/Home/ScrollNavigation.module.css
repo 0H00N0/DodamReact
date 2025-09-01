@@ -1,0 +1,401 @@
+/* ScrollNavigation 스타일 - 미니멀 스크롤 네비게이션 */
+.scrollNav {
+  position: fixed;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scrollNav:not(.sticky) {
+  opacity: 1;
+  visibility: visible;
+}
+
+.scrollNav.sticky {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
+.navContainer {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(240, 240, 240, 0.8);
+  border-radius: 24px;
+  padding: 12px 8px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.navItem {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-height: 64px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.navItem:hover {
+  background: rgba(33, 37, 41, 0.06);
+  transform: translateY(-1px);
+}
+
+.navItem.active {
+  background: rgba(33, 37, 41, 0.08);
+  color: #212529;
+}
+
+.navIcon {
+  font-size: 1.4rem;
+  display: block;
+  transition: all 0.3s ease;
+  filter: grayscale(0.3);
+}
+
+.navItem:hover .navIcon,
+.navItem.active .navIcon {
+  filter: grayscale(0);
+  transform: scale(1.1);
+}
+
+.navLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+  letter-spacing: -0.01em;
+  transition: all 0.3s ease;
+  text-align: center;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.navItem:hover .navLabel,
+.navItem.active .navLabel {
+  color: #212529;
+}
+
+.activeIndicator {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(to bottom, #212529, #495057);
+  border-radius: 2px;
+  opacity: 0;
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+/* 호버 시 확장 효과 */
+.navItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(33, 37, 41, 0.04);
+  border-radius: 16px;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.navItem:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* 반응형 디자인 - 태블릿 */
+@media (max-width: 1024px) {
+  .scrollNav {
+    left: 16px;
+  }
+  
+  .navContainer {
+    min-width: 72px;
+    padding: 10px 6px;
+    border-radius: 20px;
+  }
+  
+  .navItem {
+    padding: 10px 12px;
+    min-height: 56px;
+    border-radius: 14px;
+  }
+  
+  .navIcon {
+    font-size: 1.2rem;
+  }
+  
+  .navLabel {
+    font-size: 0.7rem;
+  }
+}
+
+/* 반응형 디자인 - 모바일 */
+@media (max-width: 768px) {
+  .scrollNav {
+    left: 12px;
+    top: auto;
+    bottom: 24px;
+    transform: none;
+  }
+  
+  .navContainer {
+    flex-direction: row;
+    min-width: auto;
+    width: auto;
+    padding: 8px 12px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.98);
+  }
+  
+  .navItem {
+    padding: 8px 12px;
+    min-height: 48px;
+    flex-direction: row;
+    gap: 6px;
+    border-radius: 16px;
+  }
+  
+  .navIcon {
+    font-size: 1.1rem;
+  }
+  
+  .navLabel {
+    font-size: 0.65rem;
+    display: none; /* 모바일에서는 라벨 숨김 */
+  }
+  
+  .activeIndicator {
+    right: auto;
+    left: 50%;
+    top: -4px;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 3px;
+    border-radius: 2px;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+}
+
+/* 작은 모바일 화면 */
+@media (max-width: 480px) {
+  .scrollNav {
+    left: 8px;
+    bottom: 16px;
+  }
+  
+  .navContainer {
+    padding: 6px 8px;
+    border-radius: 20px;
+  }
+  
+  .navItem {
+    padding: 6px 8px;
+    min-height: 40px;
+    border-radius: 12px;
+  }
+  
+  .navIcon {
+    font-size: 1rem;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .navContainer {
+    background: rgba(42, 42, 42, 0.95);
+    border-color: rgba(68, 68, 68, 0.8);
+  }
+  
+  .navItem:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .navItem.active {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }
+  
+  .navLabel {
+    color: #b0b0b0;
+  }
+  
+  .navItem:hover .navLabel,
+  .navItem.active .navLabel {
+    color: #ffffff;
+  }
+  
+  .activeIndicator {
+    background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+  }
+  
+  .navItem::before {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .navContainer {
+    border-width: 3px;
+    border-color: #000000;
+    background: #ffffff;
+  }
+  
+  .navItem {
+    border: 1px solid transparent;
+  }
+  
+  .navItem:hover,
+  .navItem.active {
+    border-color: #000000;
+    background: #f0f0f0;
+  }
+  
+  .navLabel {
+    color: #000000;
+    font-weight: 700;
+  }
+  
+  .activeIndicator {
+    background: #000000;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .scrollNav,
+  .navItem,
+  .navIcon,
+  .navLabel,
+  .navItem::before {
+    transition: none;
+  }
+  
+  .activeIndicator {
+    animation: none;
+    opacity: 1;
+  }
+  
+  .navItem:hover {
+    transform: none;
+  }
+  
+  .navItem:hover .navIcon,
+  .navItem.active .navIcon {
+    transform: none;
+  }
+}
+
+/* 터치 기기 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .navItem {
+    min-height: 48px; /* 터치 친화적 크기 */
+  }
+  
+  .navItem:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* 큰 화면 최적화 */
+@media (min-width: 1400px) {
+  .scrollNav {
+    left: 32px;
+  }
+  
+  .navContainer {
+    min-width: 88px;
+    padding: 16px 10px;
+    border-radius: 28px;
+  }
+  
+  .navItem {
+    padding: 16px 20px;
+    min-height: 72px;
+    border-radius: 20px;
+    gap: 6px;
+  }
+  
+  .navIcon {
+    font-size: 1.6rem;
+  }
+  
+  .navLabel {
+    font-size: 0.8rem;
+  }
+  
+  .activeIndicator {
+    width: 5px;
+    height: 24px;
+  }
+}
+
+/* 스크롤 성능 최적화 */
+.scrollNav {
+  will-change: transform, opacity;
+}
+
+.navItem {
+  will-change: transform, background-color;
+}
+
+/* 접근성 개선 */
+.navItem:focus {
+  outline: 2px solid #212529;
+  outline-offset: 2px;
+}
+
+.navItem:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.navItem:focus-visible {
+  outline: 2px solid #212529;
+  outline-offset: 2px;
+}

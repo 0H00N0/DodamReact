@@ -1,0 +1,38 @@
+/* Home 페이지 전체 스타일 */
+.homePage {
+  min-height: 100vh;
+  background: var(--bg-primary);
+}
+
+/* 전체 페이지 스크롤 부드럽게 */
+.homePage {
+  scroll-behavior: smooth;
+}
+
+/* 섹션 간 경계선 처리 */
+.homePage > * + * {
+  position: relative;
+}
+
+/* 반응형 여백 조정 */
+@media (max-width: 768px) {
+  .homePage {
+    overflow-x: hidden;
+  }
+}
+
+/* 전체 페이지 애니메이션 효과 */
+.homePage {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
