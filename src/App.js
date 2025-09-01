@@ -45,16 +45,6 @@ function App() {
               
               {/* 메인 콘텐츠 영역 */}
               <main id="main-content" role="main" className="main-content" tabIndex="-1">
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/category/:categoryId" element={<Category />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/search" element={<Search />} />
-                  </Routes>
-                </Suspense>
               </main>
               
               {/* 페이지 하단 정보 */}
