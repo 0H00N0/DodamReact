@@ -8,12 +8,15 @@ import CartDropdown from './CartDropdown';
 import UserDropdown from './UserDropdown';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLoginCart } from '../../contexts/LoginCartContext'; // 로그인 상태/회원정보 훅
 import logo from '../../images/logo.png';
 
 const Header = React.memo(() => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { isDark, toggleTheme } = useTheme();
+  const { isLoggedIn, member } = useLoginCart(); // 로그인 상태/회원정보
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -29,7 +32,6 @@ const Header = React.memo(() => {
 
   const handleSearchToggle = useCallback(() => {
     setIsSearchOpen(prev => !prev);
-    // 다른 드롭다운들 닫기
     setIsCartOpen(false);
     setIsUserMenuOpen(false);
   }, []);
@@ -39,11 +41,14 @@ const Header = React.memo(() => {
   }, []);
 
   const handleCartToggle = useCallback(() => {
+    if (!isLoggedIn) {
+      navigate('/member/loginForm'); // 로그인 안 했으면 로그인 페이지로
+      return;
+    }
     setIsCartOpen(prev => !prev);
-    // 다른 드롭다운들 닫기
     setIsSearchOpen(false);
     setIsUserMenuOpen(false);
-  }, []);
+  }, [isLoggedIn, navigate]);
 
   const handleCartClose = useCallback(() => {
     setIsCartOpen(false);
@@ -51,7 +56,6 @@ const Header = React.memo(() => {
 
   const handleUserMenuToggle = useCallback(() => {
     setIsUserMenuOpen(prev => !prev);
-    // 다른 드롭다운들 닫기
     setIsSearchOpen(false);
     setIsCartOpen(false);
   }, []);
@@ -73,7 +77,7 @@ const Header = React.memo(() => {
       <header className={styles.header}>
         <div className={styles.container}>
           {/* 모바일 햄버거 메뉴 버튼 */}
-          <button 
+          <button
             className={styles.mobileMenuButton}
             onClick={handleMobileMenuToggle}
             aria-label="메뉴 열기"
@@ -86,9 +90,9 @@ const Header = React.memo(() => {
 
           {/* 로고 */}
           <div className={styles.logoSection} onClick={handleLogoClick}>
-            <img 
-              src={logo} 
-              alt="도담도담" 
+            <img
+              src={logo}
+              alt="도담도담"
               className={styles.logo}
             />
           </div>
@@ -98,7 +102,8 @@ const Header = React.memo(() => {
 
           {/* 유틸리티 메뉴 */}
           <div className={styles.utilitySection}>
-            <button 
+            {/* 검색 버튼 */}
+            <button
               className={`${styles.utilityButton} ${isSearchOpen ? styles.active : ''}`}
               onClick={handleSearchToggle}
               aria-label="검색"
@@ -109,28 +114,32 @@ const Header = React.memo(() => {
                 <path d="m21 21-4.35-4.35"/>
               </svg>
             </button>
-            
-            <button 
-              className={`${styles.utilityButton} ${isCartOpen ? styles.active : ''}`}
-              onClick={handleCartToggle}
-              aria-label="장바구니"
-              aria-expanded={isCartOpen}
-            >
-              <div className={styles.cartIconWrapper}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 22a1 1 0 100-2 1 1 0 000 2z"/>
-                  <path d="M20 22a1 1 0 100-2 1 1 0 000 2z"/>
-                  <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
-                </svg>
-                {totalItems > 0 && (
-                  <span className={styles.cartBadge}>
-                    {totalItems > 99 ? '99+' : totalItems}
-                  </span>
-                )}
-              </div>
-            </button>
-            
-            <button 
+
+            {/* 장바구니 버튼: 로그인시에만 표시 */}
+            {isLoggedIn && (
+              <button
+                className={`${styles.utilityButton} ${isCartOpen ? styles.active : ''}`}
+                onClick={handleCartToggle}
+                aria-label="장바구니"
+                aria-expanded={isCartOpen}
+              >
+                <div className={styles.cartIconWrapper}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M9 22a1 1 0 100-2 1 1 0 000 2z"/>
+                    <path d="M20 22a1 1 0 100-2 1 1 0 000 2z"/>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                  </svg>
+                  {totalItems > 0 && (
+                    <span className={styles.cartBadge}>
+                      {totalItems > 99 ? '99+' : totalItems}
+                    </span>
+                  )}
+                </div>
+              </button>
+            )}
+
+            {/* 유저 메뉴 버튼 (항상 보임, 내부에서 분기 처리) */}
+            <button
               className={`${styles.utilityButton} ${isUserMenuOpen ? styles.active : ''}`}
               onClick={handleUserMenuToggle}
               aria-label="마이페이지"
@@ -143,7 +152,7 @@ const Header = React.memo(() => {
             </button>
 
             {/* 다크모드 토글 */}
-            <button 
+            <button
               className={styles.utilityButton}
               onClick={handleThemeToggle}
               aria-label={isDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
@@ -171,26 +180,29 @@ const Header = React.memo(() => {
       </header>
 
       {/* 모바일 메뉴 */}
-      <MobileMenu 
+      <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={handleMobileMenuClose}
         onToggle={handleMobileMenuToggle}
       />
 
-      {/* 드롭다운 메뉴들 */}
-      <SearchDropdown 
-        isOpen={isSearchOpen}
-        onClose={handleSearchClose}
-      />
-      
-      <CartDropdown 
-        isOpen={isCartOpen}
-        onClose={handleCartClose}
-      />
-      
-      <UserDropdown 
+      {/* 드롭다운들 */}
+      <SearchDropdown isOpen={isSearchOpen} onClose={handleSearchClose} />
+
+      {/* 장바구니 드롭다운: 로그인시에만 표시 */}
+      {isLoggedIn && (
+        <CartDropdown
+          isOpen={isCartOpen}
+          onClose={handleCartClose}
+        />
+      )}
+
+      {/* 유저 드롭다운 */}
+      <UserDropdown
         isOpen={isUserMenuOpen}
         onClose={handleUserMenuClose}
+        isLoggedIn={isLoggedIn} // 로그인 여부 전달
+        userInfo={member}         // 사용자 정보 전달
       />
     </>
   );
