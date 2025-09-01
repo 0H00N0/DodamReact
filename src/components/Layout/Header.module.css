@@ -207,10 +207,7 @@
     min-height: 40px;
   }
   
-  /* 모바일에서 유틸리티 버튼 일부 숨김 */
-  .utilityButton:nth-child(1) {
-    display: none; /* 검색 버튼 숨김 */
-  }
+  
 }
 
 @media (max-width: 480px) {
