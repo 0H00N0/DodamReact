@@ -1,0 +1,233 @@
+/* 찜 목록 페이지 스타일 */
+
+.wishlistPage {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 60vh;
+}
+
+/* 헤더 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-gray-200);
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.itemCount {
+  font-size: 1.125rem;
+  color: var(--color-gray-600);
+  font-weight: 500;
+}
+
+.clearBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: transparent;
+  color: var(--color-gray-600);
+  border: 1px solid var(--color-gray-400);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.clearBtn:hover {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-color: #fecaca;
+}
+
+/* 상품 그리드 */
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.productGrid > div {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.productGrid > div:hover {
+  transform: translateY(-4px);
+}
+
+/* 액션 버튼들 */
+.actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
+
+.continueBtn {
+  padding: 0.75rem 2rem;
+  background-color: var(--color-black);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.continueBtn:hover {
+  background-color: var(--color-gray-700);
+}
+
+/* 빈 찜 목록 */
+.emptyWishlist {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  text-align: center;
+  gap: 1.5rem;
+  padding: 3rem 2rem;
+}
+
+.emptyIcon {
+  font-size: 5rem;
+  color: var(--color-gray-300);
+  margin-bottom: 1rem;
+}
+
+.emptyTitle {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.emptyDescription {
+  font-size: 1.125rem;
+  color: var(--color-gray-600);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 400px;
+}
+
+.shopBtn {
+  padding: 1rem 2rem;
+  background-color: var(--color-black);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.125rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.shopBtn:hover {
+  background-color: var(--color-gray-700);
+  transform: translateY(-2px);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .wishlistPage {
+    padding: 1rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .title {
+    font-size: 2rem;
+  }
+
+  .titleSection {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .productGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .emptyWishlist {
+    padding: 2rem 1rem;
+    min-height: 300px;
+  }
+
+  .emptyIcon {
+    font-size: 4rem;
+  }
+
+  .emptyTitle {
+    font-size: 1.5rem;
+  }
+
+  .emptyDescription {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.75rem;
+  }
+
+  .productGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .emptyIcon {
+    font-size: 3rem;
+  }
+
+  .emptyTitle {
+    font-size: 1.25rem;
+  }
+
+  .shopBtn {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* 다크 테마 */
+@media (prefers-color-scheme: dark) {
+  .clearBtn {
+    background-color: var(--color-gray-800);
+    color: var(--color-gray-300);
+    border-color: var(--color-gray-600);
+  }
+
+  .clearBtn:hover {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+    border-color: #dc2626;
+  }
+
+  .emptyIcon {
+    color: var(--color-gray-600);
+  }
+}

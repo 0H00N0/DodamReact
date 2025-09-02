@@ -1,0 +1,329 @@
+/* FeaturedProducts 스타일 - 미니멀 상품 카드 디자인 */
+.featuredSection {
+  padding: 80px 0;
+  background: #fafbfc;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  padding-left: 140px; /* 네비게이션 공간 확보 */
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.productsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-bottom: 60px;
+}
+
+.productCard {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 2px solid #f1f3f4;
+}
+
+.productCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  border-color: #e9ecef;
+}
+
+.productImageWrapper {
+  position: relative;
+  background: #f8f9fa;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #f1f3f4;
+}
+
+.badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.badgeNew {
+  background: #212529;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.badgeBest {
+  background: #495057;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.productImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120px;
+  height: 120px;
+  background: white;
+  border-radius: 16px;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.05);
+  border-color: #dee2e6;
+}
+
+.productIcon {
+  font-size: 4rem;
+}
+
+.wishlistButton {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+  color: #6c757d;
+}
+
+.wishlistButton:hover {
+  background: #212529;
+  border-color: #212529;
+  color: white;
+}
+
+.productInfo {
+  padding: 24px;
+}
+
+.category {
+  font-size: 0.85rem;
+  color: #868e96;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.productName {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #212529;
+  margin-bottom: 12px;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stars {
+  color: #212529;
+  font-size: 1rem;
+}
+
+.ratingText {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.priceWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.originalPrice {
+  font-size: 1.1rem;
+  color: #868e96;
+  text-decoration: line-through;
+  font-weight: 500;
+}
+
+.addToCartButton {
+  width: 100%;
+  background: #212529;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.addToCartButton:hover {
+  background: #343a40;
+  transform: translateY(-2px);
+}
+
+.viewAllWrapper {
+  text-align: center;
+}
+
+.viewAllButton {
+  background: white;
+  color: #212529;
+  border: 2px solid #e9ecef;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewAllButton:hover {
+  border-color: #212529;
+  background: #f8f9fa;
+}
+
+.arrow {
+  font-size: 1.2rem;
+  transition: transform 0.3s ease;
+}
+
+.viewAllButton:hover .arrow {
+  transform: translateX(4px);
+}
+
+/* 반응형 디자인 - 태블릿 */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 20px;
+    padding-left: 110px; /* 태블릿에서 네비게이션 공간 조정 */
+  }
+}
+
+/* 반응형 디자인 - 모바일 */
+@media (max-width: 768px) {
+  .featuredSection {
+    padding: 60px 0;
+    padding-bottom: 100px; /* 하단 네비게이션 공간 확보 */
+  }
+  
+  .container {
+    padding: 0 16px;
+    padding-left: 16px; /* 모바일에서는 네비게이션이 하단에 위치하므로 좌측 패딩 제거 */
+  }
+  
+  .productsGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .productInfo {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+    padding-left: 12px; /* 작은 모바일에서도 좌측 패딩 제거 */
+  }
+  
+  .productsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .productImage {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .productIcon {
+    font-size: 3rem;
+  }
+  
+  .productInfo {
+    padding: 16px;
+  }
+  
+  .productName {
+    font-size: 1.2rem;
+  }
+  
+  .price {
+    font-size: 1.3rem;
+  }
+}
+
+/* 큰 화면 최적화 */
+@media (min-width: 1400px) {
+  .container {
+    padding: 0 32px;
+    padding-left: 160px; /* 큰 화면에서 네비게이션 공간 확대 */
+  }
+}

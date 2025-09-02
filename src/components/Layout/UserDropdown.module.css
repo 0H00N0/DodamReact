@@ -1,0 +1,399 @@
+/* 사용자 드롭다운 스타일 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown {
+  position: absolute;
+  top: 180px; /* 헤더 높이만큼 */
+  right: 20px;
+  width: 320px;
+  max-width: 90vw;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  animation: slideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 로그인하지 않은 상태 */
+.loginSection {
+  padding: 24px;
+}
+
+.welcomeMessage {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.authButtons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.loginButton,
+.signupButton {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loginButton {
+  background: #333;
+  color: white;
+}
+
+.loginButton:hover {
+  background: #555;
+}
+
+.signupButton {
+  background: white;
+  color: #333;
+  border: 1px solid #e5e5e5;
+}
+
+.signupButton:hover {
+  background: #f8f8f8;
+}
+
+.quickLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.quickLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 12px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.quickLink:hover {
+  background: #f8f8f8;
+  color: #333;
+}
+
+.quickLink svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* 로그인한 상태 */
+.userSection {
+  padding: 0;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.profileImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profileImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileImage svg {
+  color: #999;
+}
+
+.userInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.userName {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.userEmail {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuList {
+  padding: 12px 0;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.menuItem:hover {
+  background: #f8f8f8;
+  color: #333;
+}
+
+.menuItem svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.logoutSection {
+  padding: 16px 24px 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.logoutButton {
+  width: 100%;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.logoutButton:hover {
+  background: #e5e5e5;
+  color: #333;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .dropdown {
+    top: 140px; /* 모바일 헤더 높이만큼 */
+    right: 16px;
+    width: calc(100vw - 32px);
+    max-width: 340px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown {
+    top: 120px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+  
+  .loginSection {
+    padding: 20px;
+  }
+  
+  .userProfile {
+    padding: 20px;
+  }
+  
+  .logoutSection {
+    padding: 12px 20px 20px;
+  }
+  
+  .menuItem {
+    padding: 12px 20px;
+  }
+  
+  .quickLink {
+    padding: 12px 4px;
+  }
+}
+
+/* 데스크톱에서 우측 정렬 조정 */
+@media (min-width: 1024px) {
+  .dropdown {
+    right: max(20px, calc((100vw - 1200px) / 2 + 20px));
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .dropdown {
+    background: #1a1a1a;
+    color: #e0e0e0;
+  }
+  
+  .title {
+    color: #e0e0e0;
+  }
+  
+  .subtitle {
+    color: #999;
+  }
+  
+  .loginButton {
+    background: #555;
+  }
+  
+  .loginButton:hover {
+    background: #666;
+  }
+  
+  .signupButton {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+  }
+  
+  .signupButton:hover {
+    background: #444;
+  }
+  
+  .quickLinks {
+    border-top-color: #333;
+  }
+  
+  .quickLink {
+    color: #999;
+  }
+  
+  .quickLink:hover {
+    background: #333;
+    color: #e0e0e0;
+  }
+  
+  .userProfile {
+    border-bottom-color: #333;
+  }
+  
+  .profileImage {
+    background: #333;
+  }
+  
+  .profileImage svg {
+    color: #666;
+  }
+  
+  .userName {
+    color: #e0e0e0;
+  }
+  
+  .userEmail {
+    color: #999;
+  }
+  
+  .menuItem {
+    color: #999;
+  }
+  
+  .menuItem:hover {
+    background: #333;
+    color: #e0e0e0;
+  }
+  
+  .logoutSection {
+    border-top-color: #333;
+  }
+  
+  .logoutButton {
+    background: #333;
+    color: #999;
+  }
+  
+  .logoutButton:hover {
+    background: #444;
+    color: #e0e0e0;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .dropdown {
+    animation: none;
+  }
+  
+  .loginButton,
+  .signupButton,
+  .quickLink,
+  .menuItem,
+  .logoutButton {
+    transition: none;
+  }
+}

@@ -1,0 +1,295 @@
+/* 검색 드롭다운 스타일 */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.dropdown {
+  position: absolute;
+  top: 180px; /* 헤더 높이만큼 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  padding: 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* 검색 폼 */
+.searchForm {
+  margin-bottom: 24px;
+}
+
+.searchInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 16px 50px 16px 20px;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.searchInput:focus {
+  border-color: #333;
+}
+
+.searchInput::placeholder {
+  color: #999;
+}
+
+.searchButton {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchButton:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* 검색 기록 */
+.historySection {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.historyHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.historyTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.clearButton:hover {
+  color: #666;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.historyItem:hover {
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+.historyItem svg {
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* 빠른 링크 */
+.quickLinks {
+  margin-top: 20px;
+}
+
+.quickTitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.quickList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quickItem {
+  background: #f8f8f8;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.quickItem:hover {
+  background-color: #e5e5e5;
+  color: #333;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .dropdown {
+    top: 140px; /* 모바일 헤더 높이만큼 */
+    width: 95%;
+    padding: 20px;
+  }
+  
+  .searchInput {
+    padding: 14px 45px 14px 16px;
+    font-size: 16px; /* iOS에서 zoom 방지 */
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown {
+    top: 120px;
+    padding: 16px;
+  }
+  
+  .searchInput {
+    padding: 12px 40px 12px 14px;
+  }
+  
+  .quickList {
+    gap: 6px;
+  }
+  
+  .quickItem {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+/* 다크 모드 지원 */
+@media (prefers-color-scheme: dark) {
+  .dropdown {
+    background: #1a1a1a;
+    color: #e0e0e0;
+  }
+  
+  .searchInput {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+  
+  .searchInput:focus {
+    border-color: #666;
+  }
+  
+  .searchInput::placeholder {
+    color: #999;
+  }
+  
+  .searchButton {
+    color: #ccc;
+  }
+  
+  .searchButton:hover {
+    background-color: #333;
+    color: #fff;
+  }
+  
+  .historyItem:hover {
+    background-color: #333;
+  }
+  
+  .quickItem {
+    background: #333;
+    color: #ccc;
+  }
+  
+  .quickItem:hover {
+    background-color: #444;
+    color: #fff;
+  }
+  
+  .clearButton:hover {
+    color: #ccc;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .dropdown {
+    animation: none;
+  }
+  
+  .searchInput,
+  .searchButton,
+  .historyItem,
+  .quickItem,
+  .clearButton {
+    transition: none;
+  }
+}

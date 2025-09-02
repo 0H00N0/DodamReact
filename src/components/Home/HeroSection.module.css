@@ -1,0 +1,737 @@
+/* HeroSection 스타일 - 꿈 테마 슬라이드 */
+.hero {
+  background: var(--bg-secondary);
+  padding: 80px 0 100px 0; /* 하단 패딩을 100px로 조정하여 네비게이션 공간 확보 */
+  min-height: 640px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden; /* 다시 hidden으로 설정 */
+  transition: var(--transition-base);
+}
+
+/* 슬라이드 배경 그라데이션 */
+.slideBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.1;
+  transition: all 0.8s ease;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.textContent {
+  max-width: 500px;
+}
+
+/* 슬라이드 인디케이터 */
+.slideIndicator {
+  margin-bottom: 16px;
+}
+
+.dreamLabel {
+  display: inline-block;
+  background: var(--state-hover);
+  color: var(--text-secondary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  animation: slideIn 0.6s ease;
+}
+
+/* 새로운 텍스트 스타일 */
+.description {
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 32px;
+  font-weight: 400;
+  word-break: keep-all;
+  animation: fadeInUp 0.8s ease;
+}
+
+.title {
+  font-size: clamp(2.5rem, 5vw, 3.5rem); /* 반응형 폰트 크기 */
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+  word-break: keep-all; /* 한글 단어 깨지지 않게 */
+  animation: slideInLeft 0.8s ease;
+}
+
+.subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem); /* 반응형 폰트 크기 */
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+  font-weight: 400;
+  word-break: keep-all;
+  max-width: 480px; /* 가독성을 위한 최대 너비 */
+  animation: slideInLeft 0.8s ease 0.2s both;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  animation: fadeInUp 1s ease 0.4s both;
+}
+
+.primaryButton {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border: none;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  min-height: 52px; /* 터치 친화적 크기 */
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.primaryButton:hover {
+  background: var(--text-secondary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.primaryButton:active {
+  transform: translateY(0);
+}
+
+.secondaryButton {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  border: 2px solid var(--border-light);
+  padding: 14px 30px;
+  border-radius: 12px;
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-height: 52px; /* 터치 친화적 크기 */
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.secondaryButton:hover {
+  border-color: var(--text-primary);
+  background: var(--state-hover);
+}
+
+.secondaryButton:active {
+  transform: scale(0.98);
+}
+
+.imageContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 드림 카드 스타일 */
+.dreamCard {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+  background: var(--bg-primary);
+  border-radius: 32px;
+  box-shadow: var(--shadow-xl);
+  padding: 40px;
+  overflow: hidden;
+  animation: slideInRight 1s ease;
+  border: 1px solid var(--border-light);
+}
+
+.dreamGlow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  animation: dreamGlow 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.iconGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.iconBlock {
+  background: var(--bg-secondary);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  border: 2px solid var(--border-light);
+  animation: iconFloat 3s ease-in-out infinite;
+  transition: all 0.4s ease;
+}
+
+.iconBlock:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: var(--shadow-lg);
+  background: var(--bg-primary);
+}
+
+/* 개별 아이콘 애니메이션 지연 */
+.icon1 {
+  animation-delay: 0s;
+}
+
+.icon2 {
+  animation-delay: 0.5s;
+}
+
+.icon3 {
+  animation-delay: 1s;
+}
+
+.icon4 {
+  animation-delay: 1.5s;
+}
+
+/* 슬라이드 네비게이션 */
+.slideNavigation {
+  position: absolute;
+  bottom: 20px; /* Hero 섹션 하단에 위치 */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.navButton {
+  background: var(--bg-primary);
+  backdrop-filter: blur(10px);
+  border: 2px solid var(--border-light);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-base);
+}
+
+.navButton:hover {
+  background: var(--bg-primary);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.navButton:active {
+  transform: scale(0.95);
+}
+
+.dotNavigation {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  opacity: 0.3;
+}
+
+.dot:hover {
+  opacity: 0.5;
+  transform: scale(1.2);
+}
+
+.activeDot {
+  background: var(--text-secondary);
+  transform: scale(1.4);
+  opacity: 1;
+}
+
+.activeDot::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid var(--text-secondary);
+  border-radius: 50%;
+  animation: dotPulse 2s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+/* 키프레임 애니메이션 */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes dreamGlow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: rotate(0deg);
+  }
+  50% {
+    opacity: 0.6;
+    transform: rotate(180deg);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .hero {
+    padding: 60px 0;
+    min-height: 560px;
+  }
+  
+  .container {
+    padding: 0 20px;
+  }
+  
+  .content {
+    gap: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 48px 0;
+    min-height: auto;
+    text-align: center;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+  
+  .content {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    text-align: center;
+  }
+  
+  .textContent {
+    order: 1;
+    max-width: 100%;
+  }
+  
+  .imageContent {
+    order: 2;
+  }
+  
+  .title {
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  
+  .subtitle {
+    margin-bottom: 28px;
+    max-width: 100%;
+  }
+  
+  .buttonGroup {
+    justify-content: center;
+    gap: 12px;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    padding: 14px 24px;
+    min-width: 120px;
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 36px 0;
+  }
+  
+  .container {
+    padding: 0 12px;
+  }
+  
+  .content {
+    gap: 28px;
+  }
+  
+  .title {
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  
+  .subtitle {
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+  
+  .buttonGroup {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+    max-width: 280px;
+    padding: 16px 24px;
+    font-size: 0.95rem;
+  }
+  
+  .dreamCard {
+    padding: 24px;
+  }
+  
+  .iconBlock {
+    font-size: 2rem;
+  }
+  
+  .slideNavigation {
+    bottom: 20px;
+    gap: 16px;
+  }
+  
+  .navButton {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .hero {
+    padding: 28px 0;
+  }
+  
+  .container {
+    padding: 0 8px;
+  }
+  
+  .content {
+    gap: 20px;
+  }
+  
+  .buttonGroup {
+    gap: 8px;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+  
+  .dreamCard {
+    padding: 20px;
+  }
+  
+  .iconBlock {
+    font-size: 1.8rem;
+  }
+  
+  .slideNavigation {
+    bottom: 15px;
+    gap: 12px;
+  }
+  
+  .navButton {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  
+  .dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* 고해상도 화면 최적화 */
+@media (min-width: 1400px) {
+  .hero {
+    padding: 100px 0;
+    min-height: 720px;
+  }
+  
+  .container {
+    padding: 0 32px;
+  }
+  
+  .content {
+    gap: 80px;
+  }
+  
+  .title {
+    font-size: 4rem;
+    margin-bottom: 28px;
+  }
+  
+  .subtitle {
+    font-size: 1.3rem;
+    margin-bottom: 48px;
+  }
+  
+  .buttonGroup {
+    gap: 20px;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    padding: 18px 36px;
+    font-size: 1.1rem;
+    min-height: 56px;
+    min-width: 160px;
+  }
+}
+
+/* 램드스케이프 모드 대응 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .hero {
+    padding: 20px 0;
+    min-height: auto;
+  }
+  
+  .content {
+    gap: 32px;
+  }
+  
+  .title {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .buttonGroup {
+    gap: 12px;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    padding: 12px 24px;
+    min-height: 44px;
+  }
+}
+
+/* 터치 기기 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  .primaryButton,
+  .secondaryButton {
+    min-height: 48px;
+    font-size: 1rem;
+  }
+  
+  /* 터치 타겟 크기 증가 */
+  .primaryButton:active,
+  .secondaryButton:active {
+    transform: scale(0.98);
+  }
+}
+
+/* 미디어 쿼리 다크모드는 CSS 변수로 자동 처리됨 */
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .title {
+    color: #000000;
+    font-weight: 800;
+  }
+  
+  .subtitle {
+    color: #333333;
+    font-weight: 500;
+  }
+  
+  .primaryButton,
+  .secondaryButton {
+    border: 2px solid;
+  }
+}
+
+/* 애니메이션 감소 모드 지원 */
+@media (prefers-reduced-motion: reduce) {
+  .primaryButton,
+  .secondaryButton,
+  .iconBlock,
+  .navButton,
+  .dot {
+    transition: none;
+  }
+  
+  .primaryButton:hover,
+  .secondaryButton:hover,
+  .navButton:hover {
+    transform: none;
+  }
+  
+  .iconBlock:hover {
+    transform: none;
+  }
+  
+  .title,
+  .subtitle,
+  .description,
+  .buttonGroup,
+  .dreamCard,
+  .dreamLabel {
+    animation: none;
+  }
+  
+  .iconBlock,
+  .dreamGlow,
+  .activeDot::after {
+    animation: none;
+  }
+}
+
+/* 인쇄 스타일 */
+@media print {
+  .hero {
+    background: white;
+    padding: 20px 0;
+    min-height: auto;
+  }
+  
+  .slideBackground {
+    display: none;
+  }
+  
+  .buttonGroup,
+  .slideNavigation {
+    display: none;
+  }
+  
+  .title,
+  .subtitle,
+  .description {
+    color: black;
+  }
+  
+  .dreamCard {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}
