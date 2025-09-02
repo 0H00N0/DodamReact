@@ -45,10 +45,10 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo }) => {
             </div>
 
             <div className={styles.authButtons}>
-              <button onClick={go('/member/loginForm')} className={styles.loginButton}>
+              <button onClick={go('/loginForm')} className={styles.loginButton}>
                 로그인
               </button>
-              <button onClick={go('/member/signUp')} className={styles.signupButton}>
+              <button onClick={go('/signup')} className={styles.signupButton}>
                 회원가입
               </button>
             </div>
