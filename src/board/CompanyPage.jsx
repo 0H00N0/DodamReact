@@ -1,75 +1,36 @@
-import React, { useState } from 'react';
+// src/pages/CompanyPage/CompanyPage.js
+import React from 'react';
 
 const CompanyPage = () => {
-    const [activeTab, setActiveTab] =useState('overview');
+  return (
+    <div>
+      {/* 헤더 */}
+      <header style={{ backgroundColor: '#f5f5f5', padding: '20px 0', textAlign: 'center' }}>
+        <h1 style={{ margin: 0, fontSize: '2em', color: '#333' }}>도담도담</h1>
+      </header>
 
-    // === 하위 컴포넌트 정의 ===
-    const CompanyOverview = () => (
-        <div className="tab-content">
-            <p>도담도담은 아이들의 상상력과 즐거움을 가장 소중히 여기는 장난감 쇼핑몰입니다.</p>
-            <p>설립 : 2010년</p>
-            <p>직원 수: 50명</p>
-            <p>특징 : 안전한 장난감, 다양한 테마, 온라인/오프라인 구매 가능 </p>
-        </div>
-    );
+      {/* 메인 컨텐츠 */}
+      <main style={{ maxWidth: '900px', margin: '40px auto', padding: '0 20px', lineHeight: '1.6' }}>
+        <section>
+          <h2 style={{ color: '#444', textAlign: 'center' }}>회사 소개</h2>
+          <p>저희 도담도담은 고객 만족을 최우선으로 하는 IT 기업입니다.</p>
+          <p>설립: 2000년</p>
+          <p>직원 수: 200명</p>
+          <p>
+            풍부한 경험과 차별화된 전략을 바탕으로 다양한 IT 솔루션과 서비스를 제공하고 있습니다.
+          </p>
+        </section>
 
-    const CompanyHistory = () => (
-        <ul className="tab-content">
-            <li>2010년 : 도담도담 창립</li>
-            <li>2013년 : 온라인 몰 오픈</li>
-            <li>2018년 : 전국 매장 5곳 확장</li>
-            <li>2023년 : AR/VR 체험존 도입</li>
-        </ul>
-    );
+        <section style={{ marginTop: '40px' }}>
+          <h2 style={{ color: '#444', textAlign: 'center' }}>비전 & 가치</h2>
+          <p>혁신적인 아이디어와 고객 중심의 서비스를 통해 세상을 더 편리하게 만듭니다.</p>
+        </section>
+      </main>
 
-    const CompanyLocation = () => (
-        <div className="tab-content">
-            <p>본사 : 서울특별시 관악구</p>
-            <p>전화 : 02-6020-0055</p>
-            <p>이메일 : info@dodamdodam.com</p>
-            <p>지도 : </p>
-        </div>
-    );
-
-    return (
-        <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif '}}>
-            <h1 style={{ textAlign:'center',marginBottom: '30px' }}>회사 소개</h1>
-        
-            {/* 메뉴 */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-        {['overview', 'history', 'location'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              padding: '10px 20px',
-              margin: '0 10px',
-              border: 'none',
-              borderBottom: activeTab === tab ? '3px solid #007bff' : '3px solid transparent',
-              background: 'none',
-              cursor: 'pointer',
-              fontWeight: activeTab === tab ? 'bold' : 'normal',
-              transition: '0.3s'
-            }}
-          >
-            {tab === 'overview' ? '회사 개요' : tab === 'history' ? '연혁' : '위치/연락처'}
-          </button>
-        ))}
-      </div>
-
-      {/* 선택된 탭 렌더링 */}
-      <div style={{
-        maxWidth: '800px',
-        margin: '0 auto',
-        padding: '20px',
-        border: '1px solid #ddd',
-        borderRadius: '10px',
-        backgroundColor: '#f9f9f9'
-      }}>
-        {activeTab === 'overview' && <CompanyOverview />}
-        {activeTab === 'history' && <CompanyHistory />}
-        {activeTab === 'location' && <CompanyLocation />}
-      </div>
+      {/* 푸터 */}
+      <footer style={{ backgroundColor: '#333', color: '#fff', textAlign: 'center', padding: '15px 0' }}>
+        &copy; 2025 도담도담. All rights reserved.
+      </footer>
     </div>
   );
 };
