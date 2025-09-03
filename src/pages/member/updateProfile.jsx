@@ -16,7 +16,7 @@ const updateProfile = () => {
 
   // 회원 정보 불러오기
   useEffect(() => {
-    axios.get('http://localhost:8080/api/member/me', { withCredentials: true })
+    axios.get('http://localhost:3000/api/member/me', { withCredentials: true })
       .then(res => {
         const data = res.data;
         setForm({
@@ -43,7 +43,7 @@ const updateProfile = () => {
   // 수정 요청
   const handleSubmit = e => {
     e.preventDefault();
-    axios.put('http://localhost:8080/api/member/me', form, { withCredentials: true })
+    axios.put('http://localhost:3000/api/member/me', form, { withCredentials: true })
       .then(() => setMessage('회원 정보가 성공적으로 수정되었습니다.'))
       .catch(err => {
         console.error('수정 실패:', err);
