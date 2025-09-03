@@ -25,9 +25,10 @@ export default function LoginForm() {
       navigate("/", { replace: true });
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        err?.response?.data ||
-        err?.message ||
+        err?.response?.data?.error ??
+        err?.response?.data?.message ??
+        (typeof err?.response?.data === "string" ? err.response.data : undefined) ??
+        err?.message ??
         "로그인에 실패했습니다.";
       setMsg(message);
     } finally {
@@ -71,7 +72,16 @@ export default function LoginForm() {
 
         <button
           type="button"
-          onClick={() => navigate("/member/signup")}
+          onClick={() => navigate("/")}
+          disabled={loading}
+          style={styles.linkBtn}
+        >
+          로그인
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/signup")}
           disabled={loading}
           style={styles.linkBtn}
         >

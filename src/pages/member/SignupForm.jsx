@@ -20,18 +20,27 @@ export default function SignupForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // 중복 제출 방지
     setMsg("");
     setLoading(true);
     try {
       // 백엔드: POST /member/signup
-      await api.post("/member/signup", form);
-      // 가입 성공 -> 로그인 페이지로
-      navigate("/member/login", { replace: true });
+      const payload = {
+        mid: form.mid.trim(),
+        mpw: form.mpw,                 // 서버에서 해시/검증
+        mname: form.mname.trim(),
+        mtel: form.mtel.trim(),
+      };
+      await api.post("/member/signup", payload);
+
+      // ✅ 가입 성공 -> 로그인 페이지로 (라우트는 /loginForm)
+      navigate("/loginForm", { replace: true });
     } catch (err) {
       const message =
-        err?.response?.data?.message ||
-        err?.response?.data ||
-        err?.message ||
+        err?.response?.data?.error ??
+        err?.response?.data?.message ??
+        (typeof err?.response?.data === "string" ? err.response.data : undefined) ??
+        err?.message ??
         "회원가입에 실패했습니다.";
       setMsg(message);
     } finally {
@@ -41,7 +50,7 @@ export default function SignupForm() {
 
   return (
     <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form}>
+      <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>회원가입</h2>
 
         <label htmlFor="mid">아이디</label>
@@ -52,6 +61,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="아이디"
           required
+          autoComplete="username"
         />
 
         <label htmlFor="mpw">비밀번호</label>
@@ -63,6 +73,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="비밀번호"
           required
+          autoComplete="new-password"
         />
 
         <label htmlFor="mname">이름</label>
@@ -73,6 +84,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="이름"
           required
+          autoComplete="name"
         />
 
         <label htmlFor="mtel">전화번호</label>
@@ -82,17 +94,33 @@ export default function SignupForm() {
           value={form.mtel}
           onChange={onChange}
           placeholder="010-0000-0000"
+          autoComplete="tel"
         />
 
         {msg && <p style={styles.error}>{msg}</p>}
 
-        <button type="submit" disabled={loading}>
-          {loading ? "처리 중..." : "가입하기"}
-        </button>
+        <button
+              type="submit"
+              disabled={loading}
+              style={{
+              display: "block",
+              width: "100%",
+              padding: "12px 14px",
+              border: "none",
+              borderRadius: 8,
+              fontSize: 16,
+              fontWeight: 600,
+              cursor: "pointer",
+              background: "#1f6feb",
+              color: "#fff",
+       }}
+     >
+   {loading ? "처리 중..." : "가입하기"}
+     </button>
 
         <button
           type="button"
-          onClick={() => navigate("/member/login")}
+          onClick={() => navigate("/loginForm")}
           disabled={loading}
           style={styles.linkBtn}
         >
