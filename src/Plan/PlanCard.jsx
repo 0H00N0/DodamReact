@@ -10,7 +10,7 @@ export default function PlanCard({plan, onSelect}) {
             </div>
             <button onClick={() => onSelect(plan)}
                 style={{marginTop:8, padding:"10px 14px", borderRadius:8, border:"none", background:"#111827", color:"#fff", cursor:"pointer"}}>
-                이 플랜 선택
+                플랜 혜택 보기
             </button>
         </div>
     );
