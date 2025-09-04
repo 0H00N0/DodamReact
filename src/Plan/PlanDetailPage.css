@@ -1,0 +1,38 @@
+.plan-detail-container { max-width: 720px; margin: 40px auto; padding: 16px; }
+.plan-detail-title { font-size: 24px; font-weight: 900; color: #3d3f44; margin-bottom: 12px; }
+
+.plan-detail-info { list-style: none; padding: 0; margin: 0 0 18px; }
+.plan-detail-info li { margin-bottom: 8px; color: #5b6672; }
+
+.plan-price-selector { margin-bottom: 18px; }
+.plan-price-selector select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e9edf3;
+  background: #fff;
+  color: #3d3f44;
+}
+
+.button-group { display: flex; gap: 8px; }
+
+.btn-primary {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.04);
+  background: linear-gradient(180deg, #fbd6de 0%, #f6cbd6 100%);
+  color: #5d2330;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(233, 83, 113, 0.08);
+}
+.btn-primary:hover { filter: brightness(1.03); }
+.btn-primary:active { transform: translateY(1px); }
+
+.btn-secondary {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e9edf3;
+  background: #fff;
+  color: #44505b;
+  cursor: pointer;
+}

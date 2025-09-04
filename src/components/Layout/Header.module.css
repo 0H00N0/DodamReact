@@ -310,3 +310,6 @@
     transition: none;
   }
 }
+:root {
+  --shadow-base: 0 4px 12px rgba(63, 63, 46, 0.08); /* 부드러운 그림자 */
+}
