@@ -6,7 +6,7 @@ const UserDropdown = ({ isOpen, onClose, userInfo }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   // 세션 기반 로그인 체크
-  const isLoggedIn = !!sessionStorage.getItem('sid');
+  const isLoggedIn = !!sessionStorage.getItem('sid'); 
 
   useEffect(() => {
     const handleClickOutside = (e) => {
