@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import '../../App.css';
 
-const updateProfile = () => {
+const UpdateProfile = () => {
   const [form, setForm] = useState({
     memail: '',
     mtel: '',
@@ -62,11 +62,20 @@ const updateProfile = () => {
         <label>주소: <input type="text" name="maddr" value={form.maddr} onChange={handleChange} /></label><br />
         <label>우편번호: <input type="number" name="mpost" value={form.mpost} onChange={handleChange} /></label><br />
         <label>닉네임: <input type="text" name="mnic" value={form.mnic} onChange={handleChange} /></label><br />
-        <button type="submit">수정하기</button>
+        <button type="submit" style= {{
+        marginTop:16,
+        padding: "12px 24px",
+        background: "#1976d2",
+        color: "#fff",
+        borderRadius: "6px",
+        fontSize: "16px",
+        border: "none",
+        cursor: "pointer"
+        }}>수정하기</button>
       </form>
       {message && <p>{message}</p>}
     </div>
   );
 };
 
-export default updateProfile;
+export default UpdateProfile;

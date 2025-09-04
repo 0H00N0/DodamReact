@@ -14,12 +14,14 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
 
+
 // React.lazy로 코드 스플리팅
 
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
 
 const LoadingSpinner = () => (
   <div className="loading-container">
@@ -65,6 +67,9 @@ function App() {
                     {/* 2페이지 이후: /products/page/2 */}
                     <Route path="/products/page/:page" element={<ProductsPage />} />
                     <Route path="/products/:id" element={<ProductDetailPage />} />
+
+                    {/* 회원정보 수정 페이지 */}
+                    <Route path="/member/updateProfile" element={<UpdateProfile />} />
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
