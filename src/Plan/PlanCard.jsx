@@ -5,7 +5,7 @@ import "./PlanCard.css";
 const badgeLabel = (code) => {
   const c = (code || "").toUpperCase();
   if (c === "BASIC") return "입문 추천";
-  if (c === "STANDARD") return "가성비 👍";
+  if (c === "STANDARD") return "가성비";
   if (c === "PREMIUM") return "인기";
   if (c === "FAMILY") return "패밀리 베스트";
   if (c === "VIP") return "VIP 특가";
