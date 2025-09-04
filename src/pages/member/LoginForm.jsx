@@ -14,7 +14,8 @@ export default function LoginForm() {
   };
 
   const onSubmit = async (e) => {
-    e.preventDefault();                // ★ 괄호 필수
+    e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setMsg("");
     try {
@@ -22,10 +23,8 @@ export default function LoginForm() {
         mid: form.mid.trim(),
         mpw: form.mpw,
       });
-      // 세션이 생겼으므로 헤더 갱신 이벤트 발행
       window.dispatchEvent(new Event("auth:changed"));
-      // 마이페이지로 이동(아래 5번 라우트 추가 필요)
-      navigate("/", { replace: true });
+      navigate("/", { replace: true }); // 로그인 성공 후 메인으로
     } catch (err) {
       const message =
         err?.response?.data?.error ||
@@ -38,8 +37,8 @@ export default function LoginForm() {
   };
 
   return (
-    <div style={{display:"grid",placeItems:"center",minHeight:"60vh",padding:40}}>
-      <form onSubmit={onSubmit} style={{width:360,display:"grid",gap:12,padding:24,borderRadius:12,background:"#fff",boxShadow:"0 8px 24px rgba(0,0,0,0.08)"}}>
+    <div style={styles.wrapper}>
+      <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>로그인</h2>
         <label htmlFor="mid">아이디</label>
         <input id="mid" name="mid" value={form.mid} onChange={onChange} />
@@ -47,10 +46,60 @@ export default function LoginForm() {
         <label htmlFor="mpw">비밀번호</label>
         <input id="mpw" name="mpw" type="password" value={form.mpw} onChange={onChange} />
 
-        {msg && <div style={{color:"#c13030",fontSize:14}}>{msg}</div>}
+        {msg && <div style={styles.error}>{msg}</div>}
 
-        <button disabled={loading}>{loading ? "로그인 중..." : "로그인"}</button>
+        {/* ✅ 눈에 보이도록 스타일 지정 */}
+        <button
+          type="submit"
+          disabled={loading}
+          style={styles.primaryBtn}
+        >
+          {loading ? "로그인 중..." : "로그인"}
+        </button>
+
+        {/* 옵션: 회원가입 이동 버튼 */}
+        <button
+          type="button"
+          onClick={() => navigate("/signup")}
+          disabled={loading}
+          style={styles.linkBtn}
+        >
+          회원가입으로
+        </button>
       </form>
     </div>
   );
 }
+
+const styles = {
+  wrapper: {
+    minHeight: "100vh",
+    display: "grid",
+    placeItems: "center",
+    background: "#f7f7f7",
+    padding: "40px",
+  },
+  form: {
+    width: 400,
+    display: "grid",
+    gap: 12,
+    padding: 24,
+    borderRadius: 12,
+    background: "#fff",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+  },
+  error: { color: "#c13030", fontSize: 14, marginTop: 4 },
+  primaryBtn: {
+    display: "block",
+    width: "100%",
+    padding: "12px 14px",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 600,
+    cursor: "pointer",
+    background: "#1f6feb",
+    color: "#fff",
+  },
+  linkBtn: { background: "transparent", color: "#333", marginTop: 4 },
+};
