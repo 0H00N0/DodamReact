@@ -2,9 +2,11 @@ import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './UserDropdown.module.css';
 
-const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo }) => {
+const UserDropdown = ({ isOpen, onClose, userInfo }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  // 세션 기반 로그인 체크
+  const isLoggedIn = !!sessionStorage.getItem('sid');
 
   useEffect(() => {
     const handleClickOutside = (e) => {
