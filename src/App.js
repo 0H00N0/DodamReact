@@ -12,6 +12,11 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
+import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
+import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+
+// React.lazy로 코드 스플리팅
+
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
@@ -44,6 +49,13 @@ function App() {
                     {/* 구독 플랜 관련 라우트 추가 */}
                     <Route path="/plans" element={<PlanSelectPage />} />
                     <Route path="/plans/:planCode" element={<PlanDetailPage />} />
+
+                    {/* 상품 관련 라우트 추가 */}
+                    {/* 첫 페이지: /products */}
+                    <Route path="/products" element={<ProductsPage />} />
+                    {/* 2페이지 이후: /products/page/2 */}
+                    <Route path="/products/page/:page" element={<ProductsPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
