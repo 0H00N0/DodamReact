@@ -1,47 +1,33 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { api } from "../../utils/api";
 
-const profile = () => {
+export default function Profile() {
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  const goToChangePw = () => {
-    navigate('/changePw');
-  };
-  
   useEffect(() => {
-    axios.get('http://localhost:8080/api/member/me', { withCredentials: true })
-      .then(response => {
-        setMember(response.data);
+    (async () => {
+      try {
+        const { data } = await api.get("/member/me");  // ★ 올바른 엔드포인트
+        setMember(data);
+      } catch {
+        setMember(null);
+      } finally {
         setLoading(false);
-      })
-      .catch(error => {
-        console.error('회원 정보 불러오기 실패:', error);
-        alert('회원 정보를 불러오는데 실패하였습니다.');
-        setLoading(false);
-      });
+      }
+    })();
   }, []);
 
-  if (loading) return <div>로딩 중...</div>;
-  if (!member) return <div>회원 정보를 불러올 수 없습니다.</div>;
+  if (loading) return <div style={{padding:24}}>불러오는 중...</div>;
+  if (!member) return <div style={{padding:24}}>로그인이 필요합니다.</div>;
 
   return (
-    <div style={{ padding: '2rem' }}>
+    <div style={{padding:24}}>
       <h2>마이페이지</h2>
-      <p><strong>이름:</strong> {member.name}</p>
-      <p><button onClick={goToChangePw}>비밀번호 변경</button></p>   
-      <p><strong>이메일:</strong> {member.email}</p>
-      <p><strong>가입일:</strong> {member.createdAt}</p>
-      <p><strong>닉네임:</strong> {member.nic}</p>
-      <p><strong>전화번호:</strong> {member.tel}</p>
-      <p><strong>주소:</strong> {member.addr}</p>
-      <p><strong>생년월일:</strong> {member.birth}</p>
+      <p><b>아이디:</b> {member.mid}</p>
+      <p><b>이름:</b> {member.mname}</p>
+      <p><b>이메일:</b> {member.memail}</p>
+      <p><b>전화번호:</b> {member.mtel}</p>
     </div>
-
   );
-};
-
-export default profile;
+}
