@@ -52,7 +52,7 @@
 .pf-search .pf-input { padding-left: 32px; width: 240px; }
 .pf-ico { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #aaa; }
 
-.pf-range { }
+
 .pf-range-box { display: flex; align-items: center; gap: 6px; }
 .pf-currency {
   width: 24px; text-align: center; color: #999; font-size: 12px; background: #f7f7f7;
