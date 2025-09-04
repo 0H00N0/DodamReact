@@ -1,46 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from "react";
+import { api } from "../utils/api";
 
 export const useLoginCart = () => {
-    const [member, setMember] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [member, setMember] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-    //로그인 여부 판단 세션상태
-    const isLoggedIn = !!localStorage.getItem('accessToken');
-
-     useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch('/member/profile', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // 토큰 기반이면 아래 추가
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-          credentials: 'include', // 세션 기반이면 필요
-        });
-
-        if (!response.ok) {
-          throw new Error('프로필 불러오기 실패');
-        }
-
-        const data = await response.json();
-        setMember(data); // 서버에서 반환된 {id, name, email, ...}
-      } catch (err) {
-        console.error('프로필 불러오기 에러:', err);
-        setMember(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (isLoggedIn) {
-      fetchUserProfile();
-    } else {
+  const refresh = useCallback(async () => {
+    try {
+      const { data } = await api.get("/member/me");   // ★ 세션 확인
+      setMember(data);
+    } catch {
       setMember(null);
+    } finally {
       setLoading(false);
     }
-  }, [isLoggedIn]);
+  }, []);
 
-  return { isLoggedIn, member, loading };
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  // 로그인/로그아웃 시 헤더가 즉시 갱신되도록 이벤트 구독
+  useEffect(() => {
+    const handler = () => refresh();
+    window.addEventListener("auth:changed", handler);
+    return () => window.removeEventListener("auth:changed", handler);
+  }, [refresh]);
+
+  const logout = useCallback(async () => {
+    await api.post("/member/logout");
+    setMember(null);
+    window.dispatchEvent(new Event("auth:changed"));
+  }, []);
+
+  return { isLoggedIn: !!member, member, loading, refresh, logout };
 };
