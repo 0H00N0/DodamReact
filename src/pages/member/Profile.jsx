@@ -34,7 +34,16 @@ export default function Profile() {
       <p><b>이름:</b> {member.mname}</p>
       <p><b>이메일:</b> {member.memail}</p>
       <p><b>전화번호:</b> {member.mtel}</p>
-      <button onClick={goToUpdate} style={{marginTop:16}}>내 정보 변경하기</button>
+      <button onClick={goToUpdate} style={{
+        marginTop:16,
+        padding: "12px 24px",
+        background: "#1976d2",
+        color: "#fff",
+        borderRadius: "6px",
+        fontSize: "16px",
+        border: "none",
+        cursor: "pointer"
+        }}>내 정보 변경하기</button> 
     </div>
   );
 }
