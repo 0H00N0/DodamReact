@@ -15,21 +15,21 @@ export default function LoginForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setMsg("");
+    if (loading) return;
     setLoading(true);
+    setMsg("");
     try {
-      // 백엔드: POST /member/loginForm
-      // 예시 바디는 백엔드에 맞춰 조정(mid/mpw or username/password)
-      await api.post("/member/loginForm", form);
-      // 로그인 성공 -> 메인으로
-      navigate("/", { replace: true });
+      await api.post("/member/loginForm", {
+        mid: form.mid.trim(),
+        mpw: form.mpw,
+      });
+      window.dispatchEvent(new Event("auth:changed"));
+      navigate("/", { replace: true }); // 로그인 성공 후 메인으로
     } catch (err) {
       const message =
-        err?.response?.data?.error ??
-        err?.response?.data?.message ??
-        (typeof err?.response?.data === "string" ? err.response.data : undefined) ??
-        err?.message ??
-        "로그인에 실패했습니다.";
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        "아이디/비밀번호를 확인해 주세요.";
       setMsg(message);
     } finally {
       setLoading(false);
@@ -38,7 +38,7 @@ export default function LoginForm() {
 
   return (
     <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form}>
+      <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>로그인</h2>
 
         <label htmlFor="mid">아이디</label>
@@ -64,28 +64,25 @@ export default function LoginForm() {
           required
         />
 
-        {msg && <p style={styles.error}>{msg}</p>}
+        {msg && <div style={styles.error}>{msg}</div>}
 
-        <button type="submit" disabled={loading}>
+        {/* ✅ 눈에 보이도록 스타일 지정 */}
+        <button
+          type="submit"
+          disabled={loading}
+          style={styles.primaryBtn}
+        >
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          disabled={loading}
-          style={styles.linkBtn}
-        >
-          로그인
-        </button>
-
+        {/* 옵션: 회원가입 이동 버튼 */}
         <button
           type="button"
           onClick={() => navigate("/signup")}
           disabled={loading}
           style={styles.linkBtn}
         >
-          회원가입
+          회원가입으로
         </button>
       </form>
     </div>
@@ -101,7 +98,7 @@ const styles = {
     padding: "40px",
   },
   form: {
-    width: 360,
+    width: 400,
     display: "grid",
     gap: 12,
     padding: 24,
@@ -110,5 +107,17 @@ const styles = {
     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
   },
   error: { color: "#c13030", fontSize: 14, marginTop: 4 },
+  primaryBtn: {
+    display: "block",
+    width: "100%",
+    padding: "12px 14px",
+    border: "none",
+    borderRadius: 8,
+    fontSize: 16,
+    fontWeight: 600,
+    cursor: "pointer",
+    background: "#1f6feb",
+    color: "#fff",
+  },
   linkBtn: { background: "transparent", color: "#333", marginTop: 4 },
 };
