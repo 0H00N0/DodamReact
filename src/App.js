@@ -48,7 +48,7 @@ function App() {
                     {/* 화면 라우트: /loginForm 사용 */}
                     <Route path="/loginForm" element={<LoginForm />} />
                     <Route path="/signup" element={<SignupForm />} />
-                    <Route path="/mypage" element={<Profile />} />
+                    <Route path="/member/profile" element={<Profile />} />
 
                     {/* 레거시/혼용 경로 흡수 */}
                     <Route path="/login" element={<Navigate to="/loginForm" replace />} />

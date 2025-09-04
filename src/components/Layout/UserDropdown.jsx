@@ -50,8 +50,16 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               </div>
             </div>
 
-            <div className={styles.menu}>
-              <button className={styles.menuItem} onClick={go("/mypage")}>마이페이지</button>
+            <div className={styles.menuList}>
+              <button onClick={go('/member/profile')} className={styles.menuItem}>마이페이지</button>
+              <button onClick={go('/member/ordersList')} className={styles.menuItem}>주문내역</button>
+              <button onClick={go('/member/cart')} className={styles.menuItem}>장바구니</button>
+              <button onClick={go('/member/membership')} className={styles.menuItem}>구독확인</button>
+              <button onClick={go('/member/cash')} className={styles.menuItem}>결제수단조회</button>
+              <button onClick={go('/member/inquiryList')} className={styles.menuItem}>문의내역</button>
+              <button onClick={go('/member/reviewList')} className={styles.menuItem}>리뷰내역</button>
+              <button onClick={go('/member/returnList')} className={styles.menuItem}>반품조회</button>
+              <button onClick={go('/member/tradeList')} className={styles.menuItem}>교환조회</button>
             </div>
 
             <div className={styles.logoutSection}>
