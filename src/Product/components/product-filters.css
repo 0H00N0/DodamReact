@@ -8,7 +8,13 @@
 }
 .pf-input:focus { border-color: #999; }
 .pf-btn {
-  height: 36px; padding: 0 14px; border-radius: 8px; border: 1px solid #ddd; background: #fff; font-size: 14px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
+  color: #333;        /* ✅ 텍스트는 기본 진한 회색 */
 }
 .pf-btn:hover { background: #f5f5f5; cursor: pointer; }
 .pf-btn.pf-primary { background: #111; color: #fff; border-color: #111; }
@@ -16,8 +22,22 @@
 .pf-label { font-size: 12px; color: #666; margin-right: 6px; white-space: nowrap; }
 .pf-field { display: flex; align-items: center; gap: 8px; }
 .pf-num { width: 100px; }
-.pf-w80 { width: 80px; }
-
+.pf-w80 {
+  width: 100px;   /* ✅ 기존 80px → 100px */
+  min-width: 100px;
+}
+/* 셀렉트 & 인풋 */
+.pf-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+  color: #333;        /* ✅ 텍스트는 진한 회색 */
+  text-align: center;   /* ✅ 선택지 가운데 정렬 */
+}
 /* 데스크탑 바 */
 .pf-bar {
   display: none;
