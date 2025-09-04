@@ -1,15 +1,12 @@
-import React, { useRef, useEffect } from "react";
-import ReactDOM from "react-dom";              // 포털: 헤더 깨짐 방지용
-import { useNavigate } from "react-router-dom";
-import styles from "./UserDropdown.module.css";
+import React, { useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styles from './UserDropdown.module.css';
 
 const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo }) => {
-const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
   useEffect(() => {
-    if (!isOpen) return;
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) onClose();
     };
@@ -21,14 +18,9 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEsc);
     }
-    const handleEscape = (e) => { if (e.key === "Escape") onClose(); };
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEsc);
+      document.removeEventListener('keydown', handleEsc);
     };
   }, [isOpen, onClose]);
 
@@ -45,9 +37,6 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
         className={styles.dropdown}
         onClick={(e) => e.stopPropagation()}
       >
-  return ReactDOM.createPortal(
-    <div className={styles.overlay} onClick={onClose} aria-modal="true" role="dialog">
-      <div ref={dropdownRef} className={styles.dropdown} onClick={(e) => e.stopPropagation()}>
         {!isLoggedIn ? (
           <div className={styles.loginSection}>
             <div className={styles.welcomeMessage}>
@@ -55,8 +44,6 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               <p className={styles.subtitle}>로그인하고 다양한 혜택을 만나보세요</p>
             </div>
 
-            <h3 className={styles.title}>로그인이 필요합니다</h3>
-            <p className={styles.subtitle}>로그인하고 다양한 혜택을 만나보세요</p>
             <div className={styles.authButtons}>
               <button onClick={go('/loginForm')} className={styles.loginButton}>
                 로그인
@@ -64,9 +51,6 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               <button onClick={go('/signup')} className={styles.signupButton}>
                 회원가입
               </button>
-              {/*App.js 라우트와 정확히 일치 */}
-              <button onClick={go("/loginForm")} className={styles.loginButton}>로그인</button>
-              <button onClick={go("/signup")} className={styles.signupButton}>회원가입</button>
             </div>
 
           </div>
@@ -102,21 +86,17 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               <button onClick={go('/member/tradeList')} className={styles.menuItem}>교환조회</button>
             </div>
 
-          <>
-            {/* ...로그인 후 메뉴들 */}
             <div className={styles.logoutSection}>
               {/* 서버 로그아웃 엔드포인트가 /member/auth/logout 이라면 */}
               <button onClick={serverGo('/member/auth/logout')} className={styles.logoutButton}>
                 로그아웃
               </button>
-              <button onClick={onLogout} className={styles.logoutButton}>로그아웃</button>
             </div>
           </div>
-          </>
         )}
       </div>
     </div>
-    </div>,
-    document.body
   );
 };
+
+export default UserDropdown;
