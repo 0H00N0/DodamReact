@@ -12,6 +12,13 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
+import CommunityPage from "./pages/CommunityPage/CommunityPage";
+import Notice from "./pages/CommunityPage/Notice";
+import Event from "./pages/CommunityPage/Event";
+import Inquiry from "./pages/CommunityPage/Inquiry";
+import FAQ from "./pages/CommunityPage/FAQ";
+import Company from "./pages/CommunityPage/Company";
+
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
@@ -44,6 +51,16 @@ function App() {
                     {/* 구독 플랜 관련 라우트 추가 */}
                     <Route path="/plans" element={<PlanSelectPage />} />
                     <Route path="/plans/:planCode" element={<PlanDetailPage />} />
+
+                    {/* 소통(Community) */}
+                    <Route path="/board" element={<CommunityPage />}>
+                      <Route index element={<Notice />} />  {/* 기본: 공지사항 */}
+                      <Route path="notice" element={<Notice />} />
+                      <Route path="event" element={<Event />} />
+                      <Route path="inquiry" element={<Inquiry />} />
+                      <Route path="faq" element={<FAQ />} />
+                      <Route path="company" element={<Company />} />
+                    </Route>
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />

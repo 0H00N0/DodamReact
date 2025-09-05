@@ -1,0 +1,48 @@
+.container {
+  padding: 2rem;
+}
+
+.title {
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.tabNav {
+  border-bottom: 2px solid #eee;
+  margin-bottom: 1.5rem;
+}
+
+.tabList {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tabItem {}
+
+.tabLink {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  color: #555;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tabLink:hover {
+  color: #000;
+}
+
+.active {
+  color: #000;
+  border-color: #007bff; /* 강조색 */
+  font-weight: 600;
+}
+
+.content {
+  min-height: 200px;
+}
