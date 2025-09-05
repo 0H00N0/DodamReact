@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAdmin } from './contexts/AdminContext';
-import './AdminSidebar.css';
 
 /**
  * 관리자 사이드바 네비게이션 컴포넌트

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from './contexts/AdminContext';
-import './Dashboard.css';
 
 /**
  * 관리자 대시보드 컴포넌트

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { useAdmin } from './contexts/AdminContext';
-import './ProductManagement.css';
 
 /**
  * 상품 관리 메인 컴포넌트

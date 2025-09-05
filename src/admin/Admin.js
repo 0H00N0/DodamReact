@@ -1,17 +1,13 @@
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import './Admin.css';
-import AdminHeader from './admin/AdminHeader';
-import AdminSidebar from './admin/AdminSidebar';
-import { AdminProvider } from './admin/contexts/AdminContext';
+import AdminHeader from './AdminHeader';
+import AdminSidebar from './AdminSideBar';
+import { AdminProvider } from './contexts/AdminContext';
 
-// 관리자 페이지 동적 import
-const Dashboard = React.lazy(() => import('./admin/Dashboard'));
-const ProductManagement = React.lazy(() => import('./admin/ProductManagement'));
-const OrderManagement = React.lazy(() => import('./admin/OrderManagement'));
-const UserManagement = React.lazy(() => import('./admin/UserManagement'));
-const CategoryManagement = React.lazy(() => import('./admin/CategoryManagement'));
-const Statistics = React.lazy(() => import('./admin/Statistics'));
+// 존재하는 페이지만 import
+const Dashboard = React.lazy(() => import('./Dashboard'));
+const ProductManagement = React.lazy(() => import('./ProductManagement'));
 
 // 로딩 컴포넌트
 const AdminLoadingSpinner = () => (
@@ -42,26 +38,14 @@ function Admin() {
           <main className="admin-main-content">
             <Suspense fallback={<AdminLoadingSpinner />}>
               <Routes>
-                {/* 기본 경로는 대시보드로 리디렉션 */}
-                <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
+                {/* 기본 경로 */}
+                <Route path="/" element={<Navigate to="dashboard" replace />} />
                 
                 {/* 대시보드 */}
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard />} />
                 
                 {/* 상품 관리 */}
-                <Route path="/products/*" element={<ProductManagement />} />
-                
-                {/* 주문 관리 */}
-                <Route path="/orders/*" element={<OrderManagement />} />
-                
-                {/* 사용자 관리 */}
-                <Route path="/users/*" element={<UserManagement />} />
-                
-                {/* 카테고리 관리 */}
-                <Route path="/categories/*" element={<CategoryManagement />} />
-                
-                {/* 통계 */}
-                <Route path="/statistics" element={<Statistics />} />
+                <Route path="products/*" element={<ProductManagement />} />
                 
                 {/* 404 페이지 */}
                 <Route path="*" element={<div className="admin-404">페이지를 찾을 수 없습니다.</div>} />

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAdmin } from './contexts/AdminContext';
-import './AdminHeader.css';
 
 /**
  * 관리자 헤더 컴포넌트
