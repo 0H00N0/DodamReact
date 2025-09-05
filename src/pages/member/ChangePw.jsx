@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import '../../App.css';
 
 const ChangePw = () => {
   const [currentPw, setCurrentPw] = useState('');
@@ -39,7 +39,16 @@ const ChangePw = () => {
         <label>현재 비밀번호: <input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} required /></label><br />
         <label>새 비밀번호: <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} required /></label><br />
         <label>새 비밀번호 확인: <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} required /></label><br />
-        <button type="submit">변경하기</button>
+        <button type="submit" style={{
+        marginTop:16,
+        padding: "12px 24px",
+        background: "#1976d2",
+        color: "#fff",
+        borderRadius: "6px",
+        fontSize: "16px",
+        border: "none",
+        cursor: "pointer"
+        }}>변경하기</button>
       </form>
       {message && <p>{message}</p>}
     </div>

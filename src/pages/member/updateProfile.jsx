@@ -60,7 +60,7 @@ const UpdateProfile = () => {
         <label>이메일: <input type="email" name="memail" value={form.memail} onChange={handleChange} /></label><br />
         <label>전화번호: <input type="text" name="mtel" value={form.mtel} onChange={handleChange} /></label><br />
         <label>주소: <input type="text" name="maddr" value={form.maddr} onChange={handleChange} /></label><br />
-        <label>우편번호: <input type="number" name="mpost" value={form.mpost} onChange={handleChange} /></label><br />
+        <label>우편번호: <input type="number" name="mpost" value={form.mpost || ''} onChange={handleChange} /></label><br />
         <label>닉네임: <input type="text" name="mnic" value={form.mnic} onChange={handleChange} /></label><br />
         <button type="submit" style= {{
         marginTop:16,

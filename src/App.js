@@ -22,6 +22,7 @@ const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
 const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
+const ChangePw = React.lazy(() => import("./pages/member/ChangePw"));
 
 const LoadingSpinner = () => (
   <div className="loading-container">
@@ -70,7 +71,9 @@ function App() {
 
                     {/* 회원정보 수정 페이지 */}
                     <Route path="/member/updateProfile" element={<UpdateProfile />} />
-
+                    {/* 비밀번호 변경 페이지*/}
+                    <Route path="/member/changePw" element={<ChangePw />} />
+                    
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
                   </Routes>
