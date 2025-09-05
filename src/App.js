@@ -11,6 +11,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
+import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
+import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+
 
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
@@ -52,6 +55,14 @@ function App() {
                     <Route path="/loginForm" element={<LoginForm />} />
                     <Route path="/signup" element={<SignupForm />} />
                     <Route path="/member/profile" element={<Profile />} />
+
+                    {/* 상품 관련 라우트 추가 */}
+                    {/* 첫 페이지: /products */}
+                    <Route path="/products" element={<ProductsPage />} />
+                    {/* 2페이지 이후: /products/page/2 */}
+                    <Route path="/products/page/:page" element={<ProductsPage />} />
+                    <Route path="/products/:id" element={<ProductDetailPage />} />
+
 
                     {/* 레거시/혼용 경로 흡수 */}
                     <Route path="/login" element={<Navigate to="/loginForm" replace />} />
