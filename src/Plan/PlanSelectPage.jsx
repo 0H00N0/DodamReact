@@ -4,12 +4,14 @@ import { api } from "../utils/api";
 import PlanCard from "./PlanCard";
 import { useNavigate } from "react-router-dom";
 import "./PlanSelectPage.css";
+import { useScrollTop } from "./PlanScrollTop";
 
 const NORMAL_ORDER  = ["BASIC", "STANDARD", "PREMIUM"];
 const PREMIUM_ORDER = ["FAMILY", "VIP"];
 const up = (s) => (s ?? "").toString().trim().toUpperCase();
 
 export default function PlanSelectPage() {
+  useScrollTop({ behavior: "auto" }); // ✅ 페이지 진입 시 맨 위로
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -19,7 +21,17 @@ export default function PlanSelectPage() {
     (async () => {
       try {
         const { data } = await api.get("/plans");
-        setPlans(data ?? []);
+        const list = Array.isArray(data) ? data : [];
+        //첫 글자가 대문자일 수도 있으니 카멜로 정규화
+        const toCamel1 = (obj) => {
+          const out = {};
+          Object.entries(obj  || {}).forEach(([k, v]) => {
+            const ck = k ? k.charAt(0).toLowerCase() + k.slice(1) : k;
+            out[ck] = v;
+          });
+          return out;
+        };
+        setPlans(list.map(toCamel1));
       } catch {
         setErr("플랜 목록을 불러오지 못했습니다.");
       } finally {
@@ -28,7 +40,19 @@ export default function PlanSelectPage() {
     })();
   }, []);
 
-  const handleSelect = (plan) => navigate(`/plans/${plan.planCode}`);
+
+  // 디버깅용 (개발 중에만)
+useEffect(() => {
+  if (!loading && !err) {
+    const codes = plans.map(p => p.planCode);
+    console.debug("[plans] codes:", codes);
+  }
+}, [plans, loading, err]);
+
+  const handleSelect = (plan) => {
+    if(!plan?.planCode) return; //planCode가 없을때 방어로직
+    navigate(`/plans/${encodeURIComponent(plan.planCode)}`);
+  }
 
   if (loading) return <div className="loading">불러오는 중 입니다…</div>;
   if (err) return <div className="error">{err}</div>;

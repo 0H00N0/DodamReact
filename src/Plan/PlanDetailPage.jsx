@@ -3,8 +3,46 @@ import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../utils/api";
 import { useParams, useNavigate } from "react-router-dom";
 import "./PlanDetailPage.css";
+import { useScrollTop } from "./PlanScrollTop";
+
+/**
+ * note 문자열 파싱
+ * - 첫 줄(불릿이 아닌 줄)은 '혜택 설명(desc)'로
+ * - '-' 또는 '*' 로 시작하는 줄만 '포함 혜택(items)'로
+ */
+function splitBenefit(note) {
+  if (!note) return { desc: "", items: [] };
+
+  const normalized = note
+    .replaceAll("\r\n", "\n")
+    .replace(/•/g, "- ")      // '•'도 불릿 처리
+    .replace(/ - /g, "\n- "); // "문장 - 문장" 패턴을 줄바꿈 불릿으로
+
+  const lines = normalized
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const items = [];
+  const descParts = [];
+  for (const line of lines) {
+    if (/^(-|\*)\s+/.test(line)) {
+      // 불릿 줄 → 포함 혜택 항목
+      items.push(line.replace(/^(-|\*)\s+/, ""));
+    } else {
+      // 불릿이 아닌 줄 → 설명 후보
+      descParts.push(line);
+    }
+  }
+
+  return {
+    desc: descParts.length > 0 ? descParts[0] : "", // 설명은 첫 줄만 사용
+    items,
+  };
+}
 
 export default function PlanDetailPage() {
+  useScrollTop({ behavior: "auto" }); // ✅ 페이지 진입 시 맨 위로
   const { planCode } = useParams();
   const navigate = useNavigate();
 
@@ -13,7 +51,7 @@ export default function PlanDetailPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  // 숫자 통화 포맷터 (KRW, 천단위 콤마)
+  // 숫자 포맷터
   const nf = useMemo(
     () =>
       new Intl.NumberFormat("ko-KR", {
@@ -22,6 +60,7 @@ export default function PlanDetailPage() {
     []
   );
 
+  // 데이터 로딩
   useEffect(() => {
     let ignore = false;
     setLoading(true);
@@ -33,24 +72,7 @@ export default function PlanDetailPage() {
       try {
         const { data } = await api.get(`/plans/${planCode}`);
         if (ignore) return;
-
-        // 기대 응답 예시:
-        // {
-        //   planCode: "BASIC",
-        //   displayName: "베이직",
-        //   note: "월 최대 2개 대여, 파손보장 기본",
-        //   rentalPriceCapInt: 100000,  // 0이면 제한 없음
-        //   isActive: true,
-        //   planPrices: [
-        //     { months: 1, amountInt: 19000, discountRate: 0 },
-        //     { months: 3, amountInt: 54000, discountRate: 5 },  // 총액 기준
-        //     { months: 12, amountInt: 199000, discountRate: 13 }
-        //   ],
-        //   benefits: [ "동시 대여 1개", "무료 왕복 배송 1회/월", "파손 보장 기본" ]
-        // }
-
         setPlan(data);
-        // 기본 선택: 첫 번째 가격 옵션
         const firstMonths = data?.planPrices?.[0]?.months ?? null;
         setSelectedMonths(firstMonths);
       } catch (e) {
@@ -65,6 +87,41 @@ export default function PlanDetailPage() {
     };
   }, [planCode]);
 
+  // ===================== 핵심 변경 영역 (항상 훅 먼저 호출) =====================
+  const noteText = plan?.note || "";
+
+  // note 파싱
+  const { desc: parsedDesc, items: parsedItems } = useMemo(
+    () => splitBenefit(noteText),
+    [noteText]
+  );
+
+  // ✅ 변경 1) parsedItems가 하나라도 있으면 그것만 사용, 없으면 서버 benefits 사용
+  const benefitItems = useMemo(() => {
+    if (parsedItems.length > 0) return parsedItems;
+    return Array.isArray(plan?.benefits) ? plan.benefits : [];
+  }, [parsedItems, plan?.benefits]);
+
+  // ✅ 변경 2) (안전망) note 전체 문장과 동일/유사한 항목은 제외 + 중복 제거
+  const mergedBenefits = useMemo(() => {
+    const seen = new Set();
+    const noteKey = (noteText || "").trim().toLowerCase();
+
+    return benefitItems.filter((x) => {
+      const k = (x || "").trim().toLowerCase();
+      if (!k) return false;
+      if (seen.has(k)) return false;
+      // note 전체 문장이 benefit 항목으로 넘어오는 케이스 배제
+      if (noteKey && (k === noteKey || noteKey.startsWith(k) || k.startsWith(noteKey))) {
+        return false;
+      }
+      seen.add(k);
+      return true;
+    });
+  }, [benefitItems, noteText]);
+  // ===================== /핵심 변경 영역 =====================
+
+  // 조건부 리턴 (훅 아래)
   if (loading) {
     return (
       <div className="plan-detail-skeleton">
@@ -75,12 +132,12 @@ export default function PlanDetailPage() {
       </div>
     );
   }
-
   if (err) return <div className="error">{err}</div>;
   if (!plan) return <div className="error">플랜이 존재하지 않습니다.</div>;
   if (plan?.isActive === false)
     return <div className="error">현재 판매 중인 플랜이 아닙니다.</div>;
 
+  // 파생 값들
   const prices = plan.planPrices || [];
   const selectedPrice = prices.find((p) => p.months === Number(selectedMonths));
 
@@ -98,6 +155,8 @@ export default function PlanDetailPage() {
     if (!selectedPrice) return;
     navigate(`/checkout?code=${plan.planCode}&months=${selectedPrice.months}`);
   };
+
+  const descToShow = parsedDesc?.trim() ? parsedDesc : (plan.note || "");
 
   return (
     <div className="plan-detail-container">
@@ -128,16 +187,25 @@ export default function PlanDetailPage() {
           </li>
           <li>
             <span className="kv-key">혜택 설명</span>
-            <span className="kv-val">{plan.note || "—"}</span>
+            <span className="kv-val">
+              {descToShow
+                ? descToShow.split("\n").map((line, i, arr) => (
+                    <span key={i}>
+                      {line}
+                      {i !== arr.length - 1 && <br />}
+                    </span>
+                  ))
+                : "—"}
+            </span>
           </li>
         </ul>
 
-        {/* 추가 혜택 리스트(있을 때만 표기) */}
-        {Array.isArray(plan.benefits) && plan.benefits.length > 0 && (
+        {/* 포함 혜택 */}
+        {mergedBenefits.length > 0 && (
           <div className="benefit-box">
             <div className="benefit-title">포함 혜택</div>
             <ul className="benefit-list">
-              {plan.benefits.map((b, idx) => (
+              {mergedBenefits.map((b, idx) => (
                 <li key={idx} className="benefit-item">
                   <span className="benefit-dot" aria-hidden />
                   {b}
@@ -187,22 +255,23 @@ export default function PlanDetailPage() {
         )}
       </div>
 
-      {/* 액션 버튼 */}
-      <div className="button-group">
-        <button onClick={() => navigate(-1)} className="btn-secondary">
-          돌아가기
-        </button>
-        <button
-          onClick={handleCheckout}
-          className="btn-primary"
-          disabled={!selectedPrice}
-          aria-disabled={!selectedPrice}
-        >
-          {selectedPrice ? `${selectedPrice.months}개월 결제 진행` : "결제 불가"}
-        </button>
-      </div>
-
-      {/* 하단 안내(선택) */}
+      {/* 액션 바 */}
+<div className="action-bar">
+  <div className="action-inner">
+    <button onClick={() => navigate(-1)} className="btn-secondary">
+      돌아가기
+    </button>
+    <button
+      onClick={handleCheckout}
+      className="btn-primary"
+      disabled={!selectedPrice}
+      aria-disabled={!selectedPrice}
+    >
+      {selectedPrice ? `${selectedPrice.months}개월 결제 진행` : "결제 불가"}
+    </button>
+  </div>
+</div>
+      {/* 안내 */}
       <div className="fine-print">
         결제는 포트원(토스페이먼츠) 테스트 환경으로 진행됩니다. 결제 완료 후
         플랜 혜택이 즉시 적용됩니다.
