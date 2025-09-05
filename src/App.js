@@ -11,10 +11,13 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
-import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
-import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
 
-// React.lazy로 코드 스플리팅
+import CommunityPage from "./pages/CommunityPage/CommunityPage";
+import Notice from "./pages/CommunityPage/Notice";
+import Event from "./pages/CommunityPage/Event";
+import Inquiry from "./pages/CommunityPage/Inquiry";
+import FAQ from "./pages/CommunityPage/FAQ";
+import Company from "./pages/CommunityPage/Company";
 
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
@@ -59,12 +62,15 @@ function App() {
                     <Route path="/plans" element={<PlanSelectPage />} />
                     <Route path="/plans/:planCode" element={<PlanDetailPage />} />
 
-                    {/* 상품 관련 라우트 추가 */}
-                    {/* 첫 페이지: /products */}
-                    <Route path="/products" element={<ProductsPage />} />
-                    {/* 2페이지 이후: /products/page/2 */}
-                    <Route path="/products/page/:page" element={<ProductsPage />} />
-                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    {/* 소통(Community) */}
+                    <Route path="/board" element={<CommunityPage />}>
+                      <Route index element={<Notice />} />  {/* 기본: 공지사항 */}
+                      <Route path="notice" element={<Notice />} />
+                      <Route path="event" element={<Event />} />
+                      <Route path="inquiry" element={<Inquiry />} />
+                      <Route path="faq" element={<FAQ />} />
+                      <Route path="company" element={<Company />} />
+                    </Route>
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
@@ -82,3 +88,4 @@ function App() {
 }
 
 export default App;
+
