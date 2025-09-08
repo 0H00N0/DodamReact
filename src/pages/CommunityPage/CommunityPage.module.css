@@ -2,7 +2,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* 내용은 왼쪽 정렬 유지 */
+  align-items: flex-start; /* 내용 왼쪽 정렬 유지 */
   min-height: 100vh;
   padding: 20px;
 }
@@ -25,7 +25,7 @@
 
 /* 메뉴 리스트 */
 .tabList {
-  display: flex; /* 가로로 나열 */
+  display: flex;
   gap: 20px;
   list-style: none;
   padding: 0;
@@ -39,6 +39,7 @@
   font-weight: 600;
   color: #333;
   padding: 0.3rem 0.6rem;
+  transition: all 0.2s ease;
 }
 
 .tabLink:hover {
@@ -47,7 +48,7 @@
 
 .tabLink.active {
   color: #007bff;
-  border-bottom: 2px solid #007bff; /* 선택된 탭 강조 */
+  border-bottom: 2px solid #007bff;
 }
 
 /* 내용 영역 */

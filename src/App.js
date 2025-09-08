@@ -15,6 +15,7 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
 import Event from "./pages/CommunityPage/Event";
+import Community from "./pages/CommunityPage/Community";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
@@ -57,10 +58,12 @@ function App() {
                       <Route index element={<Notice />} />  {/* 기본: 공지사항 */}
                       <Route path="notice" element={<Notice />} />
                       <Route path="event" element={<Event />} />
+                      <Route path="community" element={<Community />} />  
                       <Route path="inquiry" element={<Inquiry />} />
                       <Route path="faq" element={<FAQ />} />
                       <Route path="company" element={<Company />} />
                     </Route>
+
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />

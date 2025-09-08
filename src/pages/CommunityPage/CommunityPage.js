@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
-import styles from "../../Board/CommunityPage.module.css"; // CSS 경로 수정
+import styles from "./CommunityPage.module.css"
 
 const CommunityPage = () => {
   const location = useLocation();
@@ -9,6 +9,7 @@ const CommunityPage = () => {
   const tabs = [
     { title: "공지사항", path: "notice" },
     { title: "이벤트", path: "event" },
+    { title: "커뮤니티", path: "community" },
     { title: "문의", path: "inquiry" },
     { title: "FAQ", path: "faq" },
     { title: "회사소개", path: "company" },
@@ -18,11 +19,11 @@ const CommunityPage = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>소통 페이지</h2>
 
-      {/* 탭 메뉴 */}
-      <nav className={styles.tabNav}>
+      {/* 탭 메뉴 wrapper - 가로 중앙 */}
+      <nav className={styles.tabNavWrapper}>
         <ul className={styles.tabList}>
           {tabs.map((tab) => (
-            <li key={tab.path} className={styles.tabItem}>
+            <li key={tab.path}>
               <Link
                 to={tab.path}
                 className={`${styles.tabLink} ${
