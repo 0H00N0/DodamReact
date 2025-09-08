@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // 추가
+import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
 const ChangePw = () => {
@@ -8,7 +8,7 @@ const ChangePw = () => {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // 추가
+  const navigate = useNavigate();
   const handleSubmit = e => {
     e.preventDefault();
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
 const UpdateProfile = () => {
@@ -13,7 +14,7 @@ const UpdateProfile = () => {
 
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
-
+  const navigate = useNavigate(); // 추가
   // 회원 정보 불러오기
   useEffect(() => {
     axios.get('http://localhost:3000/api/member/me', { withCredentials: true })
@@ -43,8 +44,12 @@ const UpdateProfile = () => {
   // 수정 요청
   const handleSubmit = e => {
   e.preventDefault();
-  axios.put('http://localhost:3000/member/updateProfile', form, { withCredentials: true })
-    .then(() => setMessage('회원 정보가 성공적으로 수정되었습니다.'))
+  axios.put('http://localhost:8080/member/updateProfile', form, { withCredentials: true })
+    .then(() => {
+      setMessage('회원 정보가 성공적으로 수정되었습니다.');
+      alert('회원정보 수정이 완료되었습니다.');
+      navigate('/member/profile');
+    })
     .catch(err => {
       console.error('수정 실패:', err);
       setMessage('수정 중 오류가 발생했습니다.');
