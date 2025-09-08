@@ -24,6 +24,10 @@ export default function Profile() {
     navigate("/member/updateProfile");
   };
 
+  const goToChangePw = () => {
+    navigate("/member/changePw");
+  }
+
   if (loading) return <div style={{padding:24}}>불러오는 중...</div>;
   if (!member) return <div style={{padding:24}}>로그인이 필요합니다.</div>;
 
@@ -31,6 +35,16 @@ export default function Profile() {
     <div style={{padding:24}}>
       <h2>마이페이지</h2>
       <p><b>아이디:</b> {member.mid}</p>
+      <button onClick={goToChangePw} style={{
+        marginTop:16,
+        padding: "12px 24px",
+        background: "#1976d2",
+        color: "#fff",
+        borderRadius: "6px",
+        fontSize: "16px",
+        border: "none",
+        cursor: "pointer"
+      }}>비밀번호 변경</button>
       <p><b>이름:</b> {member.mname}</p>
       <p><b>이메일:</b> {member.memail}</p>
       <p><b>전화번호:</b> {member.mtel}</p>

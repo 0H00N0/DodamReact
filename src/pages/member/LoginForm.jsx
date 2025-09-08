@@ -66,6 +66,8 @@ export default function LoginForm() {
         >
           회원가입으로
         </button>
+        <button type="button" onClick={() => navigate("/member/findIdModal")}>아이디 찾기</button>
+        <button>비밀번호 찾기</button>
       </form>
     </div>
   );

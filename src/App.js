@@ -6,6 +6,12 @@ import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
+import PlanSelectPage from "./Plan/PlanSelectPage";
+import PlanDetailPage from "./Plan/PlanDetailPage";
+
+import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
+import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+import FindIdModal from "./pages/member/FindIdModal";
 const LoadingSpinner = () => (
   <div className="loading-container">
     <div className="loading-spinner" role="status" aria-label="페이지 로딩 중">
