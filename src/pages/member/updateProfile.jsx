@@ -42,14 +42,14 @@ const UpdateProfile = () => {
 
   // 수정 요청
   const handleSubmit = e => {
-    e.preventDefault();
-    axios.put('http://localhost:3000/api/member/me', form, { withCredentials: true })
-      .then(() => setMessage('회원 정보가 성공적으로 수정되었습니다.'))
-      .catch(err => {
-        console.error('수정 실패:', err);
-        setMessage('수정 중 오류가 발생했습니다.');
-      });
-  };
+  e.preventDefault();
+  axios.put('http://localhost:3000/member/updateProfile', form, { withCredentials: true })
+    .then(() => setMessage('회원 정보가 성공적으로 수정되었습니다.'))
+    .catch(err => {
+      console.error('수정 실패:', err);
+      setMessage('수정 중 오류가 발생했습니다.');
+    });
+};
 
   if (loading) return <div>로딩 중...</div>;
 

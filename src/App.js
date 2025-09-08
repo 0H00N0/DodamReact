@@ -13,6 +13,7 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 
 import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+import FindIdModal from "./pages/member/FindIdModal";
 
 
 // React.lazy로 코드 스플리팅
@@ -73,7 +74,9 @@ function App() {
                     <Route path="/member/updateProfile" element={<UpdateProfile />} />
                     {/* 비밀번호 변경 페이지*/}
                     <Route path="/member/changePw" element={<ChangePw />} />
-                    
+                    {/* ID 찾기 모달 페이지 */}
+                    <Route path="/member/findIdModal" element={<FindIdModal />} />
+
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
                   </Routes>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // 추가
 import '../../App.css';
 
 const ChangePw = () => {
@@ -7,7 +8,7 @@ const ChangePw = () => {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
   const [message, setMessage] = useState('');
-
+  const navigate = useNavigate(); // 추가
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -16,15 +17,17 @@ const ChangePw = () => {
       return;
     }
 
-    axios.put('http://localhost:8080/api/member/me/password', {
-      currentPw,
-      newPw
-    }, { withCredentials: true })
+    axios.put('http://localhost:8080/member/changePw', {
+      currentPw: currentPw,
+      newPw: newPw
+}, { withCredentials: true })
       .then(() => {
         setMessage('비밀번호가 성공적으로 변경되었습니다.');
         setCurrentPw('');
         setNewPw('');
         setConfirmPw('');
+        alert('비밀번호 변경이 완료되었습니다.');
+        navigate('/member/profile'); // 비밀번호 변경 후 프로필 페이지로 이동
       })
       .catch(err => {
         console.error('비밀번호 변경 실패:', err);
