@@ -15,8 +15,8 @@ import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
 // 회원 관련 컴포넌트
 import FindIdModal from "./pages/member/FindIdModal";
-import FindIdEmail from "./pages/member/FindIdEmail";
-import FindIdTel from "./pages/member/FindIdTel";
+import FindIdEmail from "./pages/member/FindIdByEmail";
+import FindIdTel from "./pages/member/FindIdByTel";
 
 
 // React.lazy로 코드 스플리팅
