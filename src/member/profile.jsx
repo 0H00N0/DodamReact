@@ -31,14 +31,14 @@ const profile = () => {
   return (
     <div style={{ padding: '2rem' }}>
       <h2>마이페이지</h2>
-      <p><strong>이름:</strong> {member.name}</p>
+      <p><strong>이름:</strong> {member.mname}</p>
       <p><button onClick={goToChangePw}>비밀번호 변경</button></p>   
-      <p><strong>이메일:</strong> {member.email}</p>
+      <p><strong>이메일:</strong> {member.memail}</p>
       <p><strong>가입일:</strong> {member.createdAt}</p>
-      <p><strong>닉네임:</strong> {member.nic}</p>
-      <p><strong>전화번호:</strong> {member.tel}</p>
-      <p><strong>주소:</strong> {member.addr}</p>
-      <p><strong>생년월일:</strong> {member.birth}</p>
+      <p><strong>닉네임:</strong> {member.mnic}</p>
+      <p><strong>전화번호:</strong> {member.mtel}</p>
+      <p><strong>주소:</strong> {member.maddr}</p>
+      <p><strong>생년월일:</strong> {member.mbirth}</p>
     </div>
 
   );

@@ -14,6 +14,8 @@ const Category = React.lazy(() => import('./pages/Category'));
 const Wishlist = React.lazy(() => import('./pages/Wishlist'));
 const Cart = React.lazy(() => import('./pages/Cart'));
 const Search = React.lazy(() => import('./pages/Search'));
+const Signup = React.lazy(() => import('./pages/Signup'));
+const Login = React.lazy(() => import('./pages/Login'));
 
 // 로딩 컴포넌트
 const LoadingSpinner = () => (
@@ -45,6 +47,18 @@ function App() {
               
               {/* 메인 콘텐츠 영역 */}
               <main id="main-content" role="main" className="main-content" tabIndex="-1">
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/category/:id" element={<Category />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route path="/login" element={<Login />} />
+                  </Routes>
+                </Suspense>
               </main>
               
               {/* 페이지 하단 정보 */}

@@ -42,12 +42,12 @@ const UserDropdown = ({ isOpen, onClose }) => {
   };
 
   const handleLogin = () => {
-    alert('로그인 기능은 준비 중입니다!');
+    navigate('/login');
     onClose();
   };
 
   const handleSignup = () => {
-    alert('회원가입 기능은 준비 중입니다!');
+    navigate('/signup');
     onClose();
   };
 

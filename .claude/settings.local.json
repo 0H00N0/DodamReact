@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm audit:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(code:*)",
+      "Read(//c/dev/project/Dodam/**)",
+      "Bash(./gradlew:*)",
+      "Bash(curl:*)",
+      "Bash(timeout:*)",
+      "Bash(npm start)",
+      "Bash(npm install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
