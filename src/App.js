@@ -1,6 +1,6 @@
 // src/App.js
 import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
@@ -13,6 +13,10 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 
 import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+// 회원 관련 컴포넌트
+import FindIdModal from "./pages/member/FindIdModal";
+import FindIdEmail from "./pages/member/FindIdByEmail";
+import FindIdTel from "./pages/member/FindIdByTel";
 
 
 // React.lazy로 코드 스플리팅
@@ -32,6 +36,17 @@ const LoadingSpinner = () => (
 );
 
 function App() {
+  function FooterCondition() {
+    const location = useLocation();
+    const noFooterPaths = [
+      "/member/findIdModal",
+      "/member/findIdEmail",
+      "/member/findIdTel"
+    ];
+    const hideFooter = noFooterPaths.includes(location.pathname);
+    return !hideFooter && <Footer />;
+  }
+
   return (
     <ThemeProvider>
       <CartProvider>
@@ -62,14 +77,20 @@ function App() {
                     <Route path="/plans/:planCode" element={<PlanDetailPage />} />
 
                     {/* 상품 관련 라우트 추가 */}
-                    {/* 첫 페이지: /products */}
                     <Route path="/products" element={<ProductsPage />} />
-                    {/* 2페이지 이후: /products/page/2 */}
                     <Route path="/products/page/:page" element={<ProductsPage />} />
                     <Route path="/products/:id" element={<ProductDetailPage />} />
 
                     {/* 회원정보 수정 페이지 */}
                     <Route path="/member/updateProfile" element={<UpdateProfile />} />
+                    {/* 비밀번호 변경 페이지*/}
+                    <Route path="/member/changePw" element={<ChangePw />} />
+                    {/* ID 찾기 모달 페이지 */}
+                    <Route path="/member/findIdModal" element={<FindIdModal />} />
+                    <Route path="/member/findIdEmail" element={<FindIdEmail />} />
+                    <Route path="/member/findIdTel" element={<FindIdTel />} />
+                    {/* 비밀번호 찾기 모달 */}
+                    <Route path="/member/findPwModal" element={<FindPw />} />
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
@@ -77,7 +98,7 @@ function App() {
                 </Suspense>
               </main>
 
-              <Footer />
+              <FooterCondition />
             </div>
           </Router>
         </WishlistProvider>

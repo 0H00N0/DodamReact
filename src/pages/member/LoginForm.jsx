@@ -84,6 +84,20 @@ export default function LoginForm() {
         >
           회원가입으로
         </button>
+        <button
+          type="button"
+          onClick={() => window.open("/member/findIdModal", "_blank", "width=500,height=600")}
+          disabled={loading}
+        >
+          아이디 찾기
+        </button>
+        <button
+          type="button"
+          onClick={() => window.open("/member/findPwModal", "_blank", "width=500,height=600")}
+          disabled={loading}
+        >
+          비밀번호 찾기
+        </button>
       </form>
     </div>
   );
