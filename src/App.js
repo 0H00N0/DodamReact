@@ -17,6 +17,8 @@ import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상
 import FindIdModal from "./pages/member/FindIdModal";
 import FindIdEmail from "./pages/member/FindIdByEmail";
 import FindIdTel from "./pages/member/FindIdByTel";
+import ChangePw from "./pages/member/ChangePw";
+import FindPw from "./pages/member/FindPw";
 
 
 // React.lazy로 코드 스플리팅
@@ -25,7 +27,7 @@ const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
 
 const LoadingSpinner = () => (
   <div className="loading-container">
