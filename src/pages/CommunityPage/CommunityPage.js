@@ -25,10 +25,8 @@ const CommunityPage = () => {
           {tabs.map((tab) => (
             <li key={tab.path}>
               <Link
-                to={tab.path}
-                className={`${styles.tabLink} ${
-                  currentTab === tab.path ? styles.active : ""
-                }`}
+                to={`/board/${tab.path}`}
+                className={`${styles.tabLink} ${currentTab === tab.path ? styles.active : ""}`}
               >
                 {tab.title}
               </Link>

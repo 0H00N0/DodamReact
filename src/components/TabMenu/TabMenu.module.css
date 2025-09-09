@@ -7,19 +7,23 @@
   padding: 20px;
 }
 
-/* 탭 메뉴 영역 - 가로 중앙 */
-.tabNav {
+/* 제목과 탭 메뉴를 같은 수평선에 배치 */
+.headerWrapper {
   display: flex;
-  justify-content: center; /* 메뉴 가로 중앙 */
-  width: 100%;
-  margin-bottom: 30px;
+  align-items: center; /* 제목과 탭 수직 중앙 정렬 */
+  gap: 2rem;           /* 제목과 탭 메뉴 간 간격 */
+  margin-bottom: 1rem; /* 아래 여백 */
+}
+
+/* 페이지 제목 */
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
 /* 탭 리스트 */
 .tabList {
   display: flex;
-  justify-content: center; /* 탭 중앙 */
-  gap: 20px;               /* 탭 간격 */
   list-style: none;
   padding: 0;
   margin: 0;
@@ -29,27 +33,23 @@
 /* 탭 링크 */
 .tabLink {
   text-decoration: none;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  padding: 0.3rem 0.6rem;
-  transition: all 0.2s ease;
+  color: #000;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 .tabLink:hover {
-  color: #2563eb;
+  color: #007bff;
 }
 
 /* 선택된 탭 강조 */
-.tabLink.active {
-  color: #1d4ed8;
-  border-bottom: 2px solid #007bff;
+.active {
+  color: #007bff;
+  font-weight: bold;
 }
 
-/* 본문 내용 */
+/* 선택된 탭 내용 */
 .content {
-  margin-top: 1.5rem;
-  text-align: left;  /* 내용 왼쪽 정렬 */
-  width: 100%;
-  max-width: 900px;  /* 화면 가운데 너무 넓지 않게 */
+  margin-top: 1rem;
+  font-size: 1.1rem;
 }

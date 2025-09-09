@@ -1,31 +1,46 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 import styles from './TabMenu.module.css';
 
 const TabMenu = () => {
-  const [activeTab, setActiveTab] = useState("공지사항");
+  const location = useLocation();
+  const pathParts = location.pathname.split("/"); 
+  const currentTab = pathParts[2] || "notice"; // /board/notice 기준
+
+  const tabs = [
+    { name: "공지사항", path: "notice" },
+    { name: "이벤트", path: "event" },
+    { name: "커뮤니티", path: "community" },
+    { name: "문의", path: "inquiry" },
+    { name: "FAQ", path: "faq" },
+    { name: "회사소개", path: "company" }
+  ];
 
   return (
     <div className={styles.container}>
-  <h2 className={styles.pageTitle}>소통 페이지</h2>
 
-      <nav className="tabNav"> 
-        <ul className="tabList">
-          {["공지사항","이벤트","커뮤니티","문의","FAQ","회사소개"].map(tab => (
-            <li key={tab}>
-              <a 
-                href="#" 
-                className={`${styles.tabLink} ${activeTab === tab ? styles.active : ""}`}
-                onClick={(e) => { e.preventDefault(); setActiveTab(tab); }}
-              >
-                {tab}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>  
+      {/* 제목과 탭 메뉴를 같은 수평선에 배치 */}
+      <div className={styles.headerWrapper}>
+        <h2 className={styles.pageTitle}>소통 페이지</h2>
+        <nav>
+          <ul className={styles.tabList}>
+            {tabs.map(tab => (
+              <li key={tab.path}>
+                <Link
+                  to={`/board/${tab.path}`}
+                  className={`${styles.tabLink} ${currentTab === tab.path ? styles.active : ""}`}
+                >
+                  {tab.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
 
+      {/* 선택된 탭 내용 표시 */}
       <div className={styles.content}>
-    {activeTab} 내용이 여기에 표시됩니다.
+        {currentTab} 내용이 여기에 표시됩니다.
       </div>
     </div>
   );

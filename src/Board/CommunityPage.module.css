@@ -2,9 +2,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* 내용은 왼쪽 정렬 유지 */
-  min-height: 100vh;
-  padding: 20px;
+  align-items: center;     /* 가로 중앙 정렬 */
 }
 
 /* 페이지 제목 */
@@ -12,7 +10,8 @@
   font-size: 1.5rem;
   font-weight: bold;
   margin-bottom: 1rem;
-  text-align: left;
+  text-align: center;
+  width: 100%;          /* 🔥 가운데 정렬 확실하게 */
 }
 
 /* 탭 메뉴 wrapper - 가로 중앙 */
@@ -25,11 +24,13 @@
 
 /* 메뉴 리스트 */
 .tabList {
-  display: flex; /* 가로로 나열 */
+  display: flex;       /* ul 안 li 가로 배치 */
+  justify-content: center; /* li들 중앙 배치 */
   gap: 20px;
   list-style: none;
   padding: 0;
   margin: 0;
+  width: auto;         /* ul이 100% 차지하지 않게 */
 }
 
 /* 메뉴 링크 */
