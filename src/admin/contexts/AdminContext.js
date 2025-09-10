@@ -1,31 +1,68 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import axios from 'axios';
-import { API_BASE_URL } from '../../api-config';
+// src/contexts/AdminContext.js
 
-// Axios 인스턴스 설정
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
+import React, { createContext, useContext, useReducer, useState } from 'react';
+
+// --- Mock 데이터 (백엔드 대체) ---
+let mockProducts = [
+  {
+    productId: 1,
+    productName: '뽀로로 인형',
+    price: 25000,
+    description: '말하고 노래하는 뽀로로 인형입니다.',
+    stockQuantity: 50,
+    categoryId: 1,
+    categoryName: '장난감',
+    brandId: 1,
+    brandName: '뽀로로',
+    status: 'AVAILABLE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   },
-  withCredentials: true,
-});
+  {
+    productId: 2,
+    productName: '타요 접이식 유모차',
+    price: 150000,
+    description: '가볍고 튼튼한 휴대용 유모차입니다.',
+    stockQuantity: 20,
+    categoryId: 2,
+    categoryName: '유모차',
+    brandId: 2,
+    brandName: '타요',
+    status: 'AVAILABLE',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    productId: 3,
+    productName: '타요 미니카 세트',
+    price: 32000,
+    description: '타요와 친구들 미니카 4종 세트.',
+    stockQuantity: 100,
+    categoryId: 1,
+    categoryName: '장난감',
+    brandId: 2,
+    brandName: '타요',
+    status: 'RENTED',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-// 데이터 모델 변환 함수
-// Frontend -> Backend
-const toBackendProduct = (productData) => {
-  return {
-    productName: productData.proname,
-    price: productData.proprice,
-    description: productData.prodetai1,
-    stockQuantity: 100, // 임시값
-    categoryId: productData.catenum,
-    brandId: 1, // 임시값
-    status: productData.prostat,
-  };
-};
+const mockCategories = [
+  { catenum: 1, catename: '장난감' },
+  { catenum: 2, catename: '유모차' },
+  { catenum: 3, catename: '카시트' },
+];
 
-// Backend -> Frontend
+const mockBrands = [
+  { brandId: 1, brandName: '뽀로로' },
+  { brandId: 2, brandName: '타요' },
+  { brandId: 3, brandName: '핑크퐁' },
+];
+// --- Mock 데이터 끝 ---
+
+
+// 데이터 모델 변환 함수 (기존 유지)
 const fromBackendProduct = (product) => {
   return {
     pronum: product.productId,
@@ -34,11 +71,11 @@ const fromBackendProduct = (product) => {
     prodetai1: product.description,
     stockQuantity: product.stockQuantity,
     category: {
-      catenum: product.categoryId, // 백엔드 응답에 categoryId가 있다고 가정
+      catenum: product.categoryId,
       catename: product.categoryName,
     },
     brand: {
-      brandId: product.brandId, // 백엔드 응답에 brandId가 있다고 가정
+      brandId: product.brandId,
       brandName: product.brandName,
     },
     prostat: product.status,
@@ -47,8 +84,7 @@ const fromBackendProduct = (product) => {
   };
 };
 
-
-// 초기 상태
+// 초기 상태 (기존 유지)
 const initialState = {
   user: {
     username: 'admin',
@@ -70,7 +106,7 @@ const initialState = {
   }
 };
 
-// 액션 타입 정의
+// 액션 타입 및 리듀서 (기존 유지)
 const ACTION_TYPES = {
   SET_USER: 'SET_USER',
   SET_LOADING: 'SET_LOADING',
@@ -81,21 +117,12 @@ const ACTION_TYPES = {
   LOGOUT: 'LOGOUT'
 };
 
-// 리듀서 함수
 function adminReducer(state, action) {
   switch (action.type) {
     case ACTION_TYPES.SET_USER:
-      return {
-        ...state,
-        user: action.payload,
-        isAuthenticated: !!action.payload,
-        loading: false
-      };
+      return { ...state, user: action.payload, isAuthenticated: !!action.payload, loading: false };
     case ACTION_TYPES.LOGOUT:
-      return {
-        ...state,
-        notifications: [{ id: Date.now(), message: '로그아웃 기능이 비활성화되었습니다.', type: 'info' }]
-      };
+      return { ...state, notifications: [{ id: Date.now(), message: '로그아웃 기능이 비활성화되었습니다.', type: 'info' }] };
     case ACTION_TYPES.SET_LOADING:
       return { ...state, loading: action.payload };
     case ACTION_TYPES.TOGGLE_SIDEBAR:
@@ -123,122 +150,141 @@ export const useAdmin = () => {
 
 export function AdminProvider({ children }) {
   const [state, dispatch] = useReducer(adminReducer, initialState);
+  
+  // 상태 훅을 사용하여 mockProducts를 관리
+  const [products, setProducts] = useState(mockProducts);
 
   const addNotification = (message, type = 'info') => {
-    dispatch({
-      type: ACTION_TYPES.ADD_NOTIFICATION,
-      payload: { message, type }
+    dispatch({ type: ACTION_TYPES.ADD_NOTIFICATION, payload: { message, type } });
+  };
+  
+  // --- 상품 관리 API 함수 (Mock 데이터 사용) ---
+  const getAllProducts = async () => {
+    console.log("Fetching all mock products...");
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(products.map(fromBackendProduct));
+      }, 500); // 0.5초 지연 시뮬레이션
+    });
+  };
+  
+  const getProductById = async (id) => {
+    console.log(`Fetching mock product with id: ${id}`);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const product = products.find(p => p.productId === parseInt(id));
+        if (product) {
+          resolve(fromBackendProduct(product));
+        } else {
+          reject(new Error('Product not found'));
+        }
+      }, 300);
     });
   };
 
-  // 회원 관리 API (기존 코드 유지)
-  const getAllMembers = async () => { /* ... */ };
-  const getMemberById = async (id) => { /* ... */ };
-  const deleteMember = async (id) => { /* ... */ };
-
-  // 상품 관리 API 함수
-  const getAllProducts = async () => {
-    try {
-      const response = await api.get('/admin/products');
-      return response.data.map(fromBackendProduct);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
-      addNotification('상품 목록을 불러오지 못했습니다.', 'error');
-      throw error;
-    }
-  };
-
-  const getProductById = async (id) => {
-    try {
-      const response = await api.get(`/admin/products/${id}`);
-      return fromBackendProduct(response.data);
-    } catch (error) {
-      console.error(`Failed to fetch product ${id}:`, error);
-      addNotification('상품을 조회하지 못했습니다.', 'error');
-      throw error;
-    }
-  };
-
   const createProduct = async (productData) => {
-    try {
-      const backendProduct = toBackendProduct(productData);
-      const response = await api.post('/admin/products', backendProduct);
-      addNotification('상품이 성공적으로 등록되었습니다.', 'success');
-      return fromBackendProduct(response.data);
-    } catch (error) {
-      console.error('Failed to create product:', error);
-      addNotification(error.response?.data?.message || '상품 등록에 실패했습니다.', 'error');
-      throw error;
-    }
+    console.log("Creating new mock product:", productData);
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const category = mockCategories.find(c => c.catenum === productData.catenum);
+        const brand = mockBrands.find(b => b.brandId === productData.brandId);
+
+        const newProduct = {
+          productId: Date.now(), // Unique ID
+          productName: productData.proname,
+          price: productData.proprice,
+          description: productData.prodetai1,
+          stockQuantity: productData.stockQuantity,
+          categoryId: productData.catenum,
+          categoryName: category?.catename || 'N/A',
+          brandId: productData.brandId,
+          brandName: brand?.brandName || 'N/A',
+          status: productData.prostat,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setProducts(prev => [...prev, newProduct]);
+        addNotification('상품이 성공적으로 등록되었습니다.', 'success');
+        resolve(fromBackendProduct(newProduct));
+      }, 500);
+    });
   };
 
   const updateProduct = async (id, productData) => {
-    try {
-      const backendProduct = toBackendProduct(productData);
-      const response = await api.put(`/admin/products/${id}`, backendProduct);
-      addNotification('상품이 성공적으로 수정되었습니다.', 'success');
-      return fromBackendProduct(response.data);
-    } catch (error) {
-      console.error(`Failed to update product ${id}:`, error);
-      addNotification(error.response?.data?.message || '상품 수정에 실패했습니다.', 'error');
-      throw error;
-    }
-  };
+    console.log(`Updating mock product ${id}:`, productData);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const productIndex = products.findIndex(p => p.productId === parseInt(id));
 
+        if (productIndex === -1) {
+          return reject(new Error('Product not found'));
+        }
+        
+        const category = mockCategories.find(c => c.catenum === productData.catenum);
+        const brand = mockBrands.find(b => b.brandId === productData.brandId);
+
+        const updatedProduct = {
+          ...products[productIndex],
+          productName: productData.proname,
+          price: productData.proprice,
+          description: productData.prodetai1,
+          stockQuantity: productData.stockQuantity,
+          categoryId: productData.catenum,
+          categoryName: category?.catename || 'N/A',
+          brandId: productData.brandId,
+          brandName: brand?.brandName || 'N/A',
+          status: productData.prostat,
+          updatedAt: new Date().toISOString(),
+        };
+        
+        const updatedProducts = [...products];
+        updatedProducts[productIndex] = updatedProduct;
+        setProducts(updatedProducts);
+        
+        addNotification('상품이 성공적으로 수정되었습니다.', 'success');
+        resolve(fromBackendProduct(updatedProduct));
+      }, 500);
+    });
+  };
+  
   const deleteProduct = async (id) => {
-    try {
-      await api.delete(`/admin/products/${id}`);
-      addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
-    } catch (error) {
-      console.error(`Failed to delete product ${id}:`, error);
-      addNotification(error.response?.data?.message || '상품 삭제에 실패했습니다.', 'error');
-      throw error;
-    }
+    console.log(`Deleting mock product with id: ${id}`);
+    return new Promise(resolve => {
+      setTimeout(() => {
+        setProducts(prev => prev.filter(p => p.productId !== id));
+        addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
+        resolve();
+      }, 500);
+    });
   };
-
-  // 카테고리 및 브랜드 API
+  
+  // 카테고리 및 브랜드 API (Mock 데이터 사용)
   const getAllCategories = async () => {
-    try {
-      // 이 부분은 실제 백엔드 엔드포인트에 맞게 수정해야 할 수 있습니다.
-      //   const response = await api.get('/admin/categories');
-      //   return response.data;
-      // 임시 데이터
-      return [{ catenum: 1, catename: '장난감' }, { catenum: 2, catename: '유모차' }];
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-      addNotification('카테고리 목록을 불러오지 못했습니다.', 'error');
-      throw error;
-    }
+    return new Promise(resolve => setTimeout(() => resolve(mockCategories), 200));
   };
-
+  
   const getAllBrands = async () => {
-    try {
-        // 이 부분은 실제 백엔드 엔드포인트에 맞게 수정해야 할 수 있습니다.
-        //   const response = await api.get('/admin/brands');
-        //   return response.data;
-        // 임시 데이터
-        return [{ brandId: 1, brandName: '뽀로로' }, { brandId: 2, brandName: '타요' }];
-    } catch (error) {
-        console.error('Failed to fetch brands:', error);
-        addNotification('브랜드 목록을 불러오지 못했습니다.', 'error');
-        throw error;
-    }
+    return new Promise(resolve => setTimeout(() => resolve(mockBrands), 200));
   };
 
-
-  // 기타 함수들 (기존 코드 유지)
-  const logout = async () => { /* ... */ };
-  const toggleSidebar = () => { /* ... */ };
-  const removeNotification = (id) => { /* ... */ };
-  const updateDashboardData = (data) => { /* ... */ };
-  const checkAuthentication = () => { /* ... */ };
-  const login = async (credentials) => { /* ... */ };
-  const getAllPlans = async () => { /* ... */ };
-  const getPlanById = async (id) => { /* ... */ };
-  const createPlan = async (planData) => { /* ... */ };
-  const updatePlan = async (id, planData) => { /* ... */ };
-  const deletePlan = async (id) => { /* ... */ };
-
+  // --- 기타 함수들 (기존 유지) ---
+  const logout = async () => { dispatch({ type: ACTION_TYPES.LOGOUT }) };
+  const toggleSidebar = () => { dispatch({ type: ACTION_TYPES.TOGGLE_SIDEBAR }) };
+  const removeNotification = (id) => { dispatch({ type: ACTION_TYPES.REMOVE_NOTIFICATION, payload: id }) };
+  const updateDashboardData = (data) => { dispatch({ type: ACTION_TYPES.SET_DASHBOARD_DATA, payload: data }) };
+  const checkAuthentication = () => { /* no-op */ };
+  const login = async (credentials) => { /* no-op */ };
+  
+  const getAllMembers = async () => [];
+  const getMemberById = async (id) => ({});
+  const deleteMember = async (id) => {};
+  const getAllPlans = async () => [];
+  const getPlanById = async (id) => ({});
+  const createPlan = async (planData) => ({});
+  const updatePlan = async (id, planData) => ({});
+  const deletePlan = async (id) => {};
+  
 
   const contextValue = {
     ...state,
@@ -253,7 +299,7 @@ export function AdminProvider({ children }) {
     updateProduct,
     deleteProduct,
     getAllCategories,
-    getAllBrands, // 추가
+    getAllBrands,
     getAllPlans,
     getPlanById,
     createPlan,
