@@ -9,9 +9,8 @@ import AdminSidebar from './AdminSideBar';
 // 관리자 페이지 컴포넌트들
 const Dashboard = React.lazy(() => import('./Dashboard'));
 const UserManagement = React.lazy(() => import('./UserManagement'));
-// 다른 관리자 페이지들도 여기에 추가할 수 있습니다.
-// const ProductManagement = React.lazy(() => import('./ProductManagement'));
-// const PlanManagement = React.lazy(() => import('./PlanManagement'));
+const ProductManagement = React.lazy(() => import('./ProductManagement'));
+const PlanManagement = React.lazy(() => import('./PlanManagement'));
 
 
 // 로딩 스피너 컴포넌트
@@ -43,8 +42,8 @@ function Admin() {
               {/* 각 관리자 페이지 경로 설정 */}
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="users/*" element={<UserManagement />} />
-              {/* <Route path="products/*" element={<ProductManagement />} /> */}
-              {/* <Route path="plans/*" element={<PlanManagement />} /> */}
+              <Route path="products/*" element={<ProductManagement />} />
+              <Route path="plans/*" element={<PlanManagement />} />
 
               {/* 일치하는 경로가 없을 때 보여줄 404 페이지 */}
               <Route path="*" element={
