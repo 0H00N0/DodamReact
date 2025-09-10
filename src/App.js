@@ -1,3 +1,5 @@
+// App.js
+
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
@@ -6,6 +8,8 @@ import Footer from './components/Layout/Footer';
 import { CartProvider } from './contexts/CartContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+// ▼ AdminProvider를 import 합니다.
+import { AdminProvider } from './admin/contexts/AdminContext';
 
 // 코드 스플리팅을 위한 동적 import
 const Home = React.lazy(() => import('./pages/Home'));
@@ -16,6 +20,8 @@ const Cart = React.lazy(() => import('./pages/Cart'));
 const Search = React.lazy(() => import('./pages/Search'));
 const Signup = React.lazy(() => import('./pages/Signup'));
 const Login = React.lazy(() => import('./pages/Login'));
+// ▼ Admin 컴포넌트를 동적으로 import 합니다. (파일 경로에 주의하세요)
+const Admin = React.lazy(() => import('./admin/Admin'));
 
 // 로딩 컴포넌트
 const LoadingSpinner = () => (
@@ -49,6 +55,7 @@ function App() {
               <main id="main-content" role="main" className="main-content" tabIndex="-1">
                 <Suspense fallback={<LoadingSpinner />}>
                   <Routes>
+                    {/* --- 기존 사용자 페이지 라우트 --- */}
                     <Route path="/" element={<Home />} />
                     <Route path="/product/:id" element={<ProductDetail />} />
                     <Route path="/category/:id" element={<Category />} />
@@ -57,6 +64,17 @@ function App() {
                     <Route path="/search" element={<Search />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/login" element={<Login />} />
+
+                    {/* ▼ 추가된 어드민 페이지 라우트 ▼ */}
+                    {/* /admin/으로 시작하는 모든 경로를 Admin 컴포넌트로 연결합니다. */}
+                    <Route 
+                      path="/admin/*" 
+                      element={
+                        <AdminProvider>
+                          <Admin />
+                        </AdminProvider>
+                      } 
+                    />
                   </Routes>
                 </Suspense>
               </main>
