@@ -9,7 +9,7 @@ export default function FindIdByTel() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.get('http://localhost:8080/member/findid/tel', {
+      const res = await axios.get('http://localhost:8080/member/findIdByTel', {
         params: { mname, mtel }
       });
       setResult(`찾은 ID: ${res.data.mid}`);

@@ -2,11 +2,11 @@ import React from "react";
 
 export default function FindIdModal() {
   const goToEmail = () => {
-    window.location.href = "/member/findid/email";
-  };
-  const goToTel = () => {
-    window.location.href = "/member/findid/tel";
-  };
+  window.location.href = "/member/findIdByEmail";
+};
+const goToTel = () => {
+  window.location.href = "/member/findIdByTel";
+};
   const closeWindow = () => {
     window.close();
   };

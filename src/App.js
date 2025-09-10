@@ -15,8 +15,8 @@ import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
 // 회원 관련 컴포넌트
 import FindIdModal from "./pages/member/FindIdModal";
-import FindIdEmail from "./pages/member/FindIdByEmail";
-import FindIdTel from "./pages/member/FindIdByTel";
+import FindIdByEmail from "./pages/member/FindIdByEmail";
+import FindIdByTel from "./pages/member/FindIdByTel";
 import ChangePw from "./pages/member/ChangePw";
 import FindPw from "./pages/member/FindPw";
 
@@ -89,8 +89,8 @@ function App() {
                     <Route path="/member/changePw" element={<ChangePw />} />
                     {/* ID 찾기 모달 페이지 */}
                     <Route path="/member/findIdModal" element={<FindIdModal />} />
-                    <Route path="/member/findIdEmail" element={<FindIdEmail />} />
-                    <Route path="/member/findIdTel" element={<FindIdTel />} />
+                    <Route path="/member/findIdByEmail" element={<FindIdByEmail />} />
+                    <Route path="/member/findIdByTel" element={<FindIdByTel />} />
                     {/* 비밀번호 찾기 모달 */}
                     <Route path="/member/findPwModal" element={<FindPw />} />
 
