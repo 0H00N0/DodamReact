@@ -1,0 +1,317 @@
+/* 기본 Admin 컨테이너 스타일 */
+.admin-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #f8fafc;
+}
+
+.admin-main-wrapper {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.admin-main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  margin: 0 0 0 260px; /* 사이드바 너비만큼 마진 */
+  transition: margin-left 0.3s ease;
+}
+
+.admin-sidebar.collapsed + .admin-main-content {
+  margin-left: 70px; /* 축소된 사이드바 너비 */
+}
+
+/* 로딩 스피너 */
+.admin-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f8fafc;
+}
+
+.admin-loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.spinner {
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 404 페이지 스타일 */
+.admin-404 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  text-align: center;
+  color: #6b7280;
+}
+
+.admin-404 h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.admin-404 p {
+  font-size: 1.1rem;
+}
+
+/* 관리자 헤더 스타일 */
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.sidebar-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.admin-logo h1 {
+  font-size: 1.5rem;
+  color: #374151;
+}
+
+/* 회원 상세 정보 스타일 */
+.user-detail {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.user-info-card {
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.user-info-card h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #374151;
+}
+
+.user-info-card p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.user-info-card p strong {
+  color: #374151;
+  margin-right: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-edit {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.btn-edit:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.btn-delete {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.btn-delete:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* 로딩 상태 */
+.product-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-spinner p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* 폼 스타일 */
+.product-form {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .admin-main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
+  
+  .admin-header {
+    padding: 0 16px;
+  }
+  
+  .admin-header-center {
+    display: none;
+  }
+  
+  .filters-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .bulk-actions {
+    margin-left: 0;
+  }
+  
+  .products-table {
+    overflow-x: auto;
+  }
+  
+  .user-dropdown,
+  .notification-dropdown {
+    width: 100vw;
+    left: 0;
+    right: auto;
+    border-radius: 0;
+    margin-top: 0;
+  }
+}
