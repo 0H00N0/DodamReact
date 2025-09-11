@@ -93,7 +93,7 @@ export default function LoginForm() {
         </button>
         <button
           type="button"
-          onClick={() => window.open("/member/findPwModal", "_blank", "width=500,height=600")}
+          onClick={() => window.open("/member/findPw", "_blank", "width=500,height=600")}
           disabled={loading}
         >
           비밀번호 찾기

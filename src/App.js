@@ -19,6 +19,8 @@ import FindIdByEmail from "./pages/member/FindIdByEmail";
 import FindIdByTel from "./pages/member/FindIdByTel";
 import ChangePw from "./pages/member/ChangePw";
 import FindPw from "./pages/member/FindPw";
+import FindPwByMemail from "./pages/member/FindPwByMemail";
+import FindPwByMtel from "./pages/member/FindPwByMtel";
 
 
 // React.lazy로 코드 스플리팅
@@ -43,7 +45,10 @@ function App() {
     const noFooterPaths = [
       "/member/findIdModal",
       "/member/findIdEmail",
-      "/member/findIdTel"
+      "/member/findIdTel",
+      "/member/findPw",
+      "/member/findPwByMemail",
+      "/member/findPwByMtel"
     ];
     const hideFooter = noFooterPaths.includes(location.pathname);
     return !hideFooter && <Footer />;
@@ -92,7 +97,9 @@ function App() {
                     <Route path="/member/findIdByEmail" element={<FindIdByEmail />} />
                     <Route path="/member/findIdByTel" element={<FindIdByTel />} />
                     {/* 비밀번호 찾기 모달 */}
-                    <Route path="/member/findPwModal" element={<FindPw />} />
+                    <Route path="/member/findPw" element={<FindPw />} />
+                    <Route path="/member/findPwByMemail" element={<FindPwByMemail />} />
+                    <Route path="/member/findPwByMtel" element={<FindPwByMtel />} />
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
