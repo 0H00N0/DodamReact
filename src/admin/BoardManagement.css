@@ -1,0 +1,148 @@
+/* BoardManagement.css */
+
+.board-management {
+    padding: 2rem;
+}
+
+.board-management h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.management-section {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.management-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+/* Board List & Creation */
+.board-list-container {
+    display: flex; 
+    gap: 2rem;
+}
+
+.current-boards, .create-board-form {
+    flex: 1;
+}
+
+.board-list {
+    list-style: none;
+    padding: 0;
+}
+
+.board-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+}
+
+.board-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.board-info p {
+    margin: 0;
+}
+
+.board-info .board-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.board-info .board-id {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.delete-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.create-board-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.create-board-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.create-board-form input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.create-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Post Management */
+.post-controls {
+    margin-bottom: 1.5rem;
+}
+
+.post-controls label {
+    margin-right: 1rem;
+    font-weight: 600;
+}
+
+.post-controls select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.post-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.post-table th,
+.post-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.post-table th {
+    background-color: #f7f7f7;
+}
+
+.post-table tbody tr:hover {
+    background-color: #f5f5f5;
+}

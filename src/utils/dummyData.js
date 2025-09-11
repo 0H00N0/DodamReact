@@ -306,7 +306,140 @@ export const priceRanges = [
   { id: 'over-200', label: '20만원 이상', min: 200000, max: Infinity }
 ];
 
+
+// 주문 관련 더미 데이터
+export const orders = [
+  {
+    id: 'order-001',
+    userId: 'user-101',
+    userName: '김도담',
+    productName: '창의력 블록 세트',
+    productId: 'toy-002',
+    rentalStartDate: '2023-03-01',
+    rentalEndDate: '2023-03-15',
+    status: '승인대기', // 승인대기, 배송중, 대여중, 반납완료, 연체, 파손
+    shippingInfo: {
+      address: '서울시 강남구 테헤란로 123',
+      courier: '',
+      trackingNumber: ''
+    }
+  },
+  {
+    id: 'order-002',
+    userId: 'user-102',
+    userName: '이로운',
+    productName: '고속 RC 스포츠카',
+    productId: 'toy-004',
+    rentalStartDate: '2023-03-02',
+    rentalEndDate: '2023-03-16',
+    status: '배송중',
+    shippingInfo: {
+      address: '부산시 해운대구 마린시티로 456',
+      courier: 'CJ대한통운',
+      trackingNumber: '1234567890'
+    }
+  },
+  {
+    id: 'order-003',
+    userId: 'user-103',
+    userName: '박하준',
+    productName: '과학 실험 키트',
+    productId: 'toy-010',
+    rentalStartDate: '2023-02-20',
+    rentalEndDate: '2023-03-06',
+    status: '대여중',
+    shippingInfo: {
+      address: '인천시 연수구 송도국제대로 789',
+      courier: 'CJ대한통운',
+      trackingNumber: '0987654321'
+    }
+  },
+  {
+    id: 'order-004',
+    userId: 'user-104',
+    userName: '최아리',
+    productName: '프린세스 드레스업 세트',
+    productId: 'toy-008',
+    rentalStartDate: '2023-02-15',
+    rentalEndDate: '2023-03-01',
+    status: '반납완료',
+    shippingInfo: {
+      address: '대구시 수성구 달구벌대로 101',
+      courier: 'CJ대한통운',
+      trackingNumber: '1122334455'
+    }
+  },
+  {
+    id: 'order-005',
+    userId: 'user-105',
+    userName: '정다은',
+    productName: '자석 블록 세트',
+    productId: 'toy-009',
+    rentalStartDate: '2023-02-10',
+    rentalEndDate: '2023-02-24',
+    status: '연체',
+    shippingInfo: {
+      address: '광주시 서구 상무중앙로 202',
+      courier: 'CJ대한통운',
+      trackingNumber: '5566778899'
+    }
+  },
+  {
+    id: 'order-006',
+    userId: 'user-106',
+    userName: '강지훈',
+    productName: '드론 레이싱 세트',
+    productId: 'toy-011',
+    rentalStartDate: '2023-02-05',
+    rentalEndDate: '2023-02-19',
+    status: '파손',
+    shippingInfo: {
+      address: '대전시 유성구 대학로 303',
+      courier: 'CJ대한통운',
+      trackingNumber: '9988776655'
+    }
+  },
+  {
+    id: 'order-007',
+    userId: 'user-107',
+    userName: '윤채원',
+    productName: '소프트 베어 인형',
+    productId: 'toy-001',
+    rentalStartDate: '2023-03-05',
+    rentalEndDate: '2023-03-19',
+    status: '승인대기',
+    shippingInfo: {
+      address: '울산시 남구 삼산로 404',
+      courier: '',
+      trackingNumber: ''
+    }
+  }
+];
+
 // 유틸리티 함수들
+
+// 게시판 관련 더미 데이터
+export const boards = [
+  { id: 'notice', name: '공지사항', description: '중요 공지를 확인하세요.' },
+  { id: 'qna', name: 'Q&A', description: '상품 및 서비스에 대해 궁금한 점을 질문하세요.' },
+  { id: 'review', name: '이용후기', description: '서비스 이용 후기를 공유해주세요.' },
+];
+
+export const posts = [
+  // 공지사항
+  { id: 'post-001', boardId: 'notice', title: '[안내] 서비스 정기 점검 안내 (매월 첫째주 월요일)', author: '관리자', createdAt: '2023-03-01', views: 1204, content: '보다 나은 서비스 제공을 위해 매월 첫째주 월요일 자정에 정기 점검을 실시합니다. 이용에 참고해주시기 바랍니다.' },
+  { id: 'post-002', boardId: 'notice', title: '[이벤트] 신규 가입 회원 대상 웰컴 쿠폰 증정 이벤트', author: '관리자', createdAt: '2023-03-05', views: 2580, content: '지금 가입하시는 모든 분들께 3,000원 할인 쿠폰을 드립니다! 많은 참여 바랍니다.' },
+
+  // Q&A
+  { id: 'post-003', boardId: 'qna', title: '배송은 보통 얼마나 걸리나요?', author: '김도담', createdAt: '2023-03-02', views: 58, content: '주문하고 싶은데, 혹시 배송 기간이 어느 정도 소요되는지 알 수 있을까요? 지역은 서울입니다.' },
+  { id: 'post-004', boardId: 'qna', title: '대여 상품 파손 시 어떻게 처리되나요?', author: '이로운', createdAt: '2023-03-03', views: 120, content: '아이가 사용하다가 장난감이 부서지면 어떻게 해야 하나요? 변상 규정이 궁금합니다.' },
+  { id: 'post-005', boardId: 'qna', title: '구독 플랜 변경은 어떻게 하나요?', author: '박하준', createdAt: '2023-03-06', views: 77, content: '현재 베이직 플랜을 이용 중인데, 프리미엄 플랜으로 변경하고 싶습니다. 절차를 알려주세요.' },
+
+  // 이용후기
+  { id: 'post-006', boardId: 'review', title: '창의력 블록 세트, 아이가 정말 좋아해요!', author: '최아리', createdAt: '2023-03-04', views: 95, content: '이번에 대여한 블록 세트 덕분에 아이와 즐거운 시간을 보냈습니다. 장난감 상태도 깨끗하고 배송도 빨랐어요. 추천합니다!' },
+  { id: 'post-007', boardId: 'review', title: 'RC카 대여 후기입니다.', author: '정다은', createdAt: '2023-03-07', views: 43, content: '아이가 RC카를 너무 갖고 싶어해서 한번 대여해봤는데, 생각보다 조작도 쉽고 재미있네요. 다음에 다른 상품도 이용해보고 싶어요.' },
+];
+
 export const getProductById = (id) => {
   return products.find(product => product.id === id);
 };
