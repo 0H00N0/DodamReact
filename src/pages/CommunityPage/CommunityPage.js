@@ -19,9 +19,9 @@ const CommunityPage = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>소통 페이지</h2>
 
-      {/* 탭 메뉴 wrapper - 가로 중앙 */}
-      <nav className={styles.tabNavWrapper}>
-        <ul className={styles.tabList}>
+      {/* 왼쪽 세로 메뉴 */}
+        <nav className={styles.sidebar}>
+          <ul className={styles.menuList}>
           {tabs.map((tab) => (
             <li key={tab.path}>
               <Link

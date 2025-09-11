@@ -11,44 +11,49 @@
 .title {
   font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 20px;
   text-align: left;
 }
 
-/* 탭 메뉴 wrapper - 가로 중앙 */
-.tabNavWrapper {
-  width: 100%;
+/* 전체 레이아웃: 왼쪽 메뉴 + 오른쪽 내용 */
+.layout {
   display: flex;
-  justify-content: center; /* 탭 메뉴 가로 중앙 */
-  margin-bottom: 20px;
+  width: 100%;
+  gap: 20px; /* 메뉴와 내용 사이 간격 */
 }
 
-/* 메뉴 리스트 */
-.tabList {
-  display: flex;
-  gap: 20px;
+/* 왼쪽 세로 메뉴 */
+.sidebar {
+  width: 180px;
+  border-right: 1px solid #ddd;
+  padding-right: 10px;
+}
+
+.menuList {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-/* 메뉴 링크 */
-.tabLink {
+.menuList li {
+  margin-bottom: 15px;
+}
+
+.menuLink {
   text-decoration: none;
   font-size: 18px;
   font-weight: 600;
   color: #333;
-  padding: 0.3rem 0.6rem;
   transition: all 0.2s ease;
 }
 
-.tabLink:hover {
+.menuLink:hover {
   color: #2563eb;
 }
 
-.tabLink.active {
+.menuLink.active {
   color: #007bff;
-  border-bottom: 2px solid #007bff;
+  font-weight: bold;
 }
 
 /* 내용 영역 */
