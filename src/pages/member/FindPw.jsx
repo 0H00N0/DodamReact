@@ -14,7 +14,7 @@ const goToTel = () => {
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        <h3>ID 찾기</h3>
+        <h3>비밀번호 찾기</h3>
         <button onClick={goToEmail}>이메일로 찾기</button>
         <button onClick={goToTel}>전화번호로 찾기</button>
         <button onClick={closeWindow}>닫기</button>

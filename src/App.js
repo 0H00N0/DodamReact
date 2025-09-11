@@ -21,6 +21,7 @@ import ChangePw from "./pages/member/ChangePw";
 import FindPw from "./pages/member/FindPw";
 import FindPwByMemail from "./pages/member/FindPwByMemail";
 import FindPwByMtel from "./pages/member/FindPwByMtel";
+import ChangePwDirect from "./pages/member/ChangePwDirect";
 
 
 // React.lazy로 코드 스플리팅
@@ -100,6 +101,7 @@ function App() {
                     <Route path="/member/findPw" element={<FindPw />} />
                     <Route path="/member/findPwByMemail" element={<FindPwByMemail />} />
                     <Route path="/member/findPwByMtel" element={<FindPwByMtel />} />
+                    <Route path="/member/changePwDirect" element={<ChangePwDirect/>} />
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
