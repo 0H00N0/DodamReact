@@ -19,6 +19,10 @@ const CommunityPage = () => {
     <div className={styles.container}>
       <h2 className={styles.title}>소통 페이지</h2>
 
+      {/* 전체 레이아웃: 왼쪽 메뉴 + 오른쪽 내용 */}
+      <div className={styles.layout}>
+
+
       {/* 왼쪽 세로 메뉴 */}
         <nav className={styles.sidebar}>
           <ul className={styles.menuList}>
@@ -26,18 +30,21 @@ const CommunityPage = () => {
             <li key={tab.path}>
               <Link
                 to={`/board/${tab.path}`}
-                className={`${styles.tabLink} ${currentTab === tab.path ? styles.active : ""}`}
-              >
-                {tab.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+                className={`${styles.menuLink} ${
+                    currentTab === tab.path ? styles.active : ""
+                  }`}
+                >
+                  {tab.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      {/* 내용 영역 */}
-      <div className={styles.content}>
-        <Outlet />
+        {/* 오른쪽 내용 영역 */}
+        <div className={styles.content}>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
+import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
 import Event from "./pages/CommunityPage/Event";
 import Community from "./pages/CommunityPage/Community";
 import Inquiry from "./pages/CommunityPage/Inquiry";
@@ -56,7 +57,8 @@ function App() {
                     {/* 소통(Community) */}
                     <Route path="/board" element={<CommunityPage />}>
                       <Route index element={<Notice />} />  {/* 기본: 공지사항 */}
-                      <Route path="notice" element={<Notice />} />
+                      <Route path="notice" element={<Notice />} /> {/* 공지사항 목록 */}
+                      <Route path="notice/:noticeId" element={<NoticeDetail />} /> {/* 공지사항 상세 */}
                       <Route path="event" element={<Event />} />
                       <Route path="community" element={<Community />} />  
                       <Route path="inquiry" element={<Inquiry />} />
