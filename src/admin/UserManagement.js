@@ -64,6 +64,10 @@ function UserList() {
 
   const filteredUsers = users
     .filter(user => {
+      // 관리자 계정(ADMIN, SUPERADMIN)은 목록에서 제외
+      if (user.roleName === 'ADMIN' || user.roleName === 'SUPERADMIN') {
+        return false;
+      }
       const searchLower = filters.search.toLowerCase();
       return (
         (user.mname?.toLowerCase().includes(searchLower) ?? false) ||
@@ -98,7 +102,7 @@ function UserList() {
       <div className="filters-section">
         <input type="text" placeholder="이름, 아이디, 이메일 검색..." value={filters.search} onChange={e => setFilters(p => ({ ...p, search: e.target.value }))} className="search-input" />
         <select value={filters.role} onChange={e => setFilters(p => ({ ...p, role: e.target.value }))}>
-          <option value="">모든 역할</option><option value="ADMIN">관리자</option><option value="STAFF">직원</option><option value="USER">일반사용자</option>
+          <option value="">모든 역할</option><option value="STAFF">직원</option><option value="USER">일반사용자</option>
         </select>
       </div>
       <div className="products-table">

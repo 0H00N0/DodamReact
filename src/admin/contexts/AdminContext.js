@@ -1,6 +1,7 @@
 // src/contexts/AdminContext.js
 
 import React, { createContext, useContext, useReducer, useState } from 'react';
+import { API_BASE_URL } from '../../api-config'; // API 기본 URL 가져오기
 
 // --- Mock 데이터 (백엔드 대체) ---
 let mockProducts = [
@@ -276,9 +277,55 @@ export function AdminProvider({ children }) {
   const checkAuthentication = () => { /* no-op */ };
   const login = async (credentials) => { /* no-op */ };
   
-  const getAllMembers = async () => [];
-  const getMemberById = async (id) => ({});
-  const deleteMember = async (id) => {};
+  // --- 회원 관리 API 함수 ---
+
+  // API 요청을 위한 헬퍼 함수
+  const request = async (url, options) => {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    // 내용이 없는 응답 (e.g., 204 No Content) 처리
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.indexOf("application/json") !== -1) {
+      return response.json();
+    }
+    return {}; 
+  };
+
+  // 모든 회원 목록 가져오기
+  const getAllMembers = async () => {
+    try {
+      return await request(`${API_BASE_URL}/api/v1/admin/members`);
+    } catch (error) {
+      addNotification(`회원 목록 로딩 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // ID로 특정 회원 정보 가져오기
+  const getMemberById = async (id) => {
+    try {
+      return await request(`${API_BASE_URL}/api/v1/admin/members/${id}`);
+    } catch (error) {
+      addNotification(`회원 정보 로딩 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // 회원 삭제 (강제 탈퇴)
+  const deleteMember = async (id) => {
+    try {
+      await request(`${API_BASE_URL}/api/v1/admin/members/${id}`, {
+        method: 'DELETE',
+      });
+      addNotification(`회원(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
+    } catch (error) {
+      addNotification(`회원 삭제 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
   const getAllPlans = async () => [];
   const getPlanById = async (id) => ({});
   const createPlan = async (planData) => ({});
