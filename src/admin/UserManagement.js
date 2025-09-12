@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import { useAdmin } from './contexts/AdminContext'; 
+import { useAdmin } from './contexts/AdminContext';
+import dayjs from 'dayjs';
 
 /**
  * 사용자 관리 메인 컴포넌트
@@ -64,16 +65,28 @@ function UserList() {
 
   const filteredUsers = users
     .filter(user => {
-      // 관리자 계정(ADMIN, SUPERADMIN)은 목록에서 제외
-      if (user.roleName === 'ADMIN' || user.roleName === 'SUPERADMIN') {
-        return false;
-      }
-      const searchLower = filters.search.toLowerCase();
-      return (
+      const { role, search } = filters;
+      const searchLower = search.toLowerCase();
+
+      // 1. 검색어 필터링 (하나라도 일치하면 통과)
+      // 검색어가 없으면 모든 사용자를 대상으로 함
+      const searchMatch = !searchLower ||
         (user.mname?.toLowerCase().includes(searchLower) ?? false) ||
         (user.mid?.toLowerCase().includes(searchLower) ?? false) ||
-        (user.memail?.toLowerCase().includes(searchLower) ?? false)
-      ) && (!filters.role || user.roleName === filters.role);
+        (user.memail?.toLowerCase().includes(searchLower) ?? false);
+
+      if (!searchMatch) {
+        return false;
+      }
+
+      // 2. 역할 필터링
+      if (role) {
+        // 특정 역할이 선택된 경우, 해당 역할과 일치해야 함
+        return user.roleName === role;
+      } else {
+        // '모든 역할'이 선택된 경우, 관리자/최고관리자 제외
+        return user.roleName !== 'ADMIN' && user.roleName !== 'SUPERADMIN';
+      }
     })
     .sort((a, b) => {
       const valA = a[filters.sortBy] || '';
@@ -83,7 +96,7 @@ function UserList() {
     });
   
   const getRoleClass = (role) => ({
-    'ADMIN': 'role-admin', 'STAFF': 'role-staff', 'SUPERADMIN': 'role-superadmin', 'USER': 'role-user'
+    'ADMIN': 'role-admin', 'STAFF': 'role-staff', 'SUPERADMIN': 'role-superadmin', '일반': 'role-user'
   }[role] || '');
 
   if (loading) {
@@ -102,7 +115,11 @@ function UserList() {
       <div className="filters-section">
         <input type="text" placeholder="이름, 아이디, 이메일 검색..." value={filters.search} onChange={e => setFilters(p => ({ ...p, search: e.target.value }))} className="search-input" />
         <select value={filters.role} onChange={e => setFilters(p => ({ ...p, role: e.target.value }))}>
-          <option value="">모든 역할</option><option value="STAFF">직원</option><option value="USER">일반사용자</option>
+          <option value="">모든 역할 (관리자 제외)</option>
+          <option value="일반">일반</option>
+          <option value="STAFF">직원</option>
+          <option value="ADMIN">관리자</option>
+          <option value="SUPERADMIN">최고 관리자</option>
         </select>
       </div>
       <div className="products-table">
@@ -220,8 +237,8 @@ function UserDetail() {
           <p><strong>가입일:</strong> {new Date(user.mreg).toLocaleDateString()}</p>
           <p><strong>역할:</strong> {user.roleName}</p>
           <p><strong>로그인 방법:</strong> {user.lmtype}</p>
-          <p><strong>계정 생성일:</strong> {new Date(user.createdAt).toLocaleString()}</p>
-          <p><strong>마지막 수정일:</strong> {new Date(user.updatedAt).toLocaleString()}</p>
+          <p><strong>계정 생성일:</strong> {user.createdAt}</p>
+          <p><strong>마지막 수정일:</strong> {user.updatedAt}</p>
         </div>
       </div>
     </div>

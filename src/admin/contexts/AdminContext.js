@@ -60,8 +60,14 @@ const mockBrands = [
   { brandId: 2, brandName: '타요' },
   { brandId: 3, brandName: '핑크퐁' },
 ];
-// --- Mock 데이터 끝 ---
 
+// Mock 플랜 이름 데이터 추가
+const mockPlanNames = [
+  { planNameId: 1, planName: '베이직 플랜' },
+  { planNameId: 2, planName: '프리미엄 플랜' },
+  { planNameId: 3, planName: '엔터프라이즈 플랜' },
+];
+// --- Mock 데이터 끝 ---
 
 // 데이터 모델 변환 함수 (기존 유지)
 const fromBackendProduct = (product) => {
@@ -280,18 +286,39 @@ export function AdminProvider({ children }) {
   // --- 회원 관리 API 함수 ---
 
   // API 요청을 위한 헬퍼 함수
-  const request = async (url, options) => {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: '알 수 없는 오류가 발생했습니다.' }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  const request = async (url, options = {}) => {
+    try {
+      // CORS 및 credentials 설정 추가
+      const defaultOptions = {
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      };
+
+      const response = await fetch(url, { ...defaultOptions, ...options });
+      
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { message: '서버 오류가 발생했습니다.' };
+        }
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      // 내용이 없는 응답 (e.g., 204 No Content) 처리
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        return response.json();
+      }
+      return {}; 
+    } catch (error) {
+      console.error('API Request failed:', error);
+      throw error;
     }
-    // 내용이 없는 응답 (e.g., 204 No Content) 처리
-    const contentType = response.headers.get("content-type");
-    if (contentType && contentType.indexOf("application/json") !== -1) {
-      return response.json();
-    }
-    return {}; 
   };
 
   // 모든 회원 목록 가져오기
@@ -326,11 +353,163 @@ export function AdminProvider({ children }) {
       throw error;
     }
   };
-  const getAllPlans = async () => [];
-  const getPlanById = async (id) => ({});
-  const createPlan = async (planData) => ({});
-  const updatePlan = async (id, planData) => ({});
-  const deletePlan = async (id) => {};
+
+  // --- 플랜 관리 API 함수 (백엔드 API 연동) ---
+
+  // 플랜 이름 목록 가져오기 (새로 추가)
+  const getAllPlanNames = async () => {
+    // 실제 백엔드에 플랜 이름 API가 있다면 사용, 없다면 mock 데이터 사용
+    return new Promise(resolve => setTimeout(() => resolve(mockPlanNames), 200));
+  };
+
+  // 모든 플랜 목록 가져오기
+  const getAllPlans = async () => {
+    try {
+      // 백엔드 API 엔드포인트에 맞게 수정
+      const response = await request(`${API_BASE_URL}/api/v1/admin/plans`);
+      
+      // 백엔드 응답 데이터를 프론트엔드 형식으로 변환
+      return response.map(plan => ({
+        planId: plan.planId,
+        planName: plan.planName,
+        planCode: plan.planCode,
+        planActive: plan.planActive,
+        planCreate: plan.planCreate,
+        // prices와 benefits는 별도 API나 확장 필요
+        prices: [], // 임시로 빈 배열
+        benefits: [] // 임시로 빈 배열
+      }));
+    } catch (error) {
+      addNotification(`플랜 목록 로딩 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // ID로 특정 플랜 정보 가져오기
+  const getPlanById = async (id) => {
+    try {
+      const response = await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`);
+      
+      // 백엔드 응답을 프론트엔드 형식으로 변환
+      return {
+        planId: response.planId,
+        planName: response.planName,
+        planCode: response.planCode,
+        planActive: response.planActive,
+        planCreate: response.planCreate,
+        // prices와 benefits는 별도 처리 필요
+        prices: [], // 임시로 빈 배열
+        benefits: [] // 임시로 빈 배열
+      };
+    } catch (error) {
+      addNotification(`플랜 정보 로딩 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // 새 플랜 등록
+  const createPlan = async (planData) => {
+    try {
+      // planName을 planNameId로 변환
+      let planNameId = planData.planNameId;
+      if (!planNameId && planData.planName) {
+        // planName으로 planNameId를 찾아서 변환
+        const planNames = await getAllPlanNames();
+        const foundPlanName = planNames.find(pn => pn.planName === planData.planName);
+        if (foundPlanName) {
+          planNameId = foundPlanName.planNameId;
+        } else {
+          throw new Error('유효하지 않은 플랜 이름입니다.');
+        }
+      }
+
+      // 백엔드 API 형식에 맞게 데이터 변환
+      const requestData = {
+        planNameId: planNameId,
+        planCode: planData.planCode,
+        planActive: planData.planActive !== undefined ? planData.planActive : true
+      };
+
+      const response = await request(`${API_BASE_URL}/api/v1/admin/plans`, {
+        method: 'POST',
+        body: JSON.stringify(requestData),
+      });
+
+      addNotification('플랜이 성공적으로 등록되었습니다.', 'success');
+      
+      // 응답 데이터를 프론트엔드 형식으로 변환하여 반환
+      return {
+        planId: response.planId,
+        planName: response.planName,
+        planCode: response.planCode,
+        planActive: response.planActive,
+        planCreate: response.planCreate,
+        prices: planData.prices || [],
+        benefits: planData.benefits || []
+      };
+    } catch (error) {
+      addNotification(`플랜 등록 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // 플랜 수정
+  const updatePlan = async (id, planData) => {
+    try {
+      // planName을 planNameId로 변환
+      let planNameId = planData.planNameId;
+      if (!planNameId && planData.planName) {
+        const planNames = await getAllPlanNames();
+        const foundPlanName = planNames.find(pn => pn.planName === planData.planName);
+        if (foundPlanName) {
+          planNameId = foundPlanName.planNameId;
+        } else {
+          throw new Error('유효하지 않은 플랜 이름입니다.');
+        }
+      }
+
+      // 백엔드 API 형식에 맞게 데이터 변환
+      const requestData = {
+        planNameId: planNameId,
+        planCode: planData.planCode,
+        planActive: planData.planActive
+      };
+
+      const response = await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(requestData),
+      });
+
+      addNotification('플랜이 성공적으로 수정되었습니다.', 'success');
+      
+      // 응답 데이터를 프론트엔드 형식으로 변환하여 반환
+      return {
+        planId: response.planId,
+        planName: response.planName,
+        planCode: response.planCode,
+        planActive: response.planActive,
+        planCreate: response.planCreate,
+        prices: planData.prices || [],
+        benefits: planData.benefits || []
+      };
+    } catch (error) {
+      addNotification(`플랜 수정 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
+
+  // 플랜 삭제
+  const deletePlan = async (id) => {
+    try {
+      await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`, {
+        method: 'DELETE',
+      });
+      addNotification(`플랜(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
+    } catch (error) {
+      addNotification(`플랜 삭제 실패: ${error.message}`, 'error');
+      throw error;
+    }
+  };
   
 
   const contextValue = {
@@ -352,6 +531,7 @@ export function AdminProvider({ children }) {
     createPlan,
     updatePlan,
     deletePlan,
+    getAllPlanNames, // 새로 추가
     toggleSidebar,
     addNotification,
     removeNotification,
