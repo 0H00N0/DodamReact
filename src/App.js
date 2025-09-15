@@ -16,11 +16,15 @@ import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
 import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
 import Event from "./pages/CommunityPage/Event";
+import EventDetail from "./pages/CommunityPage/EventDetail";
 import Community from "./pages/CommunityPage/Community";
+import CommunityDetail from "./pages/CommunityPage/CommunityDetail";
+
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
 
+// Lazy 로딩 페이지
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
@@ -60,12 +64,15 @@ function App() {
                       <Route path="notice" element={<Notice />} /> {/* 공지사항 목록 */}
                       <Route path="notice/:noticeId" element={<NoticeDetail />} /> {/* 공지사항 상세 */}
                       <Route path="event" element={<Event />} />
+                      <Route path="event/:eventId" element={<EventDetail />} />
                       <Route path="community" element={<Community />} />  
+                      <Route path="community/:postId" element={<CommunityDetail />} />  {/* 상세 */}
+                      <Route path="event" element={<Event />} />
                       <Route path="inquiry" element={<Inquiry />} />
                       <Route path="faq" element={<FAQ />} />
                       <Route path="company" element={<Company />} />
                     </Route>
-
+   
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />

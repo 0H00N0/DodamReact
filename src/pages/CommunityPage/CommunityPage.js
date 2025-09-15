@@ -43,7 +43,7 @@ const CommunityPage = () => {
 
         {/* 오른쪽 내용 영역 */}
         <div className={styles.content}>
-          <Outlet />
+          <Outlet /> {/* Notice, Event, Community 각각 렌더링 */}
         </div>
       </div>
     </div>
