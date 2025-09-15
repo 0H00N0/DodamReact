@@ -12,27 +12,43 @@ function ProductList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const productData = await getAllProducts();
+      setProducts(productData);
+    } catch (error) {
+      console.error("Failed to fetch products", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const productData = await getAllProducts();
-        setProducts(productData);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [getAllProducts]);
+    fetchProducts();
+  }, []);
 
   const handleDelete = async (id) => {
     if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
       try {
         await deleteProduct(id);
-        setProducts(products.filter(product => product.pronum !== id));
+        fetchProducts(); // Re-fetch products after deletion
       } catch (error) {
         console.error("Failed to delete product", error);
       }
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'ACTIVE':
+        return '판매중';
+      case 'INACTIVE':
+        return '판매중지';
+      case 'OUT_OF_STOCK':
+        return '품절';
+      default:
+        return status;
     }
   };
 
@@ -74,7 +90,7 @@ function ProductList() {
               <td>{product.proname}</td>
               <td>{product.category?.catename}</td>
               <td>{product.proprice?.toLocaleString()}원</td>
-              <td>{product.prostat}</td>
+              <td>{getStatusText(product.prostat)}</td>
               <td>
                 <button
                   className="admin-btn secondary"

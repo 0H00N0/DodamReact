@@ -53,7 +53,7 @@ const Login = () => {
         setIsLoading(true);
         
         try {
-            const response = await fetch(`${API_BASE_URL}/member/loginForm`, {
+            const response = await fetch(`${API_BASE_URL}/api/v1/member/loginForm`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
