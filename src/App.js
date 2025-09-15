@@ -14,9 +14,10 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
 // 회원 관련 컴포넌트
+import OAuthCallback from './pages/member/OAuthCallback';
 import FindIdModal from "./pages/member/FindIdModal";
-import FindIdByEmail from "./pages/member/FindIdByEmail";
-import FindIdByTel from "./pages/member/FindIdByTel";
+import FindIdByEmail from "./pages/member/findIdByEmail";
+import FindIdByTel from "./pages/member/findIdByTel";
 import ChangePw from "./pages/member/ChangePw";
 import FindPw from "./pages/member/FindPw";
 import FindPwByMemail from "./pages/member/FindPwByMemail";
@@ -30,7 +31,7 @@ const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
 
 const LoadingSpinner = () => (
   <div className="loading-container">
@@ -105,6 +106,8 @@ function App() {
 
                     {/* 404 */}
                     <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
+                    {/* oauth callback */}
+                    <Route path="/oauth/callback/:provider" element={<OAuthCallback />} />
                   </Routes>
                 </Suspense>
               </main>
