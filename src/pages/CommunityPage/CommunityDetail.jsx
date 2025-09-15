@@ -12,7 +12,7 @@ const posts = [
 const CommunityDetail = () => {
   const { id } = useParams(); // URL에서 id 가져오기
   const post = posts.find((p) => p.id === parseInt(id));
-
+   
   if (!post) {
     return <p>게시글을 찾을 수 없습니다.</p>;
   }
