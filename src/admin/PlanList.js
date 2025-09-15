@@ -1,7 +1,7 @@
 // PlanList.js
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from './contexts/AdminContext';
+import { useAdmin } from '../admin/contexts/AdminContext'; // 경로 확인 필요
 
 function PlanList() {
   const [plans, setPlans] = useState([]);
@@ -53,38 +53,59 @@ function PlanList() {
           <tr>
             <th>플랜 이름</th>
             <th>플랜 코드</th>
+            {/* =================== 코드 수정된 부분 시작 =================== */}
+            <th>월 요금</th>
+            {/* =================== 코드 수정된 부분 끝 ===================== */}
             <th>상태</th>
-            <th>가격 옵션 수</th>
             <th>관리</th>
           </tr>
         </thead>
         <tbody>
-          {plans.map(plan => (
-            <tr key={plan.planId}>
-              <td>{plan.planName}</td>
-              <td>{plan.planCode}</td>
-              <td>
-                <span className={`status ${plan.planActive ? 'active' : 'inactive'}`}>
-                  {plan.planActive ? '활성' : '비활성'}
-                </span>
-              </td>
-              <td>{plan.prices.length}</td>
-              <td>
-                <button 
-                  className="btn-edit" 
-                  onClick={() => navigate(`/admin/plans/edit/${plan.planId}`)}
-                >
-                  수정
-                </button>
-                <button 
-                  className="btn-delete" 
-                  onClick={() => handleDelete(plan.planId)}
-                >
-                  삭제
-                </button>
-              </td>
-            </tr>
-          ))}
+          {plans.map(plan => {
+            // =================== 코드 추가된 부분 시작 ===================
+            // 1. plan의 prices 배열에서 1개월(termMonth: 1) 요금 찾기
+            const monthlyPrice = plan.prices?.find(
+              p => p.termMonth === 1 && p.ppriceBilMode === 'MONTHLY'
+            );
+
+            // 2. 찾은 요금을 원화(KRW) 형식으로 포맷팅
+            const formattedPrice = monthlyPrice
+              ? new Intl.NumberFormat('ko-KR', {
+                  style: 'currency',
+                  currency: 'KRW',
+                }).format(monthlyPrice.ppriceAmount)
+              : 'N/A'; // 1개월 요금이 없으면 'N/A' 표시
+            // =================== 코드 추가된 부분 끝 =====================
+
+            return (
+              <tr key={plan.planId}>
+                <td>{plan.planName}</td>
+                <td>{plan.planCode}</td>
+                {/* =================== 코드 수정된 부분 시작 =================== */}
+                <td>{formattedPrice}</td>
+                {/* =================== 코드 수정된 부분 끝 ===================== */}
+                <td>
+                  <span className={`status ${plan.planActive ? 'active' : 'inactive'}`}>
+                    {plan.planActive ? '활성' : '비활성'}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    className="btn-edit"
+                    onClick={() => navigate(`/admin/plans/edit/${plan.planId}`)}
+                  >
+                    수정
+                  </button>
+                  <button
+                    className="btn-delete"
+                    onClick={() => handleDelete(plan.planId)}
+                  >
+                    삭제
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

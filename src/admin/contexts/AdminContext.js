@@ -354,30 +354,29 @@ export function AdminProvider({ children }) {
     }
   };
 
+  // src/contexts/AdminContext.js
+
+// ... (파일의 다른 부분은 기존과 동일) ...
+
   // --- 플랜 관리 API 함수 (백엔드 API 연동) ---
 
-  // 플랜 이름 목록 가져오기 (새로 추가)
+  // 플랜 이름 목록 가져오기 (기존 유지)
   const getAllPlanNames = async () => {
-    // 실제 백엔드에 플랜 이름 API가 있다면 사용, 없다면 mock 데이터 사용
     return new Promise(resolve => setTimeout(() => resolve(mockPlanNames), 200));
   };
 
-  // 모든 플랜 목록 가져오기
+  // 모든 플랜 목록 가져오기 (수정됨)
   const getAllPlans = async () => {
     try {
-      // 백엔드 API 엔드포인트에 맞게 수정
+      // 백엔드 API가 이제 가격 정보를 포함하여 응답합니다.
       const response = await request(`${API_BASE_URL}/api/v1/admin/plans`);
       
-      // 백엔드 응답 데이터를 프론트엔드 형식으로 변환
+      // 백엔드 응답 데이터를 그대로 사용하거나, 필요한 경우 간단히 매핑합니다.
+      // prices 필드가 이미 포함되어 있으므로 별도 조회 로직이 필요 없습니다.
       return response.map(plan => ({
-        planId: plan.planId,
-        planName: plan.planName,
-        planCode: plan.planCode,
-        planActive: plan.planActive,
-        planCreate: plan.planCreate,
-        // prices와 benefits는 별도 API나 확장 필요
-        prices: [], // 임시로 빈 배열
-        benefits: [] // 임시로 빈 배열
+        ...plan,
+        prices: plan.prices || [], // 백엔드에서 받은 prices를 그대로 사용 (null일 경우 대비)
+        benefits: plan.benefits || [] // 혜택도 마찬가지
       }));
     } catch (error) {
       addNotification(`플랜 목록 로딩 실패: ${error.message}`, 'error');
@@ -385,21 +384,16 @@ export function AdminProvider({ children }) {
     }
   };
 
-  // ID로 특정 플랜 정보 가져오기
+  // ID로 특정 플랜 정보 가져오기 (수정됨)
   const getPlanById = async (id) => {
     try {
       const response = await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`);
       
-      // 백엔드 응답을 프론트엔드 형식으로 변환
+      // 백엔드 응답에 prices가 포함되어 있으므로 바로 반환합니다.
       return {
-        planId: response.planId,
-        planName: response.planName,
-        planCode: response.planCode,
-        planActive: response.planActive,
-        planCreate: response.planCreate,
-        // prices와 benefits는 별도 처리 필요
-        prices: [], // 임시로 빈 배열
-        benefits: [] // 임시로 빈 배열
+        ...response,
+        prices: response.prices || [],
+        benefits: response.benefits || []
       };
     } catch (error) {
       addNotification(`플랜 정보 로딩 실패: ${error.message}`, 'error');
@@ -407,91 +401,63 @@ export function AdminProvider({ children }) {
     }
   };
 
+// ... (파일의 나머지 부분은 기존과 동일) ...
+
   // 새 플랜 등록
   const createPlan = async (planData) => {
     try {
-      // planName을 planNameId로 변환
-      let planNameId = planData.planNameId;
-      if (!planNameId && planData.planName) {
-        // planName으로 planNameId를 찾아서 변환
-        const planNames = await getAllPlanNames();
-        const foundPlanName = planNames.find(pn => pn.planName === planData.planName);
-        if (foundPlanName) {
-          planNameId = foundPlanName.planNameId;
-        } else {
-          throw new Error('유효하지 않은 플랜 이름입니다.');
-        }
-      }
-
-      // 백엔드 API 형식에 맞게 데이터 변환
       const requestData = {
-        planNameId: planNameId,
+        planName: planData.planName,
         planCode: planData.planCode,
-        planActive: planData.planActive !== undefined ? planData.planActive : true
+        planActive: planData.planActive,
+        prices: planData.prices.map(p => ({
+            termMonth: parseInt(p.termMonth),
+            // ▼ .toUpperCase() 제거, 폼에서 받은 값을 그대로 사용
+            ppriceBilMode: p.billMode, 
+            ppriceAmount: parseFloat(p.amount),
+            ppriceCurr: p.currency,
+            ppriceActive: true
+        }))
+        , benefits: planData.benefits.map(b => ({
+            pbNote: b.note,
+            pbPriceCap: b.priceCap ? parseFloat(b.priceCap) : null
+        }))
+        
       };
 
       const response = await request(`${API_BASE_URL}/api/v1/admin/plans`, {
         method: 'POST',
         body: JSON.stringify(requestData),
       });
-
-      addNotification('플랜이 성공적으로 등록되었습니다.', 'success');
-      
-      // 응답 데이터를 프론트엔드 형식으로 변환하여 반환
-      return {
-        planId: response.planId,
-        planName: response.planName,
-        planCode: response.planCode,
-        planActive: response.planActive,
-        planCreate: response.planCreate,
-        prices: planData.prices || [],
-        benefits: planData.benefits || []
-      };
     } catch (error) {
       addNotification(`플랜 등록 실패: ${error.message}`, 'error');
       throw error;
     }
   };
-
   // 플랜 수정
   const updatePlan = async (id, planData) => {
     try {
-      // planName을 planNameId로 변환
-      let planNameId = planData.planNameId;
-      if (!planNameId && planData.planName) {
-        const planNames = await getAllPlanNames();
-        const foundPlanName = planNames.find(pn => pn.planName === planData.planName);
-        if (foundPlanName) {
-          planNameId = foundPlanName.planNameId;
-        } else {
-          throw new Error('유효하지 않은 플랜 이름입니다.');
-        }
-      }
-
-      // 백엔드 API 형식에 맞게 데이터 변환
       const requestData = {
-        planNameId: planNameId,
-        planCode: planData.planCode,
-        planActive: planData.planActive
+        planName: planData.planName,
+        planActive: planData.planActive,
+        prices: planData.prices.map(p => ({
+            termMonth: parseInt(p.termMonth),
+            // ▼ .toUpperCase() 제거, 폼에서 받은 값을 그대로 사용
+            ppriceBilMode: p.billMode,
+            ppriceAmount: parseFloat(p.amount),
+            ppriceCurr: p.currency,
+            ppriceActive: true
+        }))
+        ,benefits: planData.benefits.map(b => ({
+            pbNote: b.note,
+            pbPriceCap: b.priceCap ? parseFloat(b.priceCap) : null
+        }))
       };
 
       const response = await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`, {
         method: 'PUT',
         body: JSON.stringify(requestData),
       });
-
-      addNotification('플랜이 성공적으로 수정되었습니다.', 'success');
-      
-      // 응답 데이터를 프론트엔드 형식으로 변환하여 반환
-      return {
-        planId: response.planId,
-        planName: response.planName,
-        planCode: response.planCode,
-        planActive: response.planActive,
-        planCreate: response.planCreate,
-        prices: planData.prices || [],
-        benefits: planData.benefits || []
-      };
     } catch (error) {
       addNotification(`플랜 수정 실패: ${error.message}`, 'error');
       throw error;
