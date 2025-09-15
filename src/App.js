@@ -17,8 +17,8 @@ import Notice from "./pages/CommunityPage/Notice";
 import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
 import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
-import Community from "./pages/CommunityPage/Community";
-import CommunityDetail from "./pages/CommunityPage/CommunityDetail";
+import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
+import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
 
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
@@ -65,8 +65,8 @@ function App() {
                       <Route path="notice/:noticeId" element={<NoticeDetail />} /> {/* 공지사항 상세 */}
                       <Route path="event" element={<Event />} />
                       <Route path="event/:eventId" element={<EventDetail />} />
-                      <Route path="community" element={<Community />} />  
-                      <Route path="community/:postId" element={<CommunityDetail />} />  {/* 상세 */}
+                      <Route path="community" element={<CommunityBoard />} />  
+                      <Route path="community/:postId" element={<CommunityBoardDetail />} />  {/* 상세 */}
                       <Route path="event" element={<Event />} />
                       <Route path="inquiry" element={<Inquiry />} />
                       <Route path="faq" element={<FAQ />} />
