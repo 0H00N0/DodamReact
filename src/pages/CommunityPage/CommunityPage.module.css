@@ -1,0 +1,65 @@
+/* Container 전체 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* 내용 왼쪽 정렬 유지 */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 페이지 제목 */
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* 전체 레이아웃: 왼쪽 메뉴 + 오른쪽 내용 */
+.layout {
+  display: flex;
+  width: 100%;
+  gap: 20px; /* 메뉴와 내용 사이 간격 */
+}
+
+/* 왼쪽 세로 메뉴 */
+.sidebar {
+  width: 180px;
+  border-right: 1px solid #ddd;
+  padding-right: 10px;
+}
+
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuList li {
+  margin-bottom: 15px;
+}
+
+.menuLink {
+  text-decoration: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.menuLink:hover {
+  color: #2563eb;
+}
+
+.menuLink.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* 내용 영역 */
+.content {
+  width: 100%;
+  max-width: 900px;
+  text-align: left; /* 내용 왼쪽 정렬 */
+  margin-top: 20px;
+}
