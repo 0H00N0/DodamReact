@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { api } from '../../utils/api';            // ✅ 공용 인스턴스만 사용
+import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
 const UpdateProfile = () => {
   const [form, setForm] = useState({
+    mname: '',
+    mbirth: '',
     memail: '',
     mtel: '',
     maddr: '',
@@ -17,15 +19,43 @@ const UpdateProfile = () => {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
+  // 카카오 주소검색 스크립트 로드
+  useEffect(() => {
+    if (!window.daum?.Postcode) {
+      const script = document.createElement("script");
+      script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // 카카오 주소검색 연동
+  const handleAddressSearch = () => {
+    if (!window.daum?.Postcode) {
+      alert("주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        setForm(f => ({
+          ...f,
+          maddr: data.address,
+          mpost: data.zonecode
+        }));
+      }
+    }).open();
+  };
+
   // 회원 정보 불러오기
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        // ✅ 서버에 /member/me 구현되어 있어야 함
         const { data } = await api.get('/member/me');
         if (cancelled) return;
         setForm({
+          mname:  data?.mname  ?? '',
+          mbirth: data?.mbirth ?? '',
           memail: data?.memail ?? '',
           mtel:   data?.mtel   ?? '',
           maddr:  data?.maddr  ?? '',
@@ -58,7 +88,6 @@ const UpdateProfile = () => {
     setSaving(true);
     setMessage('');
     try {
-      // ✅ 공용 인스턴스 + 상대경로
       await api.put('/member/updateProfile', form);
       alert('회원정보 수정이 완료되었습니다.');
       navigate('/member/profile', { replace: true });
@@ -76,10 +105,25 @@ const UpdateProfile = () => {
     <div style={{ padding: '2rem' }}>
       <h2>회원정보 수정</h2>
       <form onSubmit={handleSubmit}>
+        <label>이름: <input type="text" name="mname" value={form.mname} onChange={handleChange} /></label><br />
+        <label>생년월일: <input type="date" name="mbirth" value={form.mbirth || ""} onChange={handleChange} /></label><br />
         <label>이메일: <input type="email" name="memail" value={form.memail} onChange={handleChange} /></label><br />
         <label>전화번호: <input type="text"  name="mtel"   value={form.mtel}   onChange={handleChange} /></label><br />
-        <label>주소:   <input type="text"  name="maddr"  value={form.maddr}  onChange={handleChange} /></label><br />
-        {/* 숫자 필드는 빈값 처리 어려우니 텍스트 추천 */}
+        <label>주소:</label>
+        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <input
+            type="text"
+            name="maddr"
+            value={form.maddr}
+            onChange={handleChange}
+            placeholder="주소"
+            style={{ width: "250px" }} 
+            autoComplete="address-line1"
+          />
+          <button type="button" onClick={handleAddressSearch} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
+          주소검색
+          </button>
+        </div>
         <label>우편번호: <input type="text"  name="mpost"  value={form.mpost}  onChange={handleChange} /></label><br />
         <label>닉네임: <input type="text"  name="mnic"   value={form.mnic}   onChange={handleChange} /></label><br />
 

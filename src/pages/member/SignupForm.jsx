@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
 
@@ -8,25 +8,43 @@ export default function SignupForm() {
     mid: "",
     mpw: "",
     mname: "",
+    mbirth: "",
     mtel: "",
     memail: "",
     maddr: "",
     mpost: "",
     mnic: "",
-    children: [], // 자녀 정보 배열
+    children: [],
   });
   const [child, setChild] = useState({ chname: "", chbirth: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 주소 검색 결과를 입력하는 함수 (예시)
+  // 카카오 주소검색 스크립트
+  useEffect(() => {
+    if (!window.daum?.Postcode) {
+      const script = document.createElement("script");
+      script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  // 카카오 주소검색 연동
   const handleAddressSearch = () => {
-    // 실제 주소 검색 API 연동 필요
-    setForm(f => ({
-      ...f,
-      maddr: "서울시 강남구 테헤란로 123",
-      mpost: "06236"
-    }));
+    if (!window.daum?.Postcode) {
+      alert("주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+    new window.daum.Postcode({
+      oncomplete: function (data) {
+        setForm(f => ({
+          ...f,
+          maddr: data.address,
+          mpost: data.zonecode
+        }));
+      }
+    }).open();
   };
 
   const onChange = (e) => {
@@ -34,13 +52,11 @@ export default function SignupForm() {
     setForm((f) => ({ ...f, [name]: value }));
   };
 
-  // 자녀 정보 입력
   const onChildChange = (e) => {
     const { name, value } = e.target;
     setChild((c) => ({ ...c, [name]: value }));
   };
 
-  // 자녀 정보 추가
   const addChild = () => {
     if (child.chname && child.chbirth) {
       setForm(f => ({
@@ -51,7 +67,6 @@ export default function SignupForm() {
     }
   };
 
-  // 자녀 정보 삭제
   const removeChild = idx => {
     setForm(f => ({
       ...f,
@@ -95,8 +110,10 @@ export default function SignupForm() {
     <div style={styles.wrapper}>
       <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>회원가입</h2>
-
-        <label htmlFor="mid">아이디</label>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+  <span style={{ color: "red" }}>*</span>는 필수 입력사항입니다.
+</div>
+        <label htmlFor="mid">아이디<span style={{ color: "red" }}>*</span></label>
         <input
           id="mid"
           name="mid"
@@ -107,7 +124,7 @@ export default function SignupForm() {
           autoComplete="username"
         />
 
-        <label htmlFor="mpw">비밀번호</label>
+        <label htmlFor="mpw">비밀번호<span style={{ color: "red" }}>*</span></label>
         <input
           id="mpw"
           type="password"
@@ -119,7 +136,7 @@ export default function SignupForm() {
           autoComplete="new-password"
         />
 
-        <label htmlFor="mname">이름</label>
+        <label htmlFor="mname">이름<span style={{ color: "red" }}>*</span></label>
         <input
           id="mname"
           name="mname"
@@ -130,17 +147,27 @@ export default function SignupForm() {
           autoComplete="name"
         />
 
-        <label htmlFor="mtel">전화번호</label>
+        <label htmlFor="mtel">전화번호<span style={{ color: "red" }}>*</span></label>
         <input
           id="mtel"
           name="mtel"
           value={form.mtel}
           onChange={onChange}
-          placeholder="010-0000-0000"
+          placeholder="-없이 숫자만 입력"
           autoComplete="tel"
         />
+        <label htmlFor="mbirth">생년월일</label>
+          <input
+            id="mbirth"
+            name="mbirth"
+            type="date"
+            value={form.mbirth || ""}
+            onChange={onChange}
+            placeholder="생년월일"
+            autoComplete="bday"
+          />
 
-        <label htmlFor="memail">이메일 주소</label>
+        <label htmlFor="memail">이메일 주소<span style={{ color: "red" }}>*</span></label>
         <input
           id="memail"
           name="memail"
@@ -149,7 +176,15 @@ export default function SignupForm() {
           placeholder="이메일"
           autoComplete="email"
         />
-
+        <label htmlFor="mpost">우편번호<span style={{ color: "red" }}>*</span></label>
+        <input
+          id="mpost"
+          name="mpost"
+          value={form.mpost}
+          onChange={onChange}
+          placeholder="우편번호"
+          autoComplete="postal-code"
+        />
         <label htmlFor="maddr">주소</label>
         <div style={{ display: "flex", gap: 8 }}>
           <input
@@ -166,62 +201,63 @@ export default function SignupForm() {
           </button>
         </div>
 
-        <label htmlFor="mpost">우편번호</label>
-        <input
-          id="mpost"
-          name="mpost"
-          value={form.mpost}
-          onChange={onChange}
-          placeholder="우편번호"
-          autoComplete="postal-code"
-        />
+        <label htmlFor="mnic">닉네임</label>
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            id="mnic"
+            name="mnic"
+            value={form.mnic}
+            onChange={onChange}
+            placeholder="닉네임"
+          />
+        </div>
 
         {/* 자녀 정보 입력 (선택) */}
         <fieldset style={{ border: "1px solid #eee", padding: 12, borderRadius: 8 }}>
-  <legend>자녀 정보 (선택)</legend>
-  {form.children.map((c, idx) => (
-    <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
-      <input
-        name="chname"
-        value={c.chname}
-        onChange={e => {
-          const value = e.target.value;
-          setForm(f => {
-            const arr = [...f.children];
-            arr[idx].chname = value;
-            return { ...f, children: arr };
-          });
-        }}
-        placeholder="자녀 이름"
-        style={{ flex: 1 }}
-      />
-      <input
-        name="chbirth"
-        type="date"
-        value={c.chbirth}
-        onChange={e => {
-          const value = e.target.value;
-          setForm(f => {
-            const arr = [...f.children];
-            arr[idx].chbirth = value;
-            return { ...f, children: arr };
-          });
-        }}
-        style={{ flex: 1 }}
-      />
-      <button type="button" onClick={() => removeChild(idx)} style={styles.linkBtn}>
-        삭제
-      </button>
-    </div>
-  ))}
-  <button
-    type="button"
-    onClick={() => setForm(f => ({ ...f, children: [...f.children, { chname: "", chbirth: "" }] }))}
-    style={styles.linkBtn}
-  >
-    입력칸 추가
-  </button>
-</fieldset>
+          <legend>자녀 정보 (선택)</legend>
+          {form.children.map((c, idx) => (
+            <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+              <input
+                name="chname"
+                value={c.chname}
+                onChange={e => {
+                  const value = e.target.value;
+                  setForm(f => {
+                    const arr = [...f.children];
+                    arr[idx].chname = value;
+                    return { ...f, children: arr };
+                  });
+                }}
+                placeholder="자녀 이름"
+                style={{ flex: 1 }}
+              />
+              <input
+                name="chbirth"
+                type="date"
+                value={c.chbirth}
+                onChange={e => {
+                  const value = e.target.value;
+                  setForm(f => {
+                    const arr = [...f.children];
+                    arr[idx].chbirth = value;
+                    return { ...f, children: arr };
+                  });
+                }}
+                style={{ flex: 1 }}
+              />
+              <button type="button" onClick={() => removeChild(idx)} style={styles.linkBtn}>
+                삭제
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => setForm(f => ({ ...f, children: [...f.children, { chname: "", chbirth: "" }] }))}
+            style={styles.linkBtn}
+          >
+            입력칸 추가
+          </button>
+        </fieldset>
 
         {msg && <p style={styles.error}>{msg}</p>}
 
