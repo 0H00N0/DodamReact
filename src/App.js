@@ -19,6 +19,9 @@ import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
 import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
 import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
+import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
 
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
