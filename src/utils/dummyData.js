@@ -309,111 +309,171 @@ export const priceRanges = [
 
 // 주문 관련 더미 데이터
 export const orders = [
-  {
-    id: 'order-001',
-    userId: 'user-101',
-    userName: '김도담',
-    productName: '창의력 블록 세트',
-    productId: 'toy-002',
-    rentalStartDate: '2023-03-01',
-    rentalEndDate: '2023-03-15',
-    status: '승인대기', // 승인대기, 배송중, 대여중, 반납완료, 연체, 파손
-    shippingInfo: {
-      address: '서울시 강남구 테헤란로 123',
-      courier: '',
-      trackingNumber: ''
+    {
+        id: 'order-001',
+        userId: 'user-101',
+        userName: '김도담',
+        productName: '창의력 블록 세트',
+        productId: 'toy-002',
+        rentalStartDate: '2023-03-01',
+        rentalEndDate: '2023-03-15',
+        status: '승인대기',
+        shippingInfo: { address: '서울시 강남구 테헤란로 123', courier: '', trackingNumber: '' }
+    },
+    {
+        id: 'order-002',
+        userId: 'user-102',
+        userName: '이로운',
+        productName: '고속 RC 스포츠카',
+        productId: 'toy-004',
+        rentalStartDate: '2023-03-02',
+        rentalEndDate: '2023-03-16',
+        status: '배송중',
+        shippingInfo: { address: '부산시 해운대구 마린시티로 456', courier: 'CJ대한통운', trackingNumber: '1234567890' }
+    },
+    {
+        id: 'order-003',
+        userId: 'user-103',
+        userName: '박하준',
+        productName: '과학 실험 키트',
+        productId: 'toy-010',
+        rentalStartDate: '2023-02-20',
+        rentalEndDate: '2023-03-06',
+        status: '대여중',
+        shippingInfo: { address: '인천시 연수구 송도국제대로 789', courier: 'CJ대한통운', trackingNumber: '0987654321' }
+    },
+    {
+        id: 'order-004',
+        userId: 'user-104',
+        userName: '최아리',
+        productName: '프린세스 드레스업 세트',
+        productId: 'toy-008',
+        rentalStartDate: '2023-02-15',
+        rentalEndDate: '2023-03-01',
+        status: '반납완료',
+        shippingInfo: { address: '대구시 수성구 달구벌대로 101', courier: 'CJ대한통운', trackingNumber: '1122334455' }
+    },
+    {
+        id: 'order-005',
+        userId: 'user-105',
+        userName: '정다은',
+        productName: '자석 블록 세트',
+        productId: 'toy-009',
+        rentalStartDate: '2023-02-10',
+        rentalEndDate: '2023-02-24',
+        status: '연체',
+        shippingInfo: { address: '광주시 서구 상무중앙로 202', courier: 'CJ대한통운', trackingNumber: '5566778899' }
+    },
+    {
+        id: 'order-006',
+        userId: 'user-106',
+        userName: '강지훈',
+        productName: '드론 레이싱 세트',
+        productId: 'toy-011',
+        rentalStartDate: '2023-02-05',
+        rentalEndDate: '2023-02-19',
+        status: '파손',
+        shippingInfo: { address: '대전시 유성구 대학로 303', courier: 'CJ대한통운', trackingNumber: '9988776655' }
+    },
+    {
+        id: 'order-007',
+        userId: 'user-107',
+        userName: '윤채원',
+        productName: '소프트 베어 인형',
+        productId: 'toy-001',
+        rentalStartDate: '2023-03-05',
+        rentalEndDate: '2023-03-19',
+        status: '승인대기',
+        shippingInfo: { address: '울산시 남구 삼산로 404', courier: '', trackingNumber: '' }
+    },
+    {
+        id: 'order-008',
+        userId: 'user-108',
+        userName: '임서연',
+        productName: '학습용 태블릿',
+        productId: 'toy-003',
+        rentalStartDate: '2023-03-06',
+        rentalEndDate: '2023-03-20',
+        status: '승인대기',
+        shippingInfo: { address: '수원시 영통구 광교중앙로 150', courier: '', trackingNumber: '' }
+    },
+    {
+        id: 'order-009',
+        userId: 'user-109',
+        userName: '한지우',
+        productName: '가족 보드게임 컬렉션',
+        productId: 'toy-005',
+        rentalStartDate: '2023-03-08',
+        rentalEndDate: '2023-03-22',
+        status: '배송중',
+        shippingInfo: { address: '용인시 수지구 포은대로 599', courier: '롯데택배', trackingNumber: '2345678901' }
+    },
+    {
+        id: 'order-010',
+        userId: 'user-110',
+        userName: '신은경',
+        productName: '크레용 미술 세트',
+        productId: 'toy-006',
+        rentalStartDate: '2023-03-10',
+        rentalEndDate: '2023-03-24',
+        status: '대여중',
+        shippingInfo: { address: '성남시 분당구 판교역로 235', courier: '한진택배', trackingNumber: '3456789012' }
+    },
+    {
+        id: 'order-011',
+        userId: 'user-111',
+        userName: '오지호',
+        productName: '점프 로프',
+        productId: 'toy-007',
+        rentalStartDate: '2023-02-25',
+        rentalEndDate: '2023-03-11',
+        status: '반납완료',
+        shippingInfo: { address: '고양시 일산동구 중앙로 1275', courier: 'CJ대한통운', trackingNumber: '4567890123' }
+    },
+    {
+        id: 'order-012',
+        userId: 'user-112',
+        userName: '유재석',
+        productName: '전략 체스 세트',
+        productId: 'toy-012',
+        rentalStartDate: '2023-02-18',
+        rentalEndDate: '2023-03-04',
+        status: '연체',
+        shippingInfo: { address: '서울시 마포구 상암산로 76', courier: '우체국택배', trackingNumber: '5678901234' }
+    },
+    {
+        id: 'order-013',
+        userId: 'user-113',
+        userName: '송지효',
+        productName: '클레이 아트 키트',
+        productId: 'toy-013',
+        rentalStartDate: '2023-02-12',
+        rentalEndDate: '2023-02-26',
+        status: '파손',
+        shippingInfo: { address: '서울시 서초구 서초대로 217', courier: 'CJ대한통운', trackingNumber: '6789012345' }
+    },
+    {
+        id: 'order-014',
+        userId: 'user-114',
+        userName: '김종국',
+        productName: '미니 축구공 세트',
+        productId: 'toy-014',
+        rentalStartDate: '2023-03-11',
+        rentalEndDate: '2023-03-25',
+        status: '승인대기',
+        shippingInfo: { address: '서울시 강남구 도산대로 420', courier: '', trackingNumber: '' }
+    },
+    {
+        id: 'order-015',
+        userId: 'user-115',
+        userName: '하동훈',
+        productName: '로봇 친구',
+        productId: 'toy-015',
+        rentalStartDate: '2023-03-12',
+        rentalEndDate: '2023-03-26',
+        status: '배송중',
+        shippingInfo: { address: '서울시 용산구 이태원로 294', courier: '롯데택배', trackingNumber: '7890123456' }
     }
-  },
-  {
-    id: 'order-002',
-    userId: 'user-102',
-    userName: '이로운',
-    productName: '고속 RC 스포츠카',
-    productId: 'toy-004',
-    rentalStartDate: '2023-03-02',
-    rentalEndDate: '2023-03-16',
-    status: '배송중',
-    shippingInfo: {
-      address: '부산시 해운대구 마린시티로 456',
-      courier: 'CJ대한통운',
-      trackingNumber: '1234567890'
-    }
-  },
-  {
-    id: 'order-003',
-    userId: 'user-103',
-    userName: '박하준',
-    productName: '과학 실험 키트',
-    productId: 'toy-010',
-    rentalStartDate: '2023-02-20',
-    rentalEndDate: '2023-03-06',
-    status: '대여중',
-    shippingInfo: {
-      address: '인천시 연수구 송도국제대로 789',
-      courier: 'CJ대한통운',
-      trackingNumber: '0987654321'
-    }
-  },
-  {
-    id: 'order-004',
-    userId: 'user-104',
-    userName: '최아리',
-    productName: '프린세스 드레스업 세트',
-    productId: 'toy-008',
-    rentalStartDate: '2023-02-15',
-    rentalEndDate: '2023-03-01',
-    status: '반납완료',
-    shippingInfo: {
-      address: '대구시 수성구 달구벌대로 101',
-      courier: 'CJ대한통운',
-      trackingNumber: '1122334455'
-    }
-  },
-  {
-    id: 'order-005',
-    userId: 'user-105',
-    userName: '정다은',
-    productName: '자석 블록 세트',
-    productId: 'toy-009',
-    rentalStartDate: '2023-02-10',
-    rentalEndDate: '2023-02-24',
-    status: '연체',
-    shippingInfo: {
-      address: '광주시 서구 상무중앙로 202',
-      courier: 'CJ대한통운',
-      trackingNumber: '5566778899'
-    }
-  },
-  {
-    id: 'order-006',
-    userId: 'user-106',
-    userName: '강지훈',
-    productName: '드론 레이싱 세트',
-    productId: 'toy-011',
-    rentalStartDate: '2023-02-05',
-    rentalEndDate: '2023-02-19',
-    status: '파손',
-    shippingInfo: {
-      address: '대전시 유성구 대학로 303',
-      courier: 'CJ대한통운',
-      trackingNumber: '9988776655'
-    }
-  },
-  {
-    id: 'order-007',
-    userId: 'user-107',
-    userName: '윤채원',
-    productName: '소프트 베어 인형',
-    productId: 'toy-001',
-    rentalStartDate: '2023-03-05',
-    rentalEndDate: '2023-03-19',
-    status: '승인대기',
-    shippingInfo: {
-      address: '울산시 남구 삼산로 404',
-      courier: '',
-      trackingNumber: ''
-    }
-  }
 ];
 
 // 유틸리티 함수들

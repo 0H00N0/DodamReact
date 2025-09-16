@@ -1,5 +1,67 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from './contexts/AdminContext';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+// --- Sub-components for Dashboard --- //
+
+const StatCard = ({ title, value, icon, change, changeType }) => (
+    <div className="stat-card">
+        <div className="stat-header">
+            <h3>{title}</h3>
+            <div className="stat-icon">{icon}</div>
+        </div>
+        <div className="stat-value">{value}</div>
+        <div className={`stat-change ${changeType}`}>{change}</div>
+    </div>
+);
+
+const RecentOrders = ({ orders, formatCurrency, getOrderStatusText, formatRelativeTime }) => (
+    <div className="dashboard-section">
+        <div className="section-header">
+            <h2>최근 주문</h2>
+            <button className="view-all-btn">전체 보기</button>
+        </div>
+        <div className="recent-orders">
+            {orders.map(order => (
+                <div key={order.id} className="order-item">
+                    <div className="order-info">
+                        <div className="order-id">{order.id}</div>
+                        <div className="order-customer">{order.customer}</div>
+                    </div>
+                    <div className="order-details">
+                        <div className="order-amount">{formatCurrency(order.amount)}</div>
+                        <div className={`order-status ${order.status}`}>{getOrderStatusText(order.status)}</div>
+                        <div className="order-time">{formatRelativeTime(order.date)}</div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
+const TopProducts = ({ products, formatNumber, formatCurrency }) => (
+    <div className="dashboard-section">
+        <div className="section-header">
+            <h2>인기 상품</h2>
+            <button className="view-all-btn">전체 보기</button>
+        </div>
+        <div className="top-products">
+            {products.map((product, index) => (
+                <div key={product.name} className="product-item">
+                    <div className="product-rank">#{index + 1}</div>
+                    <div className="product-info">
+                        <div className="product-name">{product.name}</div>
+                        <div className="product-stats">
+                            <span className="sales-count">{formatNumber(product.sales)}개 판매</span>
+                            <span className="revenue">{formatCurrency(product.revenue)}</span>
+                        </div>
+                    </div>
+                </div>
+            ))}
+        </div>
+    </div>
+);
+
 
 /**
  * 관리자 대시보드 컴포넌트
@@ -10,316 +72,123 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('7days');
 
-  // 대시보드 데이터 로드
   useEffect(() => {
+    const loadDashboardData = async () => {
+        setLoading(true);
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const mockData = {
+            totalOrders: 1234, totalProducts: 567, totalUsers: 8901, totalRevenue: 23456789,
+            recentOrders: [
+              { id: '#ORD-001', customer: '김철수', amount: 29900, status: 'completed', date: new Date(Date.now() - 1000 * 60 * 30) },
+              { id: '#ORD-002', customer: '이영희', amount: 49900, status: 'processing', date: new Date(Date.now() - 1000 * 60 * 60 * 2) },
+              { id: '#ORD-003', customer: '박민수', amount: 29900, status: 'shipped', date: new Date(Date.now() - 1000 * 60 * 60 * 5) },
+              { id: '#ORD-004', customer: '최지우', amount: 79900, status: 'completed', date: new Date(Date.now() - 1000 * 60 * 60 * 24) },
+            ],
+            topProducts: [
+              { name: '레고 클래식 블록', sales: 120, revenue: 3588000 },
+              { name: '뽀로로 코딩 컴퓨터', sales: 98, revenue: 4890200 },
+              { name: '타요 컨트롤 주차타워', sales: 85, revenue: 2541500 },
+              { name: '실바니안 패밀리 이층집', sales: 72, revenue: 3592800 }
+            ],
+            monthlySalesData: [ { name: '1월', sales: 2400000 }, { name: '2월', sales: 1398000 }, { name: '3월', sales: 9800000 }, { name: '4월', sales: 3908000 }, { name: '5월', sales: 4800000 }, { name: '6월', sales: 3800000 }, { name: '7월', sales: 4300000 }, ],
+            popularToysData: [ { name: '레고', rentals: 4000 }, { name: '뽀로로', rentals: 3000 }, { name: '타요', rentals: 2000 }, { name: '실바니안', rentals: 2780 }, { name: '핑크퐁', rentals: 1890 }, { name: '콩순이', rentals: 2390 }, { name: '또봇', rentals: 3490 }, ],
+            planDistributionData: [ { name: '베이직', value: 400 }, { name: '스탠다드', value: 300 }, { name: '프리미엄', value: 300 }, ],
+          };
+          updateDashboardData(mockData);
+        } catch (error) {
+          console.error('Dashboard data loading failed:', error);
+          addNotification('대시보드 데이터 로드 실패', 'error');
+        } finally {
+          setLoading(false);
+        }
+    };
     loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
-  const loadDashboardData = async () => {
-    setLoading(true);
-    try {
-      // 실제로는 API 호출
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockData = {
-        totalOrders: 1234,
-        totalProducts: 567,
-        totalUsers: 8901,
-        totalRevenue: 2345678,
-        recentOrders: [
-          {
-            id: '#ORD-001',
-            customer: '김철수',
-            amount: 125000,
-            status: 'completed',
-            date: new Date(Date.now() - 1000 * 60 * 30) // 30분 전
-          },
-          {
-            id: '#ORD-002',
-            customer: '이영희',
-            amount: 89000,
-            status: 'processing',
-            date: new Date(Date.now() - 1000 * 60 * 60 * 2) // 2시간 전
-          },
-          {
-            id: '#ORD-003',
-            customer: '박민수',
-            amount: 156000,
-            status: 'shipped',
-            date: new Date(Date.now() - 1000 * 60 * 60 * 5) // 5시간 전
-          }
-        ],
-        topProducts: [
-          { name: '아이폰 15', sales: 234, revenue: 234000000 },
-          { name: '갤럭시 S24', sales: 189, revenue: 189000000 },
-          { name: '맥북 프로', sales: 156, revenue: 312000000 },
-          { name: '에어�팟 프로', sales: 345, revenue: 86250000 }
-        ],
-        salesChart: [
-          { date: '2024-01-01', sales: 45000 },
-          { date: '2024-01-02', sales: 52000 },
-          { date: '2024-01-03', sales: 48000 },
-          { date: '2024-01-04', sales: 61000 },
-          { date: '2024-01-05', sales: 55000 },
-          { date: '2024-01-06', sales: 67000 },
-          { date: '2024-01-07', sales: 59000 }
-        ]
-      };
-      
-      updateDashboardData(mockData);
-    } catch (error) {
-      console.error('Dashboard data loading failed:', error);
-      addNotification('대시보드 데이터 로드 실패', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 숫자 포맷팅
-  const formatNumber = (num) => {
-    return new Intl.NumberFormat('ko-KR').format(num);
-  };
-
-  // 통화 포맷팅
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('ko-KR', {
-      style: 'currency',
-      currency: 'KRW',
-      minimumFractionDigits: 0
-    }).format(amount);
-  };
-
-  // 상대 시간 포맷팅
+  const formatNumber = (num) => new Intl.NumberFormat('ko-KR').format(num);
+  const formatCurrency = (amount) => new Intl.NumberFormat('ko-KR', { style: 'currency', currency: 'KRW', minimumFractionDigits: 0 }).format(amount);
   const formatRelativeTime = (date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / (1000 * 60));
-    
-    if (diffInMinutes < 60) {
-      return `${diffInMinutes}분 전`;
-    } else if (diffInMinutes < 1440) {
-      return `${Math.floor(diffInMinutes / 60)}시간 전`;
-    } else {
-      return `${Math.floor(diffInMinutes / 1440)}일 전`;
-    }
+    if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}시간 전`;
+    return `${Math.floor(diffInMinutes / 1440)}일 전`;
   };
+  const getOrderStatusText = (status) => ({ completed: '완료', processing: '처리중', shipped: '배송중', cancelled: '취소', pending: '대기중' }[status] || status);
 
-  // 주문 상태 한글 변환
-  const getOrderStatusText = (status) => {
-    const statusMap = {
-      'completed': '완료',
-      'processing': '처리중',
-      'shipped': '배송중',
-      'cancelled': '취소',
-      'pending': '대기중'
-    };
-    return statusMap[status] || status;
-  };
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-  if (loading) {
+  if (loading || !dashboardData) {
     return (
       <div className="dashboard-loading">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>대시보드 로딩 중...</p>
-        </div>
+        <div className="loading-spinner"><div className="spinner"></div><p>대시보드 로딩 중...</p></div>
       </div>
     );
   }
 
+  const statCardsData = [
+      { title: '총 주문', value: formatNumber(dashboardData.totalOrders), change: '+12.5%', changeType: 'positive', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.658-.463 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg> },
+      { title: '총 상품', value: formatNumber(dashboardData.totalProducts), change: '+5.2%', changeType: 'positive', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.47 2.118v-.09a2.25 2.25 0 012.244-2.477a3 3 0 005.78-1.128zM15 4.837a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.47 2.118v-.09a2.25 2.25 0 012.244-2.477a3 3 0 005.78-1.128zM15 9.84a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.47 2.118v-.09a2.25 2.25 0 012.244-2.477a3 3 0 005.78-1.128z" /></svg> },
+      { title: '총 사용자', value: formatNumber(dashboardData.totalUsers), change: '+8.7%', changeType: 'positive', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-8.048 9.58 9.58 0 00-1.302-5.466 9.58 9.58 0 00-8.52-5.466 9.58 9.58 0 00-8.52 5.466 9.58 9.58 0 00-1.302 5.466 9.337 9.337 0 004.121 8.048 9.38 9.38 0 002.625.372M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg> },
+      { title: '총 매출', value: formatCurrency(dashboardData.totalRevenue), change: '+15.3%', changeType: 'positive', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.75A.75.75 0 013 4.5h.75m0 0h.75A.75.75 0 015.25 6v.75m0 0v-.75A.75.75 0 015.25 4.5h.75m0 0h.75a.75.75 0 01.75.75v.75m0 0v.75a.75.75 0 01-.75.75h-.75m0 0h-.75a.75.75 0 01-.75-.75v-.75m0 0A.75.75 0 013.75 6h.75M12 12.75a.75.75 0 01.75-.75h.75a.75.75 0 01.75.75v.75a.75.75 0 01-.75.75h-.75a.75.75 0 01-.75-.75v-.75z" /></svg> },
+  ];
+
   return (
     <div className="dashboard">
-      {/* 페이지 헤더 */}
       <div className="dashboard-header">
-        <div className="header-content">
-          <h1>대시보드</h1>
-          <div className="header-actions">
-            <select 
-              value={selectedPeriod} 
-              onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="period-select"
-            >
-              <option value="7days">최근 7일</option>
-              <option value="30days">최근 30일</option>
-              <option value="90days">최근 90일</option>
+        <h1>대시보드</h1>
+        <div className="header-actions">
+            <select value={selectedPeriod} onChange={(e) => setSelectedPeriod(e.target.value)} className="period-select">
+                <option value="7days">최근 7일</option>
+                <option value="30days">최근 30일</option>
+                <option value="90days">최근 90일</option>
             </select>
-            <button 
-              className="refresh-btn"
-              onClick={loadDashboardData}
-              disabled={loading}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path 
-                  d="M23 4v6h-6M1 20v-6h6" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-                <path 
-                  d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                />
-              </svg>
-              새로고침
+            <button className="refresh-btn" onClick={() => {}} disabled={loading}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                새로고침
             </button>
-          </div>
         </div>
       </div>
 
-      {/* 통계 카드 */}
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-header">
-            <h3>총 주문</h3>
-            <div className="stat-icon orders">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path 
-                  d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                />
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-          </div>
-          <div className="stat-value">{formatNumber(dashboardData.totalOrders)}</div>
-          <div className="stat-change positive">+12.5%</div>
-        </div>
+        {statCardsData.map(card => <StatCard key={card.title} {...card} />)}
+      </div>
 
-        <div className="stat-card">
-          <div className="stat-header">
-            <h3>총 상품</h3>
-            <div className="stat-icon products">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path 
-                  d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                />
-                <line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-          </div>
-          <div className="stat-value">{formatNumber(dashboardData.totalProducts)}</div>
-          <div className="stat-change positive">+5.2%</div>
+      <div className="charts-grid">
+        <div className="chart-container">
+          <h2>월별 매출</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={dashboardData.monthlySalesData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={formatNumber} />
+              <Tooltip formatter={(value) => formatCurrency(value)} />
+              <Legend />
+              <Line type="monotone" dataKey="sales" stroke="#8884d8" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
-
-        <div className="stat-card">
-          <div className="stat-header">
-            <h3>총 사용자</h3>
-            <div className="stat-icon users">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <path 
-                  d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                />
-                <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke="currentColor" strokeWidth="2"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-          </div>
-          <div className="stat-value">{formatNumber(dashboardData.totalUsers)}</div>
-          <div className="stat-change positive">+8.7%</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-header">
-            <h3>총 매출</h3>
-            <div className="stat-icon revenue">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                <line x1="12" y1="1" x2="12" y2="23" stroke="currentColor" strokeWidth="2"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
-          </div>
-          <div className="stat-value">{formatCurrency(dashboardData.totalRevenue)}</div>
-          <div className="stat-change positive">+15.3%</div>
+        <div className="chart-container">
+          <h2>구독 플랜 분포</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie data={dashboardData.planDistributionData} cx="50%" cy="50%" labelLine={false} outerRadius={100} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                {dashboardData.planDistributionData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
+              </Pie>
+              <Tooltip formatter={(value) => formatNumber(value) + '명'}/>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* 메인 콘텐츠 영역 */}
-      <div className="dashboard-content">
-        {/* 최근 주문 */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <h2>최근 주문</h2>
-            <button className="view-all-btn">전체 보기</button>
-          </div>
-          <div className="recent-orders">
-            {dashboardData.recentOrders.map(order => (
-              <div key={order.id} className="order-item">
-                <div className="order-info">
-                  <div className="order-id">{order.id}</div>
-                  <div className="order-customer">{order.customer}</div>
-                </div>
-                <div className="order-amount">{formatCurrency(order.amount)}</div>
-                <div className={`order-status ${order.status}`}>
-                  {getOrderStatusText(order.status)}
-                </div>
-                <div className="order-time">{formatRelativeTime(order.date)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 인기 상품 */}
-        <div className="dashboard-section">
-          <div className="section-header">
-            <h2>인기 상품</h2>
-            <button className="view-all-btn">전체 보기</button>
-          </div>
-          <div className="top-products">
-            {dashboardData.topProducts.map((product, index) => (
-              <div key={product.name} className="product-item">
-                <div className="product-rank">#{index + 1}</div>
-                <div className="product-info">
-                  <div className="product-name">{product.name}</div>
-                  <div className="product-stats">
-                    <span className="sales-count">{formatNumber(product.sales)}개 판매</span>
-                    <span className="revenue">{formatCurrency(product.revenue)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="dashboard-bottom-grid">
+        <RecentOrders orders={dashboardData.recentOrders} formatCurrency={formatCurrency} getOrderStatusText={getOrderStatusText} formatRelativeTime={formatRelativeTime} />
+        <TopProducts products={dashboardData.topProducts} formatNumber={formatNumber} formatCurrency={formatCurrency} />
       </div>
 
-      {/* 차트 영역 (간단한 표시) */}
-      <div className="dashboard-section full-width">
-        <div className="section-header">
-          <h2>매출 추이</h2>
-          <div className="chart-legend">
-            <span className="legend-item">
-              <span className="legend-color sales"></span>
-              일일 매출
-            </span>
-          </div>
-        </div>
-        <div className="sales-chart">
-          <div className="chart-container">
-            {dashboardData.salesChart.map((data, index) => (
-              <div key={data.date} className="chart-bar">
-                <div 
-                  className="bar"
-                  style={{
-                    height: `${(data.sales / Math.max(...dashboardData.salesChart.map(d => d.sales))) * 100}%`
-                  }}
-                  title={`${data.date}: ${formatCurrency(data.sales)}`}
-                ></div>
-                <div className="bar-label">
-                  {new Date(data.date).getDate()}일
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

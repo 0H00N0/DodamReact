@@ -14,6 +14,7 @@ const PlanManagement = React.lazy(() => import('./PlanManagement'));
 const OrderManagement = React.lazy(() => import('./OrderManagement'));
 const OrderDetail = React.lazy(() => import('./OrderDetail'));
 const BoardManagement = React.lazy(() => import('./BoardManagement'));
+const VocManagement = React.lazy(() => import('./VocManagement'));
 
 
 // 로딩 스피너 컴포넌트
@@ -50,6 +51,7 @@ function Admin() {
               <Route path="orders/*" element={<OrderManagement />} />
               <Route path="orders/:orderId" element={<OrderDetail />} />
               <Route path="boards/*" element={<BoardManagement />} />
+              <Route path="voc/*" element={<VocManagement />} />
 
               {/* 일치하는 경로가 없을 때 보여줄 404 페이지 */}
               <Route path="*" element={
