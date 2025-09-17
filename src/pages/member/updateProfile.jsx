@@ -11,7 +11,8 @@ const UpdateProfile = () => {
     mtel: '',
     maddr: '',
     mpost: '',
-    mnic: ''
+    mnic: '',
+    children: []
   });
 
   const [loading, setLoading] = useState(true);
@@ -60,7 +61,8 @@ const UpdateProfile = () => {
           mtel:   data?.mtel   ?? '',
           maddr:  data?.maddr  ?? '',
           mpost:  data?.mpost  ?? '',
-          mnic:   data?.mnic   ?? ''
+          mnic:   data?.mnic   ?? '',
+          children: data?.children ?? []
         });
       } catch (err) {
         console.error('회원 정보 로딩 실패:', err);
@@ -80,6 +82,32 @@ const UpdateProfile = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // 자녀 정보 입력/수정
+  const handleChildChange = (idx, e) => {
+    const { name, value } = e.target;
+    setForm(prev => {
+      const children = [...prev.children];
+      children[idx] = { ...children[idx], [name]: value };
+      return { ...prev, children };
+    });
+  };
+
+  // 자녀 추가
+  const addChild = () => {
+    setForm(prev => ({
+      ...prev,
+      children: [...prev.children, { chname: "", chbirth: "" }]
+    }));
+  };
+
+  // 자녀 삭제
+  const removeChild = (idx) => {
+    setForm(prev => ({
+      ...prev,
+      children: prev.children.filter((_, i) => i !== idx)
+    }));
   };
 
   // 수정 요청
@@ -126,6 +154,38 @@ const UpdateProfile = () => {
         </div>
         <label>우편번호: <input type="text"  name="mpost"  value={form.mpost}  onChange={handleChange} /></label><br />
         <label>닉네임: <input type="text"  name="mnic"   value={form.mnic}   onChange={handleChange} /></label><br />
+
+        <fieldset style={{ border: "1px solid #eee", padding: 12, borderRadius: 8, marginTop: 16 }}>
+          <legend>자녀 정보 (선택)</legend>
+          {form.children.map((c, idx) => (
+            <div key={idx} style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}>
+              <input
+                name="chname"
+                value={c.chname}
+                onChange={e => handleChildChange(idx, e)}
+                placeholder="자녀 이름"
+                 style={{ width: "250px" }} 
+              />
+              <input
+                name="chbirth"
+                type="date"
+                value={c.chbirth}
+                onChange={e => handleChildChange(idx, e)}
+                 style={{ width: "250px" }} 
+              />
+              <button type="button" onClick={() => removeChild(idx)} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
+                삭제
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={addChild}
+            style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}
+          >
+            입력칸 추가
+          </button>
+        </fieldset>
 
         <button
           type="submit"
