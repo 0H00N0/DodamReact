@@ -12,6 +12,14 @@ const CommunityBoard = () => {
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
       <h1>💬 커뮤니티 게시판</h1>
+
+      {/* 작성 버튼 */}
+      <div style={{ textAlign: "right", marginBottom: "10px" }}>
+        <Link to="/board/community/write">
+          <button>✍ 글 작성</button>
+        </Link>
+      </div>
+
       <ul style={{ listStyle: "none", padding: 0 }}>
         {posts.map((post) => (
           <li key={post.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>

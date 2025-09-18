@@ -51,6 +51,16 @@ const CommunityBoardDetail = () => {
         <p>{post.content}</p>
       </div>
 
+      {/* 게시글 수정/삭제 버튼 */}
+      <div style={{ marginTop: "20px" }}>
+        <Link to={`/board/community/${post.id}/edit`}>
+          <button>✏ 글 수정</button>
+        </Link>
+        <button onClick={handleDeletePost} style={{ marginLeft: "10px" }}>
+          🗑 글 삭제
+        </button>
+      </div>
+      
       {/* 댓글 영역 */}
       <div style={{ marginTop: "40px" }}>
         <h3>댓글</h3>
