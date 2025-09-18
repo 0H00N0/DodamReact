@@ -6,6 +6,7 @@ import './Admin.css';
 import AdminHeader from './AdminHeader';
 import AdminSidebar from './AdminSideBar';
 
+
 // 관리자 페이지 컴포넌트들
 const Dashboard = React.lazy(() => import('./Dashboard'));
 const UserManagement = React.lazy(() => import('./UserManagement'));
@@ -15,6 +16,8 @@ const OrderManagement = React.lazy(() => import('./OrderManagement'));
 const OrderDetail = React.lazy(() => import('./OrderDetail'));
 const BoardManagement = React.lazy(() => import('./BoardManagement'));
 const VocManagement = React.lazy(() => import('./VocManagement'));
+const CategoryManagement = React.lazy(() => import('./CategoryManagement')); // ⬇️ 이 줄 추가
+
 
 
 // 로딩 스피너 컴포넌트
@@ -48,6 +51,7 @@ function Admin() {
               <Route path="users/*" element={<UserManagement />} />
               <Route path="products/*" element={<ProductManagement />} />
               <Route path="plans/*" element={<PlanManagement />} />
+              <Route path="categories" element={<CategoryManagement />} /> {/* ⬇️ 이 줄 추가 */}
               <Route path="orders/*" element={<OrderManagement />} />
               <Route path="orders/:orderId" element={<OrderDetail />} />
               <Route path="boards/*" element={<BoardManagement />} />

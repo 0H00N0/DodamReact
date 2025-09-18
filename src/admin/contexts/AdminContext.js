@@ -96,8 +96,13 @@ export function AdminProvider({ children }) {
       throw error;
     }
   };
+  // ⬇️ 새로운 함수 추가
+  const getAllProductStates = async () => {
+    return await request(`${API_BASE_URL}/api/v1/admin/prostates`);
+  };
 
   // --- Product Management API ---
+   // ⬇️ 새로운 함수 추가
   const getAllProducts = async () => {
     return await request(`${API_BASE_URL}/api/v1/admin/products`);
   };
@@ -129,11 +134,13 @@ export function AdminProvider({ children }) {
     addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
   };
   
-  // --- Category & Brand API ---
+  // --- Category Management API ---
   const getAllCategories = async () => {
+    // 이 함수는 이미 존재할 수 있습니다. URL이 올바른지 확인하세요.
     return await request(`${API_BASE_URL}/api/v1/admin/categories`);
   };
 
+  // ⬇️ 아래 새로운 함수들을 추가합니다 ⬇️
   const createCategory = async (categoryData) => {
     const newCategory = await request(`${API_BASE_URL}/api/v1/admin/categories`, {
       method: 'POST',
@@ -142,9 +149,19 @@ export function AdminProvider({ children }) {
     addNotification('카테고리가 성공적으로 등록되었습니다.', 'success');
     return newCategory;
   };
-  
-  const getAllBrands = async () => {
-    return await request(`${API_BASE_URL}/api/v1/admin/brands`);
+
+  const updateCategory = async (id, categoryData) => {
+    const updatedCategory = await request(`${API_BASE_URL}/api/v1/admin/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(categoryData),
+    });
+    addNotification('카테고리가 성공적으로 수정되었습니다.', 'success');
+    return updatedCategory;
+  };
+
+  const deleteCategory = async (id) => {
+    await request(`${API_BASE_URL}/api/v1/admin/categories/${id}`, { method: 'DELETE' });
+    addNotification('카테고리가 성공적으로 삭제되었습니다.', 'success');
   };
 
   // --- Other Functions ---
@@ -209,6 +226,33 @@ export function AdminProvider({ children }) {
     await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`, { method: 'DELETE' });
     addNotification(`플랜(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
   };
+  
+  // --- ⬇️ 1. 이미지 업로드 API 함수 추가 ⬇️ ---
+  const uploadImage = async (imageFile) => {
+    const formData = new FormData();
+    formData.append('image', imageFile); // 'image'는 백엔드에서 받을 key 이름입니다.
+
+    try {
+      // 파일 업로드는 Content-Type을 브라우저가 자동으로 설정하도록 해야 하므로
+      // 별도의 fetch 요청을 사용하거나, request 헬퍼를 수정해야 합니다.
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/upload/image`, { // 👈 새 API 엔드포인트
+        method: 'POST',
+        body: formData,
+        credentials: 'include', // 필요 시 포함
+      });
+
+      if (!response.ok) {
+        throw new Error('이미지 업로드에 실패했습니다.');
+      }
+      
+      // 서버에서는 { "imageUrl": "저장된_경로/이미지.jpg" } 와 같은 JSON을 반환해야 합니다.
+      return response.json(); 
+    } catch (error) {
+      console.error('Image upload failed:', error);
+      addNotification(error.message, 'error');
+      throw error;
+    }
+  };
 
   const contextValue = {
     ...state,
@@ -224,7 +268,8 @@ export function AdminProvider({ children }) {
     deleteProduct,
     getAllCategories,
     createCategory,
-    getAllBrands,
+    updateCategory,
+    deleteCategory,
     getAllPlans,
     getPlanById,
     createPlan,
@@ -235,7 +280,9 @@ export function AdminProvider({ children }) {
     addNotification,
     removeNotification,
     updateDashboardData,
-    checkAuthentication
+    checkAuthentication,
+    uploadImage,
+    getAllProductStates
   };
 
   return (

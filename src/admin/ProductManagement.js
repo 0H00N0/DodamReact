@@ -1,142 +1,98 @@
-
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-import { ProductProvider, useProduct } from './contexts/ProductContext';
-import './Admin.css'; // We will add new styles here
+import { useAdmin } from './contexts/AdminContext';
+import './Admin.css';
 
+// 코드 스플리팅: ProductForm은 필요할 때만 로드합니다.
 const ProductForm = React.lazy(() => import('./ProductForm'));
-
-// Product Detail Modal
-function ProductDetailModal({ product, onClose }) {
-  if (!product) return null;
-
-  return (
-    <div className="admin-modal-overlay" onClick={onClose}>
-      <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
-        <h2>{product.productName}</h2>
-        <div className="product-detail-content">
-            <img src={`/images/${product.imageName}`} alt={product.productName} className="product-detail-image"/>
-            <div className="product-detail-info">
-                <p><strong>ID:</strong> {product.productId}</p>
-                <p><strong>카테고리:</strong> {product.category.categoryName}</p>
-                <p><strong>브랜드:</strong> {product.brand.brandName}</p>
-                <p><strong>가격:</strong> {product.price.toLocaleString()}원</p>
-                <p><strong>재고:</strong> {product.stockQuantity}</p>
-                <p><strong>상태:</strong> {product.status}</p>
-                <p><strong>설명:</strong> {product.description}</p>
-                <p><strong>등록일:</strong> {new Date(product.createdAt).toLocaleDateString()}</p>
-            </div>
-        </div>
-        <div className="admin-modal-actions">
-          <button className="admin-btn secondary" onClick={onClose}>닫기</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
+const ProductDetail = React.lazy(() => import('./ProductDetail')); // 👈 상세 컴포넌트 import
+// 상품 목록을 보여주는 메인 컴포넌트
 function ProductList() {
-  const { products, updateProduct, deleteProduct } = useProduct();
-  const [filter, setFilter] = useState('ALL');
-  const [sort, setSort] = useState({ key: 'productId', order: 'asc' });
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const { getAllProducts, deleteProduct } = useAdmin(); // deleteProduct도 가져옵니다.
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const filteredAndSortedProducts = useMemo(() => {
-    let result = [...products];
-
-    // Filtering
-    if (filter !== 'ALL') {
-      result = result.filter(p => p.status === filter);
+  const fetchProducts = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await getAllProducts();
+      setProducts(data);
+    } catch (error) {
+      console.error("상품 목록 조회 실패:", error);
+    } finally {
+      setLoading(false);
     }
+  }, [getAllProducts]);
 
-    // Sorting
-    result.sort((a, b) => {
-      const valA = a[sort.key];
-      const valB = b[sort.key];
-      if (valA < valB) return sort.order === 'asc' ? -1 : 1;
-      if (valA > valB) return sort.order === 'asc' ? 1 : -1;
-      return 0;
-    });
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
-    return result;
-  }, [products, filter, sort]);
-
-  const handleSort = (key) => {
-    if (sort.key === key) {
-      setSort({ ...sort, order: sort.order === 'asc' ? 'desc' : 'asc' });
-    } else {
-      setSort({ key, order: 'asc' });
-    }
-  };
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('정말로 이 상품을 삭제하시겠습니까?')) {
-      deleteProduct(id);
+      try {
+        await deleteProduct(id);
+        fetchProducts(); // 삭제 후 목록 새로고침
+      } catch (error) {
+        console.error("상품 삭제 실패:", error);
+      }
     }
   };
 
-  const handleStatusChange = (productId, newStatus) => {
-    const product = products.find(p => p.productId === productId);
-    if (product) {
-      updateProduct(productId, { ...product, status: newStatus });
-    }
-  };
+  if (loading) return <div>상품 목록을 불러오는 중...</div>;
 
   return (
     <div className="product-management">
-      <h2>상품 관리</h2>
-      <div className="toolbar">
+      <div className="page-header">
+        <h2>상품 관리</h2>
         <button
           className="admin-btn primary"
           onClick={() => navigate('/admin/products/new')}
         >
-          상품 등록
+          새 상품 등록
         </button>
-        <div className="filters">
-            <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-                <option value="ALL">모든 상태</option>
-                <option value="ACTIVE">판매중</option>
-                <option value="INACTIVE">판매중지</option>
-                <option value="OUT_OF_STOCK">품절</option>
-            </select>
-        </div>
       </div>
       <table className="admin-table">
         <thead>
           <tr>
-            <th onClick={() => handleSort('productId')}>ID {sort.key === 'productId' && (sort.order === 'asc' ? '▲' : '▼')}</th>
-            <th onClick={() => handleSort('productName')}>상품명 {sort.key === 'productName' && (sort.order === 'asc' ? '▲' : '▼')}</th>
-            <th onClick={() => handleSort('price')}>가격 {sort.key === 'price' && (sort.order === 'asc' ? '▲' : '▼')}</th>
-            <th onClick={() => handleSort('stockQuantity')}>재고 {sort.key === 'stockQuantity' && (sort.order === 'asc' ? '▲' : '▼')}</th>
+            <th>ID</th>
+            <th>상품명</th>
+            <th>브랜드</th>
+            <th>카테고리</th>
+            <th>가격</th>
             <th>상태</th>
+            <th>등록일</th>
             <th>작업</th>
           </tr>
         </thead>
         <tbody>
-          {filteredAndSortedProducts.map(product => (
-            <tr key={product.productId} onClick={() => setSelectedProduct(product)} style={{cursor: 'pointer'}}>
-              <td>{product.productId}</td>
-              <td>{product.productName}</td>
-              <td>{product.price.toLocaleString()}원</td>
-              <td>{product.stockQuantity}</td>
-              <td onClick={(e) => e.stopPropagation()}>
-                <select value={product.status} onChange={(e) => handleStatusChange(product.productId, e.target.value)}>
-                    <option value="ACTIVE">판매중</option>
-                    <option value="INACTIVE">판매중지</option>
-                    <option value="OUT_OF_STOCK">품절</option>
-                </select>
-              </td>
-              <td onClick={(e) => e.stopPropagation()}>
+          {products.map(product => (
+            <tr key={product.pronum}>
+              <td>{product.pronum}</td>
+              <td>{product.proname}</td>
+              <td>{product.probrand}</td>
+              <td>{product.categoryName}</td>
+              <td>{product.proprice.toLocaleString()}원</td>
+              <td>{product.productGrade}</td>
+              <td>{new Date(product.procre).toLocaleDateString()}</td>
+              <td>
+                {/* ⬇️ '상세' 버튼 추가 ⬇️ */}
+                <button
+                  className="admin-btn info" // 새로운 스타일 클래스
+                  onClick={() => navigate(`/admin/products/${product.pronum}`)}
+                >
+                  상세
+                </button>
                 <button
                   className="admin-btn secondary"
-                  onClick={() => navigate(`/admin/products/edit/${product.productId}`)}
+                  onClick={() => navigate(`/admin/products/edit/${product.pronum}`)}
                 >
                   수정
                 </button>
                 <button
                   className="admin-btn danger"
-                  onClick={() => handleDelete(product.productId)}
+                  onClick={() => handleDelete(product.pronum)}
                 >
                   삭제
                 </button>
@@ -145,22 +101,23 @@ function ProductList() {
           ))}
         </tbody>
       </table>
-      {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
     </div>
   );
 }
 
+// ProductManagement는 이제 라우터 역할을 합니다.
 function ProductManagement() {
+  // ProductProvider는 App.js나 상위 Admin 컴포넌트에서 제공한다고 가정합니다.
+  // 만약 여기서만 사용한다면 ProductProvider로 감싸야 합니다.
   return (
-    <ProductProvider>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Routes>
-          <Route path="/" element={<ProductList />} />
-          <Route path="/new" element={<ProductForm />} />
-          <Route path="/edit/:id" element={<ProductForm />} />
-        </Routes>
-      </Suspense>
-    </ProductProvider>
+    <Suspense fallback={<div>페이지 로딩 중...</div>}>
+      <Routes>
+        <Route index element={<ProductList />} />
+        <Route path="new" element={<ProductForm />} />
+        <Route path="edit/:id" element={<ProductForm />} />
+        <Route path=":id" element={<ProductDetail />} /> {/* 👈 상세 페이지 라우트 추가 */}
+      </Routes>
+    </Suspense>
   );
 }
 
