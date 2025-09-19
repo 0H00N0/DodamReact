@@ -51,7 +51,7 @@ function ProductForm() {
   const [categories, setCategories] = useState([]);
   const [productStates, setProductStates] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api/v1';
   useEffect(() => {
     async function fetchData() {
       try {
@@ -83,7 +83,8 @@ function ProductForm() {
               imageName: product.imageName || ''
             });
             if (product.imageName) {
-              setImagePreview(`/images/${product.imageName}`);
+              // 그냥 파일 이름이 아닌, 서버에서 이미지를 제공하는 전체 URL로 설정
+              setImagePreview(`${API_BASE_URL}/images/${product.imageName}`);
             }
           }
         }

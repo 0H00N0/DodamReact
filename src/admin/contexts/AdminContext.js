@@ -119,6 +119,30 @@ export function AdminProvider({ children }) {
     addNotification('상품이 성공적으로 등록되었습니다.', 'success');
     return newProduct;
   };
+  // --- ⬇️ 주문(Order) 관리 API 함수 추가 ⬇️ ---
+  const getAllOrders = async () => {
+    return await request(`${API_BASE_URL}/api/v1/admin/orders`);
+  };
+
+  const getOrderById = async (orderId) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/orders/${orderId}`);
+  };
+
+  const updateOrderApproval = async (orderId) => {
+    // 승인 상태를 '1' (승인)으로 변경
+    return await request(`${API_BASE_URL}/api/v1/admin/orders/${orderId}/approval`, {
+      method: 'PATCH',
+      body: JSON.stringify({ renApproval: 1 }), 
+    });
+  };
+
+  const assignOrderRider = async (orderId, riderData) => {
+    // riderData는 { renRider: "...", trackingNumber: "..." } 형태
+    return await request(`${API_BASE_URL}/api/v1/admin/orders/${orderId}/rider`, {
+      method: 'PATCH',
+      body: JSON.stringify(riderData),
+    });
+  };
 
   const updateProduct = async (id, productData) => {
     const updatedProduct = await request(`${API_BASE_URL}/api/v1/admin/products/${id}`, {
@@ -282,7 +306,11 @@ export function AdminProvider({ children }) {
     updateDashboardData,
     checkAuthentication,
     uploadImage,
-    getAllProductStates
+    getAllProductStates,
+    getAllOrders,
+    getOrderById,
+    updateOrderApproval,
+    assignOrderRider
   };
 
   return (
