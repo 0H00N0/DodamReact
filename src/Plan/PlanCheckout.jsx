@@ -119,7 +119,7 @@ export default function CheckoutPage() {
       const statusLike = String(resp?.status || resp?.billingKey || "").toUpperCase();
 
       // 1) 오버레이(즉시 발급): billingKey가 있고 그 값이 NEEDS_CONFIRMATION이 아님
-      if (resp?.billingKey && statusLike !== "NEEDS_CONFIRMATION") {
+      if (resp?.billingKey && statusLike !== "NEEDS_CONFIRMATION" && !resp.billingKey.startsWith("billing-issue-token")) {
         await billingKeysApi.register({
           billingKey: resp.billingKey,
           rawJson: JSON.stringify(resp),
