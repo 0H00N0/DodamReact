@@ -62,18 +62,20 @@ function AdminSidebar() {
       title: '주문 관리',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path 
-            d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" 
-            stroke="currentColor" 
-            strokeWidth="2"
-          />
-          <polyline points="14,2 14,8 20,8" stroke="currentColor" strokeWidth="2"/>
-          <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" strokeWidth="2"/>
-          <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" strokeWidth="2"/>
-          <polyline points="10,9 9,9 8,9" stroke="currentColor" strokeWidth="2"/>
+          {/* SVG 아이콘 코드 */}
         </svg>
       ),
-      path: '/admin/orders',
+      path: '/admin/orders', // 기본 경로
+      // ⬇️ 아래 submenu 배열을 추가합니다. ⬇️
+      submenu: [
+        { title: '대여 목록', path: '/admin/orders/list' },
+        { title: '대여 승인', path: '/admin/orders/approval' },
+        { title: '배송 중/완료', path: '/admin/orders/shipping' },
+        { title: '회수', path: '/admin/orders/returns' },
+        { title: '연체', path: '/admin/orders/overdue' },
+        { title: '손실/분실', path: '/admin/orders/lost' },
+        { title: '연장', path: '/admin/orders/extended' }, // 새 서브메뉴 추가
+      ]
     },
     {
       key: 'users',

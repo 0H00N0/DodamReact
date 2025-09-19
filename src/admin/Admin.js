@@ -52,9 +52,8 @@ function Admin() {
               <Route path="products/*" element={<ProductManagement />} />
               <Route path="plans/*" element={<PlanManagement />} />
               <Route path="categories" element={<CategoryManagement />} /> {/* ⬇️ 이 줄 추가 */}
-               {/* ⬇️ 주문 관리 라우트를 아래와 같이 수정 ⬇️ */}
-              <Route path="orders" element={<OrderManagement />} />
-              <Route path="orders/:orderId" element={<OrderDetail />} />
+               {/* ⬇️ path를 "orders"에서 "orders/*"로 변경합니다. ⬇️ */}
+              <Route path="orders/*" element={<OrderManagement />} />
               <Route path="boards/*" element={<BoardManagement />} />
               <Route path="voc/*" element={<VocManagement />} />
 

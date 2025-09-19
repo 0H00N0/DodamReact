@@ -1,21 +1,93 @@
+// OrderManagement.js (전체 교체)
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import { useAdmin } from './contexts/AdminContext';
+import OrderDetail from './OrderDetail';
 import './OrderManagement.css';
 
+// 공통 OrderTable 컴포넌트
+const OrderTable = ({ title, orders, columns }) => (
+    <div className="order-content-area">
+        <h3>{title}</h3>
+        <div className="order-table-container">
+            <table className="order-table">
+                <thead>
+                    <tr>{columns.map((col, i) => <th key={i}>{col.header}</th>)}</tr>
+                </thead>
+                <tbody>
+                    {orders.length > 0 ? orders.map(order => (
+                        <tr key={order.renNum}>
+                            {columns.map((col, i) => <td key={i}>{col.accessor(order)}</td>)}
+                        </tr>
+                    )) : (
+                        <tr><td colSpan={columns.length} className="no-data">해당하는 주문이 없습니다.</td></tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    </div>
+);
+
+// 대여 승인 컴포넌트
+const ApprovalComponent = ({ orders, onApprove }) => {
+    const columns = [
+        { header: '주문번호', accessor: o => <Link to={`/admin/orders/${o.renNum}`}>{o.renNum}</Link> },
+        { header: '주문자명', accessor: o => o.memberName },
+        { header: '상품명', accessor: o => o.productName },
+        { header: '대여일', accessor: o => new Date(o.renDate).toLocaleDateString() },
+        { header: '반납일', accessor: o => o.retDate ? new Date(o.retDate).toLocaleDateString() : '미정' },
+        { header: '상태', accessor: () => <span className="status-pending">승인대기</span> },
+        { header: '작업', accessor: o => <button onClick={() => onApprove(o.renNum)} className="approve-btn">승인</button> },
+    ];
+    return <OrderTable title="대여 승인" orders={orders} columns={columns} />;
+};
+
+// 배송 중/완료 컴포넌트
+const ShippingComponent = ({ orders, onSubmit }) => {
+    const [shippingDetails, setShippingDetails] = useState({});
+    const handleChange = (id, field, value) => setShippingDetails(p => ({ ...p, [id]: { ...p[id], [field]: value } }));
+    const handleSubmit = (id) => {
+        const d = shippingDetails[id];
+        if (d && d.courier && d.trackingNumber) onSubmit(id, d.courier, d.trackingNumber);
+        else alert('배송기사와 운송장 번호를 모두 입력해주세요.');
+    };
+
+    const columns = [
+        { header: '주문번호', accessor: o => <Link to={`/admin/orders/${o.renNum}`}>{o.renNum}</Link> },
+        { header: '주문자명', accessor: o => o.memberName },
+        { header: '상품명', accessor: o => o.productName },
+        { header: '배송상태', accessor: o => o.renShip || '미입력' },
+        { header: '운송장 정보', accessor: o => (
+            o.trackingNumber ? (
+                <span>{o.renRider} / {o.trackingNumber}</span>
+            ) : (
+                <div className="shipping-input">
+                    <input type="text" placeholder="배송기사(택배사)" onChange={(e) => handleChange(o.renNum, 'courier', e.target.value)} />
+                    <input type="text" placeholder="운송장 번호" onChange={(e) => handleChange(o.renNum, 'trackingNumber', e.target.value)} />
+                    <button onClick={() => handleSubmit(o.renNum)} className="shipping-btn">입력</button>
+                </div>
+            )
+        ) },
+    ];
+    return <OrderTable title="배송 중/완료" orders={orders} columns={columns} />;
+};
+
+// 메인 OrderManagement 컴포넌트
 const OrderManagement = () => {
     const { getAllOrders, updateOrderApproval, assignOrderRider } = useAdmin();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('approval');
+    const [error, setError] = useState(null);
 
-    const fetchOrders = useCallback(async () => {
+    const fetchOrders = useCallback(async (filter = {}) => {
         try {
             setLoading(true);
-            const data = await getAllOrders();
-            setOrders(data);
+            setError(null);
+            const data = await getAllOrders(filter); // 서버 API가 필터 지원 시 활용
+            setOrders(data || []);
         } catch (error) {
             console.error("주문 목록 조회 실패:", error);
+            setError("주문 데이터를 불러오는데 실패했습니다. 다시 시도해주세요.");
         } finally {
             setLoading(false);
         }
@@ -29,153 +101,62 @@ const OrderManagement = () => {
         if (window.confirm(`주문번호 ${orderId}를 승인 처리하시겠습니까?`)) {
             try {
                 await updateOrderApproval(orderId);
-                fetchOrders(); // 목록 새로고침
+                fetchOrders();
             } catch (error) {
-                console.error("주문 승인 실패:", error);
+                console.error("승인 처리 실패:", error);
+                setError("승인 처리에 실패했습니다.");
             }
         }
     };
 
     const handleShippingSubmit = async (orderId, courier, trackingNumber) => {
         try {
-            await assignOrderRider(orderId, { renRider: courier, trackingNumber });
-            fetchOrders(); // 목록 새로고침
+            await assignOrderRider(orderId, { renRider: courier, trackingNumber, renShip: '배송중' });
+            fetchOrders();
         } catch (error) {
-            console.error("운송장 정보 입력 실패:", error);
-        }
-    };
-    
-    // 백엔드 renApproval 값에 따른 상태 텍스트 매핑
-    const getStatusText = (status) => {
-        switch (status) {
-            case 0: return '승인대기';
-            case 1: return '배송중';
-            // ... 다른 상태값들 추가 ...
-            default: return '알수없음';
+            console.error("배송 정보 저장 실패:", error);
+            setError("배송 정보 저장에 실패했습니다.");
         }
     };
 
-    const renderContent = () => {
-        if (loading) return <div>로딩 중...</div>;
-        
-        // renApproval: 0(승인대기), 1(배송중/승인완료)
-        const approvalList = orders.filter(o => o.renApproval === 0);
-        const shippingList = orders.filter(o => o.renApproval === 1);
-        // ... 다른 탭에 대한 필터링 로직 추가 가능 ...
+    if (loading) return <div className="loading-message">로딩 중...</div>;
+    if (error) return <div className="loading-message">{error}</div>;
 
-        switch (activeTab) {
-            case 'approval':
-                return <RentalList orders={approvalList} onApprove={handleApprove} getStatusText={getStatusText} />;
-            case 'shipping':
-                return <ShippingList orders={shippingList} onSubmit={handleShippingSubmit} />;
-            default:
-                return <div className="order-table-container"><p>해당 상태의 주문이 없습니다.</p></div>;
-        }
+    // 클라이언트 측 필터링
+    const filteredData = {
+        list: orders,
+        approval: orders.filter(o => o.renApproval === 0),
+        shipping: orders.filter(o => o.renApproval === 1),
+        returns: orders.filter(o => o.restate === 10),
+        overdue: orders.filter(o => o.overdue === 1),
+        lost: orders.filter(o => o.renloss === 1 || o.renloss === 2),
+        extended: orders.filter(o => o.extend === 1), // 새 필터 추가
     };
+
+    const genericColumns = [
+        { header: '주문번호', accessor: o => <Link to={`/admin/orders/${o.renNum}`}>{o.renNum}</Link> },
+        { header: '주문자명', accessor: o => o.memberName },
+        { header: '상품명', accessor: o => o.productName },
+        { header: '대여일', accessor: o => new Date(o.renDate).toLocaleDateString() },
+        { header: '반납일', accessor: o => o.retDate ? new Date(o.retDate).toLocaleDateString() : '미정' },
+        { header: '배송상태', accessor: o => o.renShip || '미입력' },
+    ];
 
     return (
-        <div className="order-management">
-            <h1>주문 관리</h1>
-            <div className="order-tabs">
-                <button className={`order-tab ${activeTab === 'approval' ? 'active' : ''}`} onClick={() => setActiveTab('approval')}>대여 승인</button>
-                <button className={`order-tab ${activeTab === 'shipping' ? 'active' : ''}`} onClick={() => setActiveTab('shipping')}>배송 관리</button>
-            </div>
-            <div className="order-content">
-                {renderContent()}
-            </div>
+        <div className="order-management-container">
+            <Routes>
+                <Route path="/" element={<Navigate to="list" replace />} />
+                <Route path="list" element={<OrderTable title="전체 대여 목록" orders={filteredData.list} columns={genericColumns} />} />
+                <Route path="approval" element={<ApprovalComponent orders={filteredData.approval} onApprove={handleApprove} />} />
+                <Route path="shipping" element={<ShippingComponent orders={filteredData.shipping} onSubmit={handleShippingSubmit} />} />
+                <Route path="returns" element={<OrderTable title="회수 목록" orders={filteredData.returns} columns={genericColumns} />} />
+                <Route path="overdue" element={<OrderTable title="연체 목록" orders={filteredData.overdue} columns={genericColumns} />} />
+                <Route path="lost" element={<OrderTable title="손실/분실 목록" orders={filteredData.lost} columns={genericColumns} />} />
+                <Route path="extended" element={<OrderTable title="연장 목록" orders={filteredData.extended} columns={genericColumns} />} /> {/* 새 경로 추가 */}
+                <Route path=":orderId" element={<OrderDetail onUpdate={fetchOrders} />} />
+            </Routes>
         </div>
     );
 };
-
-// ... (RentalList, ShippingList, ReturnList 컴포넌트는 아래에 이어서 작성) ...
-
-const RentalList = ({ orders, onApprove, getStatusText }) => (
-    <div className="order-table-container">
-        <table className="order-table">
-            <thead>
-                <tr>
-                    <th>주문번호</th>
-                    <th>주문자명</th>
-                    <th>상품명</th>
-                    <th>주문일</th>
-                    <th>상태</th>
-                    <th>작업</th>
-                </tr>
-            </thead>
-            <tbody>
-                {orders.map(order => (
-                    <tr key={order.renNum}>
-                        <td><Link to={`/admin/orders/${order.renNum}`}>{order.renNum}</Link></td>
-                        <td>{order.memberName}</td>
-                        <td>{order.productName}</td>
-                        <td>{new Date(order.renDate).toLocaleDateString()}</td>
-                        <td><span className="status-pending">{getStatusText(order.renApproval)}</span></td>
-                        <td>
-                            <button onClick={() => onApprove(order.renNum)} className="approve-btn">승인</button>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
-
-const ShippingList = ({ orders, onSubmit }) => {
-    const [shippingDetails, setShippingDetails] = useState({});
-
-    const handleChange = (orderId, field, value) => {
-        setShippingDetails(prev => ({
-            ...prev,
-            [orderId]: { ...prev[orderId], [field]: value }
-        }));
-    };
-
-    const handleSubmit = (orderId) => {
-        const details = shippingDetails[orderId];
-        if (details && details.courier && details.trackingNumber) {
-            onSubmit(orderId, details.courier, details.trackingNumber);
-            // 입력 필드 초기화
-            setShippingDetails(prev => ({...prev, [orderId]: null}));
-        } else {
-            alert('택배사와 운송장 번호를 모두 입력해주세요.');
-        }
-    };
-
-    return (
-        <div className="order-table-container">
-            <table className="order-table">
-                <thead>
-                    <tr>
-                        <th>주문번호</th>
-                        <th>주문자명</th>
-                        <th>상품명</th>
-                        <th>운송장 정보</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.map(order => (
-                        <tr key={order.renNum}>
-                            <td><Link to={`/admin/orders/${order.renNum}`}>{order.renNum}</Link></td>
-                            <td>{order.memberName}</td>
-                            <td>{order.productName}</td>
-                            <td>
-                                {order.trackingNumber ? (
-                                    <span>{order.renRider} / {order.trackingNumber}</span>
-                                ) : (
-                                    <div className="shipping-input">
-                                        <input type="text" placeholder="배송기사(택배사)" onChange={(e) => handleChange(order.renNum, 'courier', e.target.value)} />
-                                        <input type="text" placeholder="운송장 번호" onChange={(e) => handleChange(order.renNum, 'trackingNumber', e.target.value)} />
-                                        <button onClick={() => handleSubmit(order.renNum)} className="shipping-btn">입력</button>
-                                    </div>
-                                )}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-};
-
 
 export default OrderManagement;
