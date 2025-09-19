@@ -11,7 +11,7 @@ function ProductDetail() {
   const [loading, setLoading] = useState(true);
 
   // API 기본 URL (환경변수에서 가져오거나 기본값 사용)
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api/v1';
 
   useEffect(() => {
     const fetchProduct = async () => {
