@@ -1,45 +1,96 @@
 // src/pages/CommunityPage/CommunityBoardDetail.jsx
-import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const posts = [
-  { id: 1, title: "우리 아이 블록 놀이 후기", author: "맘스타그램", date: "2025-09-08", content: "도담도담 블록으로 아이가 하루 종일 즐겁게 놀았어요!" },
-  { id: 2, title: "육아 꿀팁 공유합니다", author: "육아대디", date: "2025-09-06", content: "잠들기 전 동화책 읽어주면 아이가 빨리 잠들더라고요." },
-  { id: 3, title: "첫 구매 후기", author: "새댁맘", date: "2025-09-02", content: "빠른 배송에 놀랐고, 제품 퀄리티도 좋습니다." }
-];
+const CommunityBoardDetail = ({ currentUser }) => {
+  const { postId } = useParams();
+  const navigate = useNavigate();
 
-const CommunityBoardDetail = () => {
-  const { postId } = useParams(); // postId 가져오기
-  const post = posts.find((p) => p.id === parseInt(postId));
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // 댓글 상태
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
 
-  if (!post) return <p>게시글을 찾을 수 없습니다.</p>;
-
-  // 댓글 작성
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-    const newC = {
-      id: Date.now(),
-      author: "익명", // 나중에 로그인 연결 가능
-      content: newComment,
-      createdAt: new Date().toLocaleString(),
+  // 1️⃣ 게시글 조회
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const res = await axios.get(`/api/boards/${postId}`);
+        setPost(res.data);
+        setComments(res.data.comments || []); // 댓글 초기값
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("게시글을 불러오지 못했습니다.");
+        setLoading(false);
+      }
     };
-    setComments([...comments, newC]);
-    setNewComment("");
+    fetchPost();
+  }, [postId]);
+
+  // 2️⃣ 게시글 삭제
+  const handleDeletePost = async () => {
+    if (window.confirm("정말 삭제하시겠습니까?")) {
+      try {
+        await axios.delete(`/api/boards/${postId}`);
+        alert("게시글이 삭제되었습니다.");
+        navigate("/board/community");
+      } catch (err) {
+        console.error(err);
+        alert("삭제 실패! 다시 시도해주세요.");
+      }
+    }
   };
 
-  // 댓글 수정
-  const handleEditComment = (id, content) => {
-    setComments(comments.map((c) => (c.id === id ? { ...c, content } : c)));
+  // 3️⃣ 댓글 작성
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    try {
+      const res = await axios.post(`/api/boards/${postId}/comments`, {
+        content: newComment,
+        author: currentUser?.username || "익명",
+      });
+      setComments([...comments, res.data]);
+      setNewComment("");
+    } catch (err) {
+      console.error(err);
+      alert("댓글 등록 실패!");
+    }
   };
 
-  // 댓글 삭제
-  const handleDeleteComment = (id) => {
-    setComments(comments.filter((c) => c.id !== id));
+  // 4️⃣ 댓글 수정
+  const handleEditComment = async (id) => {
+    const content = prompt("댓글을 수정하세요", comments.find(c => c.id === id).content);
+    if (!content) return;
+    try {
+      await axios.put(`/api/boards/${postId}/comments/${id}`, { content });
+      setComments(comments.map(c => (c.id === id ? { ...c, content } : c)));
+    } catch (err) {
+      console.error(err);
+      alert("댓글 수정 실패!");
+    }
   };
+
+  // 5️⃣ 댓글 삭제
+  const handleDeleteComment = async (id) => {
+    if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
+    try {
+      await axios.delete(`/api/boards/${postId}/comments/${id}`);
+      setComments(comments.filter(c => c.id !== id));
+    } catch (err) {
+      console.error(err);
+      alert("댓글 삭제 실패!");
+    }
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+  if (error) return <div>{error}</div>;
+  if (!post) return <div>게시글이 존재하지 않습니다.</div>;
+
+  const isAuthor = currentUser?.username === post.author;
 
   return (
     <div style={{ padding: "20px", maxWidth: "900px", margin: "0 auto" }}>
@@ -52,15 +103,17 @@ const CommunityBoardDetail = () => {
       </div>
 
       {/* 게시글 수정/삭제 버튼 */}
-      <div style={{ marginTop: "20px" }}>
-        <Link to={`/board/community/${post.id}/edit`}>
-          <button>✏ 글 수정</button>
-        </Link>
-        <button onClick={handleDeletePost} style={{ marginLeft: "10px" }}>
-          🗑 글 삭제
-        </button>
-      </div>
-      
+      {isAuthor && (
+        <div style={{ marginTop: "20px" }}>
+          <Link to={`/board/community/edit/${post.id}`}>
+            <button>✏ 글 수정</button>
+          </Link>
+          <button onClick={handleDeletePost} style={{ marginLeft: "10px" }}>
+            🗑 글 삭제
+          </button>
+        </div>
+      )}
+
       {/* 댓글 영역 */}
       <div style={{ marginTop: "40px" }}>
         <h3>댓글</h3>
@@ -77,18 +130,14 @@ const CommunityBoardDetail = () => {
                 <b>{c.author}</b>: {c.content}
               </p>
               <small style={{ color: "gray" }}>{c.createdAt}</small>
-              <div>
-                <button
-                  onClick={() => {
-                    const content = prompt("댓글을 수정하세요", c.content);
-                    if (content) handleEditComment(c.id, content);
-                  }}
-                  style={{ marginRight: "8px" }}
-                >
-                  수정
-                </button>
-                <button onClick={() => handleDeleteComment(c.id)}>삭제</button>
-              </div>
+              {currentUser?.username === c.author && (
+                <div>
+                  <button onClick={() => handleEditComment(c.id)} style={{ marginRight: "8px" }}>
+                    수정
+                  </button>
+                  <button onClick={() => handleDeleteComment(c.id)}>삭제</button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

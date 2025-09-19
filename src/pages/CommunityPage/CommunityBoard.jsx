@@ -1,6 +1,7 @@
 // src/pages/CommunityPage/CommunityBoard.jsx
 import React from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 const posts = [
   { id: 1, title: "우리 아이 블록 놀이 후기", author: "맘스타그램", date: "2025-09-08", content: "도담도담 블록으로 아이가 하루 종일 즐겁게 놀았어요!" },

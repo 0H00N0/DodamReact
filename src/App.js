@@ -53,6 +53,7 @@ function App() {
               <main id="main-content" role="main" className="main-content" tabIndex="-1">
                 <Suspense fallback={<LoadingSpinner />}>
                   <Routes>
+                    {/* 기본 페이지 */}
                     <Route path="/" element={<Home />} />
                     <Route path="/loginForm" element={<LoginForm />} />
                     <Route path="/signup" element={<SignupForm />} />
@@ -71,6 +72,12 @@ function App() {
                       <Route path="community" element={<CommunityBoard />} />  
                       <Route path="community/:postId" element={<CommunityBoardDetail />} />  {/* 상세 */}
                       <Route path="event" element={<Event />} />
+                      
+                      {/* 글 작성/수정/삭제 */}
+                      <Route path="community/write" element={<CommunityBoardForm />} />
+                      <Route path="community/edit/:postId" element={<CommunityBoardEdit />} />
+                      <Route path="community/delete/:postId" element={<CommunityBoardDelete />} />
+                      
                       <Route path="inquiry" element={<Inquiry />} />
                       <Route path="faq" element={<FAQ />} />
                       <Route path="company" element={<Company />} />
