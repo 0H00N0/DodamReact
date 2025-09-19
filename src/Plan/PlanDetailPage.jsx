@@ -153,7 +153,7 @@ export default function PlanDetailPage() {
 
   const handleCheckout = () => {
     if (!selectedPrice) return;
-    navigate(`/checkout?code=${plan.planCode}&months=${selectedPrice.months}`);
+    navigate(`/plan/checkout?code=${plan.planCode}&months=${selectedPrice.months}`);
   };
 
   const descToShow = parsedDesc?.trim() ? parsedDesc : (plan.note || "");
