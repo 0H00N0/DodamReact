@@ -8,8 +8,6 @@ const mockPlanNames = [
   { planNameId: 3, planName: '엔터프라이즈 플랜' },
 ];
 
-
-
 // --- Initial State and Reducer ---
 const initialState = {
   user: { username: 'admin', role: 'ADMIN', name: 'Admin User', isAuthenticated: true },
@@ -55,9 +53,7 @@ const AdminContext = createContext();
 
 export const useAdmin = () => {
   const context = useContext(AdminContext);
-  if (!context) {
-    throw new Error('useAdmin must be used within an AdminProvider');
-  }
+  if (!context) throw new Error('useAdmin must be used within an AdminProvider');
   return context;
 };
 
@@ -68,45 +64,73 @@ export function AdminProvider({ children }) {
     dispatch({ type: ACTION_TYPES.ADD_NOTIFICATION, payload: { message, type } });
   };
 
-  // --- API Request Helper ---
+  // --- Safe JSON parser ---
+  const parseResponse = async (response) => {
+    const ct = response.headers.get('content-type') || '';
+    if (ct.includes('application/json')) {
+      return response.json();
+    }
+    // 비 JSON 응답일 경우 텍스트만 소거
+    try { await response.text(); } catch (_) {}
+    return {};
+  };
+
+  // --- API Request Helper (Preflight 최소화) ---
   const request = async (url, options = {}) => {
     try {
-      const defaultOptions = {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...options.headers }
-      };
-      const response = await fetch(url, { ...defaultOptions, ...options });
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (e) {
-          errorData = { message: 'An error occurred on the server.' };
+      const method = (options.method || 'GET').toUpperCase();
+      const hasBody = options.body !== undefined && options.body !== null;
+      const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+
+      const headers = { ...(options.headers || {}) };
+
+      // 👉 GET/HEAD에는 절대 Content-Type을 넣지 않음
+      if (hasBody) {
+        // 👉 JSON 바디에만 Content-Type 지정, FormData는 브라우저가 자동 설정
+        if (!isFormData && !('Content-Type' in headers)) {
+          headers['Content-Type'] = 'application/json';
         }
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      } else {
+        // body가 없으면 잘못 들어온 Content-Type 제거
+        if ('Content-Type' in headers) delete headers['Content-Type'];
       }
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        return response.json();
+
+      const response = await fetch(url, {
+        credentials: 'include',
+        ...options,
+        method,
+        headers
+      });
+
+      if (!response.ok) {
+        let message = `HTTP ${response.status}`;
+        try {
+          const maybeJson = await response.clone().json();
+          message = maybeJson?.message || maybeJson?.error || message;
+        } catch (_) {
+          try { message = await response.clone().text() || message; } catch (_) {}
+        }
+        throw new Error(message);
       }
-      return {}; 
+
+      return await parseResponse(response);
     } catch (error) {
       console.error('API Request failed:', error);
-      addNotification(error.message, 'error');
+      addNotification(error.message || '네트워크 오류가 발생했습니다.', 'error');
       throw error;
     }
   };
+
   // ⬇️ 새로운 함수 추가
   const getAllProductStates = async () => {
     return await request(`${API_BASE_URL}/api/v1/admin/prostates`);
   };
 
   // --- Product Management API ---
-   // ⬇️ 새로운 함수 추가
   const getAllProducts = async () => {
     return await request(`${API_BASE_URL}/api/v1/admin/products`);
   };
-  
+
   const getProductById = async (id) => {
     return await request(`${API_BASE_URL}/api/v1/admin/products/${id}`);
   };
@@ -119,7 +143,8 @@ export function AdminProvider({ children }) {
     addNotification('상품이 성공적으로 등록되었습니다.', 'success');
     return newProduct;
   };
-  // --- ⬇️ 주문(Order) 관리 API 함수 추가 ⬇️ ---
+
+  // --- 주문(Order) ---
   const getAllOrders = async () => {
     return await request(`${API_BASE_URL}/api/v1/admin/orders`);
   };
@@ -129,15 +154,13 @@ export function AdminProvider({ children }) {
   };
 
   const updateOrderApproval = async (orderId) => {
-    // 승인 상태를 '1' (승인)으로 변경
     return await request(`${API_BASE_URL}/api/v1/admin/orders/${orderId}/approval`, {
       method: 'PATCH',
-      body: JSON.stringify({ renApproval: 1 }), 
+      body: JSON.stringify({ renApproval: 1 }),
     });
   };
 
   const assignOrderRider = async (orderId, riderData) => {
-    // riderData는 { renRider: "...", trackingNumber: "..." } 형태
     return await request(`${API_BASE_URL}/api/v1/admin/orders/${orderId}/rider`, {
       method: 'PATCH',
       body: JSON.stringify(riderData),
@@ -152,19 +175,17 @@ export function AdminProvider({ children }) {
     addNotification('상품이 성공적으로 수정되었습니다.', 'success');
     return updatedProduct;
   };
-  
+
   const deleteProduct = async (id) => {
     await request(`${API_BASE_URL}/api/v1/admin/products/${id}`, { method: 'DELETE' });
     addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
   };
-  
-  // --- Category Management API ---
+
+  // --- Category ---
   const getAllCategories = async () => {
-    // 이 함수는 이미 존재할 수 있습니다. URL이 올바른지 확인하세요.
     return await request(`${API_BASE_URL}/api/v1/admin/categories`);
   };
 
-  // ⬇️ 아래 새로운 함수들을 추가합니다 ⬇️
   const createCategory = async (categoryData) => {
     const newCategory = await request(`${API_BASE_URL}/api/v1/admin/categories`, {
       method: 'POST',
@@ -188,15 +209,15 @@ export function AdminProvider({ children }) {
     addNotification('카테고리가 성공적으로 삭제되었습니다.', 'success');
   };
 
-  // --- Other Functions ---
+  // --- 기타 컨트롤 ---
   const logout = async () => { dispatch({ type: ACTION_TYPES.LOGOUT }) };
   const toggleSidebar = () => { dispatch({ type: ACTION_TYPES.TOGGLE_SIDEBAR }) };
   const removeNotification = (id) => { dispatch({ type: ACTION_TYPES.REMOVE_NOTIFICATION, payload: id }) };
   const updateDashboardData = (data) => { dispatch({ type: ACTION_TYPES.SET_DASHBOARD_DATA, payload: data }) };
-  const checkAuthentication = () => { /* no-op */ };
-  const login = async (credentials) => { /* no-op */ };
-  
-  // --- Member Management API ---
+  const checkAuthentication = () => {};
+  const login = async () => {};
+
+  // --- Member ---
   const getAllMembers = async () => {
     return await request(`${API_BASE_URL}/api/v1/admin/members`);
   };
@@ -210,7 +231,37 @@ export function AdminProvider({ children }) {
     addNotification(`회원(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
   };
 
-  // --- Plan Management API ---
+  // --- Deliveryman ---
+  const getAllDeliverymen = async () => {
+    return await request(`${API_BASE_URL}/api/v1/admin/deliverymen`);
+  };
+
+  const getDeliverymanById = async (delnum) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/deliverymen/${delnum}`);
+  };
+
+  const createDeliveryman = async (payload) => {
+    const created = await request(`${API_BASE_URL}/api/v1/admin/deliverymen`, { 
+      method: 'POST',
+      body: JSON.stringify(payload) });
+    addNotification('배송기사가 성공적으로 등록되었습니다.', 'success');
+    return created;
+  };
+
+  const updateDeliveryman = async (delnum, payload) => {
+    const updated = await request(`${API_BASE_URL}/api/v1/admin/deliverymen/${delnum}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload) });
+    addNotification(`배송기사(#${delnum})가 성공적으로 수정되었습니다.`, 'success');
+    return updated;
+  };
+
+  const deleteDeliveryman = async (delnum) => {
+   await request(`${API_BASE_URL}/api/v1/admin/deliverymen/${delnum}`, { method: 'DELETE' });
+    addNotification(`배송기사(#${delnum})가 성공적으로 삭제되었습니다.`, 'success');
+  };
+
+  // --- Plan ---
   const getAllPlanNames = async () => {
     return new Promise(resolve => setTimeout(() => resolve(mockPlanNames), 200));
   };
@@ -250,27 +301,22 @@ export function AdminProvider({ children }) {
     await request(`${API_BASE_URL}/api/v1/admin/plans/${id}`, { method: 'DELETE' });
     addNotification(`플랜(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
   };
-  
-  // --- ⬇️ 1. 이미지 업로드 API 함수 추가 ⬇️ ---
+
+  // --- 이미지 업로드 ---
   const uploadImage = async (imageFile) => {
     const formData = new FormData();
-    formData.append('image', imageFile); // 'image'는 백엔드에서 받을 key 이름입니다.
+    formData.append('image', imageFile);
 
     try {
-      // 파일 업로드는 Content-Type을 브라우저가 자동으로 설정하도록 해야 하므로
-      // 별도의 fetch 요청을 사용하거나, request 헬퍼를 수정해야 합니다.
-      const response = await fetch(`${API_BASE_URL}/api/v1/admin/upload/image`, { // 👈 새 API 엔드포인트
+      // FormData는 request 헬퍼로 보내도 되지만, 파일 업로드 특성상 fetch를 직접 사용
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/upload/image`, {
         method: 'POST',
         body: formData,
-        credentials: 'include', // 필요 시 포함
+        credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error('이미지 업로드에 실패했습니다.');
-      }
-      
-      // 서버에서는 { "imageUrl": "저장된_경로/이미지.jpg" } 와 같은 JSON을 반환해야 합니다.
-      return response.json(); 
+      if (!response.ok) throw new Error('이미지 업로드에 실패했습니다.');
+      return response.json();
     } catch (error) {
       console.error('Image upload failed:', error);
       addNotification(error.message, 'error');
@@ -309,6 +355,11 @@ export function AdminProvider({ children }) {
     getAllProductStates,
     getAllOrders,
     getOrderById,
+    getAllDeliverymen,
+    getDeliverymanById,
+    createDeliveryman,
+    updateDeliveryman,
+    deleteDeliveryman,
     updateOrderApproval,
     assignOrderRider
   };

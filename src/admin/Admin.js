@@ -17,7 +17,7 @@ const OrderDetail = React.lazy(() => import('./OrderDetail'));
 const BoardManagement = React.lazy(() => import('./BoardManagement'));
 const VocManagement = React.lazy(() => import('./VocManagement'));
 const CategoryManagement = React.lazy(() => import('./CategoryManagement')); // ⬇️ 이 줄 추가
-
+const DeliverymanManagement = React.lazy(() => import('./DeliverymanManagement'));
 
 
 // 로딩 스피너 컴포넌트
@@ -52,6 +52,7 @@ function Admin() {
               <Route path="products/*" element={<ProductManagement />} />
               <Route path="plans/*" element={<PlanManagement />} />
               <Route path="categories" element={<CategoryManagement />} /> {/* ⬇️ 이 줄 추가 */}
+              <Route path="deliverymen/*" element={<DeliverymanManagement />} />
                {/* ⬇️ path를 "orders"에서 "orders/*"로 변경합니다. ⬇️ */}
               <Route path="orders/*" element={<OrderManagement />} />
               <Route path="boards/*" element={<BoardManagement />} />

@@ -166,16 +166,26 @@ function AdminSidebar() {
         { title: '상품 통계', path: '/admin/statistics/products' },
         { title: '사용자 통계', path: '/admin/statistics/users' }
       ]
-    }
+    },
+    {
+      key: 'deliverymen',
+      title: '배송기사 관리',
+      
+      path: '/admin/deliverymen'
+}
   ];
 
   // 활성 메뉴 확인
   const isMenuActive = (menuItem) => {
-    if (menuItem.submenu) {
-      return menuItem.submenu.some(sub => location.pathname === sub.path);
-    }
-    return location.pathname === menuItem.path;
-  };
+  if (menuItem.submenu) {
+    // 서브메뉴는 기존 그대로 두되, startsWith로도 보완해도 됨
+    return menuItem.submenu.some(sub =>
+      location.pathname === sub.path || location.pathname.startsWith(sub.path + '/')
+    );
+  }
+  // 단일 메뉴: 기본 경로 OR 하위 경로도 활성 처리
+  return location.pathname === menuItem.path || location.pathname.startsWith(menuItem.path + '/');
+};
 
   return (
     <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
