@@ -1,135 +1,272 @@
-import React, { useState, useMemo } from 'react';
-import { boards as initialBoards, posts as initialPosts } from '../utils/dummyData';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAdmin } from './contexts/AdminContext';
 import './BoardManagement.css';
 
-const BoardManagement = () => {
-    const [boards, setBoards] = useState(initialBoards);
-    const [posts, setPosts] = useState(initialPosts);
-    const [newBoard, setNewBoard] = useState({ id: '', name: '', description: '' });
-    const [selectedBoard, setSelectedBoard] = useState(initialBoards[0]?.id || '');
+// --- 컴포넌트: 상세 보기 모달 ---
+const PostDetailModal = ({ post, onClose }) => {
+    if (!post) return null;
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                <h2>{post.title}</h2>
+                <div className="post-meta">
+                    <span>작성자: {post.authorNickname} ({post.authorId})</span>
+                    <span>작성일: {new Date(post.createdAt).toLocaleString()}</span>
+                </div>
+                {/* HTML 태그를 포함한 내용을 안전하게 렌더링하고, 줄바꿈(\n)을 <br>로 변환 */}
+                <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content ? post.content.replace(/\n/g, '<br />') : '' }} />
+            </div>
+        </div>
+    );
+};
 
-    const handleNewBoardChange = (e) => {
-        const { name, value } = e.target;
-        setNewBoard(prev => ({ ...prev, [name]: value }));
-    };
+// --- 컴포넌트: 글 작성 모달 ---
+const CreatePostModal = ({ category, onClose, onPostCreated }) => {
+    const { createPost, addNotification } = useAdmin();
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleCreateBoard = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!newBoard.id || !newBoard.name) {
-            alert('게시판 ID와 이름은 필수입니다.');
+        if (!title.trim() || !content.trim()) {
+            addNotification('제목과 내용을 모두 입력해주세요.', 'warn');
             return;
         }
-        if (boards.some(b => b.id === newBoard.id)) {
-            alert('이미 존재하는 게시판 ID입니다.');
+        setIsSubmitting(true);
+        try {
+            await createPost({ categoryId: category.id, title, content });
+            addNotification('게시글이 성공적으로 등록되었습니다.', 'success');
+            onPostCreated(); // 부모 컴포넌트에 성공 알림 (모달 닫기 및 목록 새로고침)
+        } catch (error) {
+            // 에러 알림은 context의 request 헬퍼가 처리할 수 있습니다.
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content wide" onClick={e => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                <h2>{category.name}: 새 글 작성</h2>
+                <form onSubmit={handleSubmit} className="post-create-form">
+                    <input type="text" placeholder="제목을 입력하세요" value={title} onChange={e => setTitle(e.target.value)} required />
+                    <textarea placeholder="내용을 입력하세요" value={content} onChange={e => setContent(e.target.value)} required />
+                    <button type="submit" className="create-btn" disabled={isSubmitting}>
+                        {isSubmitting ? '등록 중...' : '등록하기'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+
+// --- 메인 컴포넌트 ---
+const BoardManagement = () => {
+    const { 
+        getAllBoardCategories, createBoardCategory, deleteBoardCategory, // <-- 이 부분을 수정했습니다.
+        getPostsByCategory, deletePost, getPostById, addNotification 
+    } = useAdmin();
+
+    const [categories, setCategories] = useState([]);
+    const [posts, setPosts] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [newCategoryName, setNewCategoryName] = useState('');
+    const [isLoading, setIsLoading] = useState({ categories: true, posts: false });
+    const [viewingPost, setViewingPost] = useState(null);
+    const [isCreatingPost, setIsCreatingPost] = useState(false);
+
+    const fetchCategories = useCallback(async () => {
+        try {
+            setIsLoading(prev => ({ ...prev, categories: true }));
+            const data = await getAllBoardCategories();
+            setCategories(data);
+        } catch (error) {
+            addNotification('게시판 목록 로딩 실패', 'error');
+        } finally {
+            setIsLoading(prev => ({ ...prev, categories: false }));
+        }
+    }, [getAllBoardCategories, addNotification]);
+
+    useEffect(() => {
+        fetchCategories();
+    }, [fetchCategories]);
+
+    const handleSelectCategory = useCallback(async (category) => {
+        // Clear viewing post when changing category
+        setViewingPost(null);
+
+        if (selectedCategory?.id === category.id) {
+            setSelectedCategory(null);
+            setPosts([]);
             return;
         }
-        const newBoardData = { ...newBoard };
-        setBoards([...boards, newBoardData]);
-        setNewBoard({ id: '', name: '', description: '' }); // Reset form
+        setSelectedCategory(category);
+        try {
+            setIsLoading(prev => ({ ...prev, posts: true }));
+            const postData = await getPostsByCategory(category.id);
+            setPosts(postData);
+        } catch (error) {
+            addNotification(`${category.name} 게시글 로딩 실패`, 'error');
+        } finally {
+            setIsLoading(prev => ({ ...prev, posts: false }));
+        }
+    }, [selectedCategory, getPostsByCategory, addNotification]);
+
+    const handleCreateCategory = async (e) => {
+        e.preventDefault();
+        if (!newCategoryName.trim()) return;
+        try {
+            await createBoardCategory({ categoryName: newCategoryName });
+            setNewCategoryName('');
+            fetchCategories();
+        } catch (error) { /* 에러 알림은 context에서 처리 */ }
     };
 
-    const handleDeleteBoard = (boardId) => {
-        if (window.confirm('정말로 이 게시판을 삭제하시겠습니까? 해당 게시판의 모든 글이 삭제됩니다.')) {
-            setBoards(boards.filter(b => b.id !== boardId));
-            setPosts(posts.filter(p => p.boardId !== boardId));
+    const handleDeleteCategory = async (e, categoryId) => {
+        e.stopPropagation();
+        if (window.confirm('정말 이 게시판을 삭제하시겠습니까?')) {
+            try {
+                await deleteBoardCategory(categoryId);
+                if (selectedCategory?.id === categoryId) {
+                    setSelectedCategory(null);
+                    setPosts([]);
+                }
+                fetchCategories();
+            } catch (error) { /* 에러 알림은 context에서 처리 */ }
+        }
+    };
+    
+    const handleDeletePost = async (postId) => {
+        if (window.confirm('이 게시글을 정말로 삭제하시겠습니까?')) {
+            try {
+                await deletePost(postId);
+                if (selectedCategory) {
+                    // This re-fetches the posts for the current category
+                    handleSelectCategory(selectedCategory); 
+                }
+            } catch (error) { /* 에러 알림은 context에서 처리 */ }
         }
     };
 
-    const handleDeletePost = (postId) => {
-        if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
-            setPosts(posts.filter(p => p.id !== postId));
+    const handleViewPost = async (postId) => {
+        try {
+            const postData = await getPostById(postId);
+            setViewingPost(postData);
+        } catch (error) {
+            addNotification('게시글을 불러오는 데 실패했습니다.', 'error');
         }
     };
 
-    const filteredPosts = useMemo(() => {
-        return posts.filter(p => p.boardId === selectedBoard);
-    }, [posts, selectedBoard]);
+    const handlePostCreated = () => {
+        setIsCreatingPost(false);
+        if (selectedCategory) {
+            const currentCategory = { ...selectedCategory };
+            // Temporarily deselect and then reselect to trigger a fresh data load
+            setSelectedCategory(null);
+            handleSelectCategory(currentCategory);
+        }
+    };
 
     return (
         <div className="board-management">
-            <h1>게시판 관리</h1>
+            <h1>게시판 및 게시글 통합 관리</h1>
 
-            {/* Section for Managing Boards */}
+            {/* --- 게시판 카테고리 관리 섹션 --- */}
             <div className="management-section">
-                <h2>게시판 목록 및 생성</h2>
                 <div className="board-list-container">
                     <div className="current-boards">
-                        <h3>현재 게시판</h3>
-                        <ul className="board-list">
-                            {boards.map(board => (
-                                <li key={board.id} className="board-list-item">
-                                    <div className="board-info">
-                                        <p className="board-name">{board.name}</p>
-                                        <p className="board-id">ID: {board.id}</p>
-                                    </div>
-                                    <button onClick={() => handleDeleteBoard(board.id)} className="delete-btn">삭제</button>
-                                </li>
-                            ))}
-                        </ul>
+                        <h2>게시판 목록 (클릭하여 게시글 보기)</h2>
+                        {isLoading.categories ? <p>로딩 중...</p> : (
+                            <ul className="board-list">
+                                {categories.map(cat => (
+                                    <li key={cat.id} 
+                                        className={`board-list-item ${selectedCategory?.id === cat.id ? 'active' : ''}`}
+                                        onClick={() => handleSelectCategory(cat)}>
+                                        <div className="board-info">
+                                            <p className="board-name">{cat.name}</p>
+                                            <p className="board-id">ID: {cat.id}</p>
+                                        </div>
+                                        <button onClick={(e) => handleDeleteCategory(e, cat.id)} className="delete-btn">삭제</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                     <div className="create-board-form">
-                        <h3>새 게시판 생성</h3>
-                        <form onSubmit={handleCreateBoard}>
+                        <h2>새 게시판 생성</h2>
+                        <form onSubmit={handleCreateCategory}>
                             <div className="form-group">
-                                <label htmlFor="new-board-id">게시판 ID</label>
-                                <input type="text" id="new-board-id" name="id" value={newBoard.id} onChange={handleNewBoardChange} placeholder="e.g., notice" required />
+                                <label htmlFor="categoryName">게시판 이름</label>
+                                <input
+                                    type="text"
+                                    id="categoryName"
+                                    value={newCategoryName}
+                                    onChange={(e) => setNewCategoryName(e.target.value)}
+                                    placeholder="예: 자유게시판"
+                                    required
+                                />
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="new-board-name">게시판 이름</label>
-                                <input type="text" id="new-board-name" name="name" value={newBoard.name} onChange={handleNewBoardChange} placeholder="e.g., 공지사항" required />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="new-board-desc">설명</label>
-                                <input type="text" id="new-board-desc" name="description" value={newBoard.description} onChange={handleNewBoardChange} placeholder="e.g., 중요 공지를 확인하세요." />
-                            </div>
-                            <button type="submit" className="create-btn">생성</button>
+                            <button type="submit" className="create-btn">생성하기</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            {/* Section for Managing Posts */}
-            <div className="management-section">
-                <h2>게시글 관리</h2>
-                <div className="post-controls">
-                    <label htmlFor="board-select">게시판 선택:</label>
-                    <select id="board-select" value={selectedBoard} onChange={e => setSelectedBoard(e.target.value)}>
-                        {boards.map(board => (
-                            <option key={board.id} value={board.id}>{board.name}</option>
-                        ))}
-                    </select>
+            {/* --- 선택된 게시판의 게시글 관리 섹션 --- */}
+            {selectedCategory && (
+                <div className="management-section">
+                    <div className="section-header">
+                        <h2>"{selectedCategory.name}" 게시글 목록</h2>
+                        <button className="create-btn" onClick={() => setIsCreatingPost(true)}>새 글 작성</button>
+                    </div>
+                    {isLoading.posts ? <p>게시글 로딩 중...</p> : (
+                        <div className="post-table-container">
+                            {posts.length > 0 ? (
+                                <table className="post-table">
+                                    <thead>
+                                        <tr>
+                                            <th>글 번호</th>
+                                            <th>제목</th>
+                                            <th>작성자 (ID)</th>
+                                            <th>작성일</th>
+                                            <th>관리</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {posts.map(post => (
+                                            <tr key={post.id}>
+                                                <td>{post.id}</td>
+                                                <td className="post-title" onClick={() => handleViewPost(post.id)}>
+                                                    {post.title}
+                                                </td>
+                                                <td>{post.authorNickname} ({post.authorId})</td>
+                                                <td>{new Date(post.createdAt).toLocaleString()}</td>
+                                                <td>
+                                                    <button onClick={() => handleDeletePost(post.id)} className="delete-btn">삭제</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            ) : <p>이 게시판에는 게시글이 없습니다.</p>}
+                        </div>
+                    )}
                 </div>
-                <div className="post-table-container">
-                    <table className="post-table">
-                        <thead>
-                            <tr>
-                                <th>제목</th>
-                                <th>작성자</th>
-                                <th>작성일</th>
-                                <th>조회수</th>
-                                <th>작업</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredPosts.length > 0 ? filteredPosts.map(post => (
-                                <tr key={post.id}>
-                                    <td>{post.title}</td>
-                                    <td>{post.author}</td>
-                                    <td>{post.createdAt}</td>
-                                    <td>{post.views}</td>
-                                    <td>
-                                        <button onClick={() => handleDeletePost(post.id)} className="delete-btn">삭제</button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5">이 게시판에는 아직 글이 없습니다.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            )}
+
+            {/* --- 모달 렌더링 영역 --- */}
+            <PostDetailModal post={viewingPost} onClose={() => setViewingPost(null)} />
+            {isCreatingPost && selectedCategory && (
+                <CreatePostModal 
+                    category={selectedCategory} 
+                    onClose={() => setIsCreatingPost(false)} 
+                    onPostCreated={handlePostCreated}
+                />
+            )}
         </div>
     );
 };
