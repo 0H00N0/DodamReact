@@ -1,0 +1,55 @@
+/* Container 전체 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;  /* 내용은 왼쪽 정렬 */
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* 제목과 탭 메뉴를 같은 수평선에 배치 */
+.headerWrapper {
+  display: flex;
+  align-items: center; /* 제목과 탭 수직 중앙 정렬 */
+  gap: 2rem;           /* 제목과 탭 메뉴 간 간격 */
+  margin-bottom: 1rem; /* 아래 여백 */
+}
+
+/* 페이지 제목 */
+.pageTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* 탭 리스트 */
+.tabList {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;             /* 화면 전체 폭 */
+}
+
+/* 탭 링크 */
+.tabLink {
+  text-decoration: none;
+  color: #000;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tabLink:hover {
+  color: #007bff;
+}
+
+/* 선택된 탭 강조 */
+.active {
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* 선택된 탭 내용 */
+.content {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+}

@@ -172,7 +172,18 @@ function AdminSidebar() {
       title: '배송기사 관리',
       
       path: '/admin/deliverymen'
+},
+{
+  key: 'events',
+  title: '이벤트 관리',
+  icon: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M3 4h18M3 12h18M3 20h18" stroke="currentColor" strokeWidth="2"/>
+    </svg>
+  ),
+  path: '/admin/events'
 }
+
   ];
 
   // 활성 메뉴 확인
