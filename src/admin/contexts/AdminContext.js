@@ -236,6 +236,15 @@ export function AdminProvider({ children }) {
     return await request(`${API_BASE_URL}/api/v1/admin/deliverymen`);
   };
 
+  const getDeliveryEligibleMembers = async () => {
+  const members = await getAllMembers(); // 기존 함수 재사용
+  // 역할 필드명이 프로젝트마다 다를 수 있으니 방어적으로 필터
+  return (members || []).filter(m => {
+    const role = (m.role || m.mrole || m.roleName || m.mroleName || '').toString().toUpperCase();
+    return role.includes('DELIVERY') || role.includes('딜리버') || role.includes('라이더');
+  });
+  };
+
   const getDeliverymanById = async (delnum) => {
     return await request(`${API_BASE_URL}/api/v1/admin/deliverymen/${delnum}`);
   };
@@ -330,6 +339,7 @@ export function AdminProvider({ children }) {
     logout,
     getAllMembers,
     getMemberById,
+    getDeliveryEligibleMembers,
     deleteMember,
     getAllProducts,
     getProductById,
