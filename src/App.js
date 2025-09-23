@@ -1,29 +1,43 @@
-// App.js
-
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import './App.css';
-import Header from './components/Layout/Header';
-import Footer from './components/Layout/Footer';
-import { CartProvider } from './contexts/CartContext';
-import { WishlistProvider } from './contexts/WishlistContext';
-import { ThemeProvider } from './contexts/ThemeContext';
+// src/App.js
+import React, { Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import "./App.css";
+import Header from "./components/Layout/Header";
+import Footer from "./components/Layout/Footer";
+import { CartProvider } from "./contexts/CartContext";
+import { WishlistProvider } from "./contexts/WishlistContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 // ▼ AdminProvider를 import 합니다.
 import { AdminProvider } from './admin/contexts/AdminContext';
 
-// 코드 스플리팅을 위한 동적 import
-const Home = React.lazy(() => import('./pages/Home'));
-const ProductDetail = React.lazy(() => import('./pages/ProductDetail'));
-const Category = React.lazy(() => import('./pages/Category'));
-const Wishlist = React.lazy(() => import('./pages/Wishlist'));
-const Cart = React.lazy(() => import('./pages/Cart'));
-const Search = React.lazy(() => import('./pages/Search'));
-const Signup = React.lazy(() => import('./pages/Signup'));
-const Login = React.lazy(() => import('./pages/Login'));
+
+// Plan 폴더에 있는 컴포넌트 임포트 (경로 수정됨)
+import PlanSelectPage from "./Plan/PlanSelectPage.jsx";
+import PlanDetailPage from "./Plan/PlanDetailPage";
+
+import CommunityPage from "./pages/CommunityPage/CommunityPage";
+import Notice from "./pages/CommunityPage/Notice";
+import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
+import Event from "./pages/CommunityPage/Event";
+import EventDetail from "./pages/CommunityPage/EventDetail";
+import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
+import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
+import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
+
+
+import Inquiry from "./pages/CommunityPage/Inquiry";
+import FAQ from "./pages/CommunityPage/FAQ";
+import Company from "./pages/CommunityPage/Company";
+
+// Lazy 로딩 페이지
+const Home = React.lazy(() => import("./pages/Home"));
+const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
+const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 // ▼ Admin 컴포넌트를 동적으로 import 합니다. (파일 경로에 주의하세요)
 const Admin = React.lazy(() => import('./admin/Admin'));
 
-// 로딩 컴포넌트
 const LoadingSpinner = () => (
   <div className="loading-container">
     <div className="loading-spinner" role="status" aria-label="페이지 로딩 중">
@@ -32,10 +46,6 @@ const LoadingSpinner = () => (
   </div>
 );
 
-/**
- * 메인 애플리케이션 컴포넌트
- * React Router와 Context Providers를 포함한 전체 앱 구조
- */
 function App() {
   return (
     <ThemeProvider>
@@ -43,28 +53,42 @@ function App() {
         <WishlistProvider>
           <Router>
             <div className="App">
-              {/* 접근성을 위한 스킵 링크 */}
-              <a href="#main-content" className="skip-link">
-                메인 콘텐츠로 건너뛰기
-              </a>
-              
-              {/* 페이지 상단 네비게이션 */}
+              <a href="#main-content" className="skip-link">메인 콘텐츠로 건너뛰기</a>
               <Header />
-              
-              {/* 메인 콘텐츠 영역 */}
+
               <main id="main-content" role="main" className="main-content" tabIndex="-1">
                 <Suspense fallback={<LoadingSpinner />}>
                   <Routes>
-                    {/* --- 기존 사용자 페이지 라우트 --- */}
+                    {/* 기본 페이지 */}
                     <Route path="/" element={<Home />} />
-                    <Route path="/product/:id" element={<ProductDetail />} />
-                    <Route path="/category/:id" element={<Category />} />
-                    <Route path="/wishlist" element={<Wishlist />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/search" element={<Search />} />
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
+                    <Route path="/loginForm" element={<LoginForm />} />
+                    <Route path="/signup" element={<SignupForm />} />
 
+                    {/* 구독 플랜 관련 라우트 추가 */}
+                    <Route path="/plans" element={<PlanSelectPage />} />
+                    <Route path="/plans/:planCode" element={<PlanDetailPage />} />
+
+                    {/* 소통(Community) */}
+                    <Route path="/board" element={<CommunityPage />}>
+                      <Route index element={<Notice />} />  {/* 기본: 공지사항 */}
+                      <Route path="notice" element={<Notice />} /> {/* 공지사항 목록 */}
+                      <Route path="notice/:noticeId" element={<NoticeDetail />} /> {/* 공지사항 상세 */}
+                      <Route path="event" element={<Event />} />
+                      <Route path="event/:eventId" element={<EventDetail />} />
+                      <Route path="community" element={<CommunityBoard />} />  
+                      <Route path="community/:postId" element={<CommunityBoardDetail />} />  {/* 상세 */}
+                      <Route path="event" element={<Event />} />
+                      
+                      {/* 글 작성/수정/삭제 */}
+                      <Route path="community/write" element={<CommunityBoardForm />} />
+                      <Route path="community/edit/:postId" element={<CommunityBoardEdit />} />
+                      <Route path="community/delete/:postId" element={<CommunityBoardDelete />} />
+                      
+                      <Route path="inquiry" element={<Inquiry />} />
+                      <Route path="faq" element={<FAQ />} />
+                      <Route path="company" element={<Company />} />
+                      
+                    </Route>
                     {/* ▼ 추가된 어드민 페이지 라우트 ▼ */}
                     {/* /admin/으로 시작하는 모든 경로를 Admin 컴포넌트로 연결합니다. */}
                     <Route 
@@ -75,11 +99,12 @@ function App() {
                         </AdminProvider>
                       } 
                     />
+                    {/* 404 */}
+                    <Route path="*" element={<div style={{ padding: 24 }}>404</div>} />
                   </Routes>
                 </Suspense>
               </main>
-              
-              {/* 페이지 하단 정보 */}
+
               <Footer />
             </div>
           </Router>
