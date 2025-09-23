@@ -9,7 +9,7 @@ import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 // Plan 폴더에 있는 컴포넌트 임포트 (경로 수정됨)
-import PlanSelectPage from "./Plan/PlanSelectPage";
+import PlanSelectPage from "./Plan/PlanSelectPage.jsx";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
