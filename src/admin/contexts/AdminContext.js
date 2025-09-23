@@ -387,7 +387,44 @@ export function AdminProvider({ children }) {
         method: 'POST',
         body: JSON.stringify(postData),
     });
-    };
+  };
+  const getAllEvents = async () => {
+  return await request(`${API_BASE_URL}/api/v1/admin/events`);
+};
+
+const getEventById = async (evNum) => {
+  return await request(`${API_BASE_URL}/api/v1/admin/events/${evNum}`);
+};
+
+const createEvent = async (eventData) => {
+  const newEvent = await request(`${API_BASE_URL}/api/v1/admin/events`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...eventData,
+      eventType: eventData.eventType || 'FIRST'
+    }),
+  });
+  addNotification('이벤트가 성공적으로 생성되었습니다.', 'success');
+  return newEvent;
+};
+
+const updateEvent = async (evNum, eventData) => {
+  const updatedEvent = await request(`${API_BASE_URL}/api/v1/admin/events/${evNum}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      ...eventData,
+      eventType: eventData.eventType || 'FIRST'
+    }),
+  });
+  addNotification('이벤트가 성공적으로 수정되었습니다.', 'success');
+  return updatedEvent;
+};
+
+
+const deleteEvent = async (evNum) => {
+  await request(`${API_BASE_URL}/api/v1/admin/events/${evNum}`, { method: 'DELETE' });
+  addNotification('이벤트가 성공적으로 삭제되었습니다.', 'success');
+};
 
   const contextValue = {
     ...state,
@@ -437,7 +474,12 @@ export function AdminProvider({ children }) {
     getPostsByCategory,
     deletePost,
     getPostById,
-    createPost
+    createPost,
+    getAllEvents,
+    getEventById,
+    createEvent,
+    updateEvent,
+    deleteEvent
   };
 
   return (

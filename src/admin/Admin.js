@@ -18,7 +18,7 @@ const BoardManagement = React.lazy(() => import('./BoardManagement'));
 const VocManagement = React.lazy(() => import('./VocManagement'));
 const CategoryManagement = React.lazy(() => import('./CategoryManagement')); // ⬇️ 이 줄 추가
 const DeliverymanManagement = React.lazy(() => import('./DeliverymanManagement'));
-
+const EventManagement = React.lazy(() => import('./EventManagement'));
 
 // 로딩 스피너 컴포넌트
 const AdminLoadingSpinner = () => (
@@ -57,6 +57,7 @@ function Admin() {
               <Route path="orders/*" element={<OrderManagement />} />
               <Route path="boards/*" element={<BoardManagement />} />
               <Route path="voc/*" element={<VocManagement />} />
+              <Route path="events/*" element={<EventManagement />} />
 
               {/* 일치하는 경로가 없을 때 보여줄 404 페이지 */}
               <Route path="*" element={
