@@ -6,6 +6,9 @@ if (hostname === "localhost") {
 } else if (hostname === "192.168.219.102") {
   backendHost = "http://192.168.219.102:8080";
 }
+else {
+  backendHost = `http://${hostname}:8080`;
+}   
 /* else if(hostname === "도메인.확장자"){
     backendHost = "http://도메인.확장자";
 }*/
