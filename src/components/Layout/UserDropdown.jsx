@@ -22,40 +22,7 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
     };
   }, [isOpen, onClose]);
 
-<<<<<<< HEAD
-  const handleWishlist = () => {
-    navigate('/wishlist');
-    onClose();
-  };
-
-  const handleCart = () => {
-    navigate('/cart');
-    onClose();
-  };
-
-  const handleLogin = () => {
-    navigate('/login');
-    onClose();
-  };
-
-  const handleSignup = () => {
-    navigate('/signup');
-    onClose();
-  };
-
-  const handleMenuClick = (menuName) => {
-    alert(`${menuName} 기능은 준비 중입니다!`);
-    onClose();
-  };
-
-  const handleLogout = () => {
-    alert('로그아웃되었습니다!');
-    // 실제 구현에서는 로그아웃 로직 추가
-    onClose();
-  };
-=======
   const go = (path) => () => { navigate(path); onClose(); };
->>>>>>> board
 
   if (!isOpen) return null;
 
