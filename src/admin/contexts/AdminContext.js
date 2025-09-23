@@ -120,6 +120,23 @@ export function AdminProvider({ children }) {
       throw error;
     }
   };
+  // --- ⬇️ VOC 관리 API 함수 추가 ⬇️ ---
+  const getAllVocs = async (page = 0, size = 10) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/voc?page=${page}&size=${size}`);
+  };
+
+  const getVocById = async (vocId) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/voc/${vocId}`);
+  };
+
+  const updateVoc = async (vocId, updateData) => {
+    const updatedVoc = await request(`${API_BASE_URL}/api/v1/admin/voc/${vocId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(updateData),
+    });
+    addNotification('VOC 정보가 성공적으로 업데이트되었습니다.', 'success');
+    return updatedVoc;
+  };
 
   // ⬇️ 새로운 함수 추가
   const getAllProductStates = async () => {
@@ -208,6 +225,7 @@ export function AdminProvider({ children }) {
     await request(`${API_BASE_URL}/api/v1/admin/categories/${id}`, { method: 'DELETE' });
     addNotification('카테고리가 성공적으로 삭제되었습니다.', 'success');
   };
+  
 
   // --- 기타 컨트롤 ---
   const logout = async () => { dispatch({ type: ACTION_TYPES.LOGOUT }) };
@@ -332,6 +350,44 @@ export function AdminProvider({ children }) {
       throw error;
     }
   };
+  // --- ⬇️ 게시판 관리 API 함수 추가 ⬇️ ---
+  const getAllBoardCategories = async () => {
+    return await request(`${API_BASE_URL}/api/v1/admin/boards`);
+  };
+
+  const createBoardCategory = async (categoryData) => {
+    const newCategory = await request(`${API_BASE_URL}/api/v1/admin/boards`, {
+      method: 'POST',
+      body: JSON.stringify(categoryData),
+    });
+    addNotification('새로운 게시판이 성공적으로 생성되었습니다.', 'success');
+    return newCategory;
+  };
+
+  const deleteBoardCategory = async (id) => {
+    await request(`${API_BASE_URL}/api/v1/admin/boards/${id}`, { method: 'DELETE' });
+    addNotification('게시판이 성공적으로 삭제되었습니다.', 'success');
+  };
+  // --- ⬇️ 게시글 관리 API 함수 추가 ⬇️ ---
+  const getPostsByCategory = async (categoryId) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/boards/${categoryId}/posts`);
+  };
+
+  const deletePost = async (postId) => {
+    await request(`${API_BASE_URL}/api/v1/admin/boards/posts/${postId}`, { method: 'DELETE' });
+    addNotification('게시글이 성공적으로 삭제되었습니다.', 'success');
+  };
+  // --- ⬇️ 게시글 상세조회, 생성 API 함수 추가 ⬇️ ---
+  const getPostById = async (postId) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/boards/posts/${postId}`);
+  };
+
+  const createPost = async (postData) => {
+    return await request(`${API_BASE_URL}/api/v1/admin/boards/posts`, {
+        method: 'POST',
+        body: JSON.stringify(postData),
+    });
+    };
 
   const contextValue = {
     ...state,
@@ -371,7 +427,17 @@ export function AdminProvider({ children }) {
     updateDeliveryman,
     deleteDeliveryman,
     updateOrderApproval,
-    assignOrderRider
+    assignOrderRider,
+    getAllVocs,
+    getVocById,
+    updateVoc,
+    getAllBoardCategories,
+    createBoardCategory,
+    deleteBoardCategory,
+    getPostsByCategory,
+    deletePost,
+    getPostById,
+    createPost
   };
 
   return (
@@ -379,4 +445,4 @@ export function AdminProvider({ children }) {
       {children}
     </AdminContext.Provider>
   );
-}
+} 
