@@ -316,31 +316,35 @@ export function AdminProvider({ children }) {
   const getAllEvents = async () => request(`${API_BASE_URL}/admin/events`);
   const getEventById = async (evNum) => request(`${API_BASE_URL}/admin/events/${evNum}`);
   const createEvent = async (eventData) => {
-    const newEvent = await request(`${API_BASE_URL}/admin/events`, {
-      method: 'POST',
-      body: JSON.stringify({
-        ...eventData,
-        eventType: eventData.eventType || 'FIRST'
-      }),
-    });
-    addNotification('이벤트가 성공적으로 생성되었습니다.', 'success');
-    return newEvent;
-  };
-  const updateEvent = async (evNum, eventData) => {
-    const updatedEvent = await request(`${API_BASE_URL}/admin/events/${evNum}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        ...eventData,
-        eventType: eventData.eventType || 'FIRST'
-      }),
-    });
-    addNotification('이벤트가 성공적으로 수정되었습니다.', 'success');
-    return updatedEvent;
-  };
-  const deleteEvent = async (evNum) => {
-    await request(`${API_BASE_URL}/admin/events/${evNum}`, { method: 'DELETE' });
-    addNotification('이벤트가 성공적으로 삭제되었습니다.', 'success');
-  };
+  const newEvent = await request(`${API_BASE_URL}/admin/events`, {
+    method: 'POST',
+    body: JSON.stringify({
+      ...eventData,
+      eventType: eventData.eventType || 'FIRST',
+      capacity: eventData.eventType === 'FIRST' ? eventData.capacity : null // ✅ 추가
+    }),
+  });
+  addNotification('이벤트가 성공적으로 생성되었습니다.', 'success');
+  return newEvent;
+};
+
+const updateEvent = async (evNum, eventData) => {
+  const updatedEvent = await request(`${API_BASE_URL}/admin/events/${evNum}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+      ...eventData,
+      eventType: eventData.eventType || 'FIRST',
+      capacity: eventData.eventType === 'FIRST' ? eventData.capacity : null // ✅ 추가
+    }),
+  });
+  addNotification('이벤트가 성공적으로 수정되었습니다.', 'success');
+  return updatedEvent;
+};
+
+const deleteEvent = async (evNum) => {
+  await request(`${API_BASE_URL}/admin/events/${evNum}`, { method: 'DELETE' });
+  addNotification('이벤트가 성공적으로 삭제되었습니다.', 'success');
+};
 
   const contextValue = {
     ...state,

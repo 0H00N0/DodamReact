@@ -7,14 +7,14 @@ function EventManagement() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({
-  evName: '',
-  evContent: '',
-  eventType: 'FIRST',  // 기본값
-  status: 0,
-  startTime: '',
-  endTime: ''
-});
-
+    evName: '',
+    evContent: '',
+    eventType: 'FIRST',  // 기본값
+    status: 0,
+    startTime: '',
+    endTime: '',
+    capacity: ''
+  });
 
   useEffect(() => {
     loadEvents();
@@ -29,13 +29,14 @@ function EventManagement() {
     const data = await getEventById(evNum);
     setSelectedEvent(data);
     setFormData({
-  evName: data.evName,
-  evContent: data.evContent,
-  eventType: data.eventType || 'FIRST',
-  status: data.status,
-  startTime: data.startTime ? data.startTime.substring(0,16) : '',
-  endTime: data.endTime ? data.endTime.substring(0,16) : ''
-});
+      evName: data.evName,
+      evContent: data.evContent,
+      eventType: data.eventType || 'FIRST',
+      status: data.status,
+      startTime: data.startTime ? data.startTime.substring(0, 16) : '',
+      endTime: data.endTime ? data.endTime.substring(0, 16) : '',
+      capacity: data.capacity || ''
+    });
   };
 
   const handleChange = (e) => {
@@ -45,7 +46,15 @@ function EventManagement() {
   const handleCreate = async () => {
     await createEvent(formData);
     loadEvents();
-    setFormData({ evName: '', evContent: '', status: 0, startTime: '', endTime: '' });
+    setFormData({
+      evName: '',
+      evContent: '',
+      status: 0,
+      startTime: '',
+      endTime: '',
+      capacity: '',
+      eventType: 'FIRST'
+    });
   };
 
   const handleUpdate = async () => {
@@ -72,6 +81,8 @@ function EventManagement() {
           <tr>
             <th>ID</th>
             <th>이름</th>
+            <th>유형</th>
+            <th>정원</th>
             <th>상태</th>
             <th>시작</th>
             <th>종료</th>
@@ -79,15 +90,24 @@ function EventManagement() {
           </tr>
         </thead>
         <tbody>
-          {events.map(ev => (
+          {events.map((ev) => (
             <tr key={ev.evNum} onClick={() => handleSelect(ev.evNum)}>
               <td>{ev.evNum}</td>
               <td>{ev.evName}</td>
+              <td>{ev.eventType}</td>
+              <td>{ev.capacity || '-'}</td>
               <td>{ev.status}</td>
               <td>{ev.startTime}</td>
               <td>{ev.endTime}</td>
               <td>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(ev.evNum); }}>삭제</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(ev.evNum);
+                  }}
+                >
+                  삭제
+                </button>
               </td>
             </tr>
           ))}
@@ -95,58 +115,72 @@ function EventManagement() {
       </table>
 
       <div className="dashboard-section">
-  <h2>{selectedEvent ? '이벤트 수정' : '새 이벤트 생성'}</h2>
+        <h2>{selectedEvent ? '이벤트 수정' : '새 이벤트 생성'}</h2>
 
-  <input
-    type="text"
-    name="evName"
-    placeholder="이벤트 이름"
-    value={formData.evName}
-    onChange={handleChange}
-  />
+        <input
+          type="text"
+          name="evName"
+          placeholder="이벤트 이름"
+          value={formData.evName}
+          onChange={handleChange}
+        />
 
-  <textarea
-    name="evContent"
-    placeholder="이벤트 내용"
-    value={formData.evContent}
-    onChange={handleChange}
-  />
+        <textarea
+          name="evContent"
+          placeholder="이벤트 내용"
+          value={formData.evContent}
+          onChange={handleChange}
+        />
 
-  {/* 이벤트 유형 선택 */}
-  <label>이벤트 유형</label>
-  <select name="eventType" value={formData.eventType} onChange={handleChange}>
-    <option value="FIRST">선착순</option>
-    <option value="DRAWING">추첨</option>
-  </select>
+        {/* 이벤트 유형 선택 */}
+        <label>이벤트 유형</label>
+        <select name="eventType" value={formData.eventType} onChange={handleChange}>
+          <option value="FIRST">선착순</option>
+          <option value="DRAWING">추첨</option>
+        </select>
 
-  {/* 상태 선택 */}
-  <select name="status" value={formData.status} onChange={handleChange}>
-    <option value={0}>예정</option>
-    <option value={1}>진행중</option>
-    <option value={2}>종료</option>
-  </select>
+        {/* 선착순일 때만 capacity 입력 */}
+        {formData.eventType === 'FIRST' && (
+          <div>
+            <label>정원</label>
+            <input
+              type="number"
+              name="capacity"
+              placeholder="참여 정원"
+              value={formData.capacity}
+              onChange={handleChange}
+            />
+          </div>
+        )}
 
-  <input
-    type="datetime-local"
-    name="startTime"
-    value={formData.startTime}
-    onChange={handleChange}
-  />
-  <input
-    type="datetime-local"
-    name="endTime"
-    value={formData.endTime}
-    onChange={handleChange}
-  />
+        {/* 상태 선택 */}
+        <select name="status" value={formData.status} onChange={handleChange}>
+          <option value={0}>예정</option>
+          <option value={1}>진행중</option>
+          <option value={2}>종료</option>
+        </select>
 
-  <div>
-    {selectedEvent ? (
-      <button onClick={handleUpdate}>수정</button>
-    ) : (
-      <button onClick={handleCreate}>생성</button>
-    )}
-  </div>
-</div>
+        <input
+          type="datetime-local"
+          name="startTime"
+          value={formData.startTime}
+          onChange={handleChange}
+        />
+        <input
+          type="datetime-local"
+          name="endTime"
+          value={formData.endTime}
+          onChange={handleChange}
+        />
+
+        <div>
+          {selectedEvent ? (
+            <button onClick={handleUpdate}>수정</button>
+          ) : (
+            <button onClick={handleCreate}>생성</button>
+          )}
+        </div>
+      </div>
 
       {/* 단건 조회 결과 */}
       {selectedEvent && (
@@ -155,6 +189,8 @@ function EventManagement() {
           <p>ID: {selectedEvent.evNum}</p>
           <p>이름: {selectedEvent.evName}</p>
           <p>내용: {selectedEvent.evContent}</p>
+          <p>유형: {selectedEvent.eventType}</p>
+          <p>정원: {selectedEvent.capacity || '-'}</p>
           <p>상태: {selectedEvent.status}</p>
           <p>시작: {selectedEvent.startTime}</p>
           <p>종료: {selectedEvent.endTime}</p>

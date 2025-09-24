@@ -6,6 +6,8 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+    withCredentials: true, // ✅ JSESSIONID 쿠키 포함
+
 });
 
 /** 모든 이벤트 목록을 가져옵니다. (GET /events) */
