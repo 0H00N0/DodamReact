@@ -30,14 +30,16 @@ import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
 
+// --- Logistics Guard ---
+import LogisticsGuard from "./routes/LogisticsGuard";
+
+
 // --- Lazy Pages (기존) ---
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Admin = React.lazy(() => import("./admin/Admin"));
 
-// --- Logistics Guard ---
-import LogisticsGuard from "./routes/LogisticsGuard";
 
 // --- Logistics Lazy Pages ---
 const LogisticsLayout = React.lazy(() => import("./logistics/LogisticsLayout"));
