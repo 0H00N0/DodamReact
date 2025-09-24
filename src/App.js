@@ -7,7 +7,7 @@ import Footer from "./components/Layout/Footer";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { AdminProvider } from "./admin/context/AdminContext";
+import { AdminProvider } from "./admin/contexts/AdminContext";
 
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
