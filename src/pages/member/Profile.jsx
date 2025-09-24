@@ -48,6 +48,22 @@ export default function Profile() {
       <p><b>이름:</b> {member.mname}</p>
       <p><b>이메일:</b> {member.memail}</p>
       <p><b>전화번호:</b> {member.mtel}</p>
+      <p><b>생년월일:</b> {member.mbirth}</p>
+      <p><b>우편번호:</b> {member.mpost}</p>
+      <p><b>주소:</b> {member.maddr}</p>
+      <p><b>닉네임:</b> {member.mnic}</p>
+      <h3>자녀 정보</h3>
+      {member.children && member.children.length > 0 ? (
+        <ul>
+          {member.children.map((child, index) => (
+            <li key={index}>
+              {child.chname} ({child.chbirth})
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>등록된 자녀 정보가 없습니다.</p>
+      )}
       <button onClick={goToUpdate} style={{
         marginTop:16,
         padding: "12px 24px",

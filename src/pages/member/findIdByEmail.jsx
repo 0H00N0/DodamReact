@@ -9,9 +9,9 @@ export default function FindIdByEmail() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.get('http://localhost:8080/api/member/findid/email', {
-        params: { mname, memail }
-      });
+       const res = await axios.get('http://localhost:8080/member/findIdByEmail', {
+      params: { mname, memail }
+    });
       setResult(`찾은 ID: ${res.data.mid}`);
     } catch (err) {
       setResult('회원 정보를 찾을 수 없습니다.');

@@ -1,11 +1,11 @@
 import React from "react";
 
-export default function FindIdModal() {
+export default function FindPw() {
   const goToEmail = () => {
-  window.location.href = "/member/findIdByEmail";
+  window.location.href = "/member/findPwByMemail";
 };
 const goToTel = () => {
-  window.location.href = "/member/findIdByTel";
+  window.location.href = "/member/findPwByMtel";
 };
   const closeWindow = () => {
     window.close();
@@ -14,7 +14,7 @@ const goToTel = () => {
   return (
     <div style={overlayStyle}>
       <div style={modalStyle}>
-        <h3>ID 찾기</h3>
+        <h3>비밀번호 찾기</h3>
         <button onClick={goToEmail}>이메일로 찾기</button>
         <button onClick={goToTel}>전화번호로 찾기</button>
         <button onClick={closeWindow}>닫기</button>
