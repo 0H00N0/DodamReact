@@ -1,4 +1,3 @@
-// src/pages/CommunityPage/CommunityBoardForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createBoard } from "../../api/boardApi";
@@ -20,22 +19,39 @@ function CommunityBoardForm({ currentUser }) {
       return;
     }
 
-    const newBoard = { title, writer, content };
+    // 👉 서버 DTO 필드명과 맞추세요 (boardTitle, boardWriter, boardContent 같은 식일 수도 있음)
+    const newBoard = {
+      title: title,
+      content: content,
+      writer: writer,
+    };
+
     setLoading(true);
     setError("");
 
     try {
-      const res = await createBoard(newBoard); // API 호출
-      const newPostId = res.data.postId; // 새 글 ID 반환 가정
+      const res = await createBoard(newBoard); // res = response.data
+      console.log("서버 응답:", res);
+
+      const newPostId = res.id || res.bnum;
+
       alert("게시글이 등록되었습니다!");
-      navigate(`/board/community/${newPostId}`); // 상세 페이지 이동
+      navigate(`/board/community/${newPostId}`);
     } catch (err) {
       console.error("게시글 등록 실패:", err);
-      setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setLoading(false);
+
+      if (err.response) {
+        console.error("응답 상태코드:", err.response.status);
+        console.error("응답 데이터:", err.response.data);
+      } else {
+        console.error("서버 응답 없음:", err.message);
     }
-  };
+
+    setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg">
@@ -90,13 +106,12 @@ function CommunityBoardForm({ currentUser }) {
           className="p-4 bg-white text-black font-semibold rounded-2xl border-4 border-black shadow-md hover:bg-gray-100 transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? "등록 중..." : (
-            <>    
+            <>
               <span>등록하기</span>
               <span>💌</span>
             </>
-          )}
+          )}   
         </button>
-
       </form>
     </div>
   );
