@@ -41,6 +41,11 @@ import Company from "./pages/CommunityPage/Company";
 
 // React.lazy로 코드 스플리팅
 
+// --- Logistics Guard ---
+import LogisticsGuard from "./routes/LogisticsGuard";
+
+
+// --- Lazy Pages (기존) ---
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
@@ -48,8 +53,6 @@ const Profile = React.lazy(() => import("./pages/member/Profile"));
 const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
 const Admin = React.lazy(() => import("./admin/Admin"));
 
-// --- Logistics Guard ---
-import LogisticsGuard from "./routes/LogisticsGuard";
 
 // --- Logistics Lazy Pages ---
 const LogisticsLayout = React.lazy(() => import("./logistics/LogisticsLayout"));
