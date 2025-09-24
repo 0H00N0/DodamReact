@@ -10,7 +10,7 @@ export default function LogisticsGuard({ children }) {
   const mtcode = user?.memtype?.mtcode ?? user?.mtcode;
   const isDeliveryman = mtcode === 3 || user?.role === 'DELIVERYMAN';
 
-  if (!isAuth) return <Navigate to="/login" state={{ from: loc }} replace />;
+  if (!isAuth) return <Navigate to="/loginForm" state={{ from: loc }} replace />;
   if (!isDeliveryman) return <Navigate to="/" replace />;
   return children;
 }
