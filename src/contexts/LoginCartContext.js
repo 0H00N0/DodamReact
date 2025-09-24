@@ -1,46 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { api } from "../utils/api";
 
 export const useLoginCart = () => {
-    const [member, setMember] = useState(null);
-    const [loading, setLoading] = useState(true);
+  const [member, setMember] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const once = useRef(false); // 개발모드(StrictMode) 이중 실행 가드
 
-    //로그인 여부 판단 세션상태
-    const isLoggedIn = !!localStorage.getItem('accessToken');
-
-     useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const response = await fetch('/member/profile', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            // 토큰 기반이면 아래 추가
-            'Authorization': `Bearer ${localStorage.getItem('accessToken')}`,
-          },
-          credentials: 'include', // 세션 기반이면 필요
-        });
-
-        if (!response.ok) {
-          throw new Error('프로필 불러오기 실패');
-        }
-
-        const data = await response.json();
-        setMember(data); // 서버에서 반환된 {id, name, email, ...}
-      } catch (err) {
-        console.error('프로필 불러오기 에러:', err);
+  const refresh = useCallback(async () => {
+    try {
+      // 1) 가벼운 로그인 여부 확인
+      const { data: me } = await api.get("/oauth/me"); // { login: boolean, sid: ... }
+      if (!me?.login) {
         setMember(null);
-      } finally {
-        setLoading(false);
+        return;
       }
-    };
-
-    if (isLoggedIn) {
-      fetchUserProfile();
-    } else {
+      // 2) 실제 프로필 로드
+      const { data } = await api.get("/member/me");
+      setMember(data);
+    } catch (err) {
+      const s = err?.status ?? err?.response?.status;
+      if (s !== 401 && s !== 403) console.error("refresh failed:", err);
       setMember(null);
+    } finally {
       setLoading(false);
     }
-  }, [isLoggedIn]);
+  }, []);
 
-  return { isLoggedIn, member, loading };
+  useEffect(() => {
+    if (once.current) return;
+    once.current = true;
+    refresh();
+  }, [refresh]);
+
+  // 로그인/로그아웃 이후 헤더 즉시 갱신
+  useEffect(() => {
+    const handler = () => refresh();
+    window.addEventListener("auth:changed", handler);
+    return () => window.removeEventListener("auth:changed", handler);
+  }, [refresh]);
+
+  const logout = useCallback(async () => {
+    try { await api.post("/member/logout"); }
+    finally {
+      setMember(null);
+      window.dispatchEvent(new Event("auth:changed"));
+    }
+  }, []);
+
+  return { isLoggedIn: !!member, member, loading, refresh, logout };
 };

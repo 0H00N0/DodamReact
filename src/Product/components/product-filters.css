@@ -1,0 +1,107 @@
+/* 컨테이너 */
+.pf-wrap { width: 100%; }
+
+/* 공통 */
+.pf-input {
+  height: 36px; padding: 0 12px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; background: #fff; outline: none;
+}
+.pf-input:focus { border-color: #999; }
+.pf-btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
+  color: #333;        /* ✅ 텍스트는 기본 진한 회색 */
+}
+.pf-btn:hover { background: #f5f5f5; cursor: pointer; }
+.pf-btn.pf-primary { background: #111; color: #fff; border-color: #111; }
+.pf-btn.pf-primary:hover { background: #000; }
+.pf-label { font-size: 12px; color: #666; margin-right: 6px; white-space: nowrap; }
+.pf-field { display: flex; align-items: center; gap: 8px; }
+.pf-num { width: 100px; }
+.pf-w80 {
+  width: 100px;   /* ✅ 기존 80px → 100px */
+  min-width: 100px;
+}
+/* 셀렉트 & 인풋 */
+.pf-input {
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  outline: none;
+  color: #333;        /* ✅ 텍스트는 진한 회색 */
+  text-align: center;   /* ✅ 선택지 가운데 정렬 */
+}
+/* 데스크탑 바 */
+.pf-bar {
+  display: none;
+  align-items: center; justify-content: space-between;
+  gap: 12px; border: 1px solid #e6e6e6; background: #fff;
+  border-radius: 12px; padding: 10px 12px;
+}
+.pf-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.pf-right { display: flex; align-items: center; gap: 8px; }
+
+.pf-search { position: relative; }
+.pf-search .pf-input { padding-left: 32px; width: 240px; }
+.pf-ico { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); color: #aaa; }
+
+
+.pf-range-box { display: flex; align-items: center; gap: 6px; }
+.pf-currency {
+  width: 24px; text-align: center; color: #999; font-size: 12px; background: #f7f7f7;
+  border: 1px solid #e5e5e5; border-radius: 6px; height: 28px; line-height: 28px;
+}
+.pf-tilde { color: #999; }
+
+/* 토글 스위치 */
+.pf-toggle { gap: 6px; }
+.pf-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+.pf-switch input { opacity: 0; width: 0; height: 0; }
+.pf-slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background: #d5d5d5; transition: .2s; border-radius: 999px;
+}
+.pf-slider::before {
+  position: absolute; content: ""; height: 18px; width: 18px; left: 2px; top: 2px;
+  background: white; transition: .2s; border-radius: 50%;
+}
+.pf-switch input:checked + .pf-slider { background: #111; }
+.pf-switch input:checked + .pf-slider::before { transform: translateX(18px); }
+.pf-toggle-label { font-size: 14px; color: #333; }
+
+/* 모바일 */
+.pf-mobile { display: block; }
+.pf-mobile-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border: 1px solid #e6e6e6; border-radius: 12px; padding: 12px 14px;
+}
+.pf-caret { color: #888; }
+.pf-mobile-panel {
+  margin-top: 8px; border: 1px solid #e6e6e6; border-radius: 12px; background: #fff; padding: 12px;
+}
+.pf-group { display: grid; gap: 10px; }
+.pf-row { display: flex; gap: 8px; }
+.pf-actions { margin-top: 8px; }
+.pf-gap > * { flex: 1; }
+
+/* 활성 칩 */
+.pf-chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.pf-chip {
+  border: 1px solid #eee; background: #f8f8f8; color: #333; border-radius: 999px;
+  padding: 6px 10px; font-size: 12px; cursor: pointer;
+}
+.pf-chip:hover { background: #f1f1f1; }
+.pf-chip-x { margin-left: 6px; color: #999; }
+
+/* 반응형 */
+@media (min-width: 768px) {
+  .pf-desktop { display: flex; }
+  .pf-mobile { display: none; }
+}

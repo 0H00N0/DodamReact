@@ -1,6 +1,5 @@
-// src/components/Member/UserDropdown.jsx (경로만 네 프로젝트에 맞게)
 import React, { useRef, useEffect } from "react";
-import ReactDOM from "react-dom";              // 포털: 헤더 깨짐 방지용
+import ReactDOM from "react-dom"; // 포털: 헤더 깨짐 방지용
 import { useNavigate } from "react-router-dom";
 import styles from "./UserDropdown.module.css";
 
@@ -34,16 +33,42 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
             <h3 className={styles.title}>로그인이 필요합니다</h3>
             <p className={styles.subtitle}>로그인하고 다양한 혜택을 만나보세요</p>
             <div className={styles.authButtons}>
-              {/*App.js 라우트와 정확히 일치 */}
-              <button onClick={go("/loginForm")} className={styles.loginButton}>로그인</button>
+              {/* 프론트 라우트로 이동 */}
+              <button onClick={go("/login")} className={styles.loginButton}>로그인</button>
               <button onClick={go("/signup")} className={styles.signupButton}>회원가입</button>
             </div>
           </div>
         ) : (
           <>
-            {/* ...로그인 후 메뉴들 */}
+            <div className={styles.profileSection}>
+              <div className={styles.avatar} aria-hidden="true">👤</div>
+              <div className={styles.profileText}>
+                <div className={styles.welcome}>안녕하세요!</div>
+                <div className={styles.username}>
+                  {userInfo?.mname || userInfo?.mid || "회원"} 님
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.menuList}>
+              <button onClick={go('/member/profile')} className={styles.menuItem}>마이페이지</button>
+              <button onClick={go('/member/ordersList')} className={styles.menuItem}>주문내역</button>
+              <button onClick={go('/member/cart')} className={styles.menuItem}>장바구니</button>
+              <button onClick={go('/member/membership')} className={styles.menuItem}>구독확인</button>
+              <button onClick={go('/member/cash')} className={styles.menuItem}>결제수단조회</button>
+              <button onClick={go('/member/inquiryList')} className={styles.menuItem}>문의내역</button>
+              <button onClick={go('/member/reviewList')} className={styles.menuItem}>리뷰내역</button>
+              <button onClick={go('/member/returnList')} className={styles.menuItem}>반품조회</button>
+              <button onClick={go('/member/tradeList')} className={styles.menuItem}>교환조회</button>
+            </div>
+
             <div className={styles.logoutSection}>
-              <button onClick={onLogout} className={styles.logoutButton}>로그아웃</button>
+              <button
+                onClick={() => { onLogout?.(); onClose(); }} // 코드로 POST /member/logout 호출
+                className={styles.logoutButton}
+              >
+                로그아웃
+              </button>
             </div>
           </>
         )}

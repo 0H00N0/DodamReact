@@ -15,7 +15,7 @@ const Header = React.memo(() => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { isDark, toggleTheme } = useTheme();
-  const { isLoggedIn, member } = useLoginCart(); // 로그인 상태/회원정보
+  const { isLoggedIn, member, logout } = useLoginCart(); // ★ logout 포함
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -42,7 +42,8 @@ const Header = React.memo(() => {
 
   const handleCartToggle = useCallback(() => {
     if (!isLoggedIn) {
-      navigate('/member/loginForm'); // 로그인 안 했으면 로그인 페이지로
+      // ★ App 라우트와 통일된 경로로 이동
+      navigate('/loginForm');
       return;
     }
     setIsCartOpen(prev => !prev);
@@ -72,6 +73,18 @@ const Header = React.memo(() => {
     toggleTheme();
   }, [toggleTheme]);
 
+  // ★ 로그아웃 처리: 세션 종료 후 홈으로 이동 + 드롭다운/패널 닫기
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout(); // useLoginCart: 서버 /member/logout + auth:changed 이벤트
+    } finally {
+      setIsUserMenuOpen(false);
+      setIsCartOpen(false);
+      setIsSearchOpen(false);
+      navigate('/');
+    }
+  }, [logout, navigate]);
+
   return (
     <>
       <header className={styles.header}>
@@ -90,11 +103,7 @@ const Header = React.memo(() => {
 
           {/* 로고 */}
           <div className={styles.logoSection} onClick={handleLogoClick}>
-            <img
-              src={logo}
-              alt="도담도담"
-              className={styles.logo}
-            />
+            <img src={logo} alt="도담도담" className={styles.logo} />
           </div>
 
           {/* 데스크톱 네비게이션 */}
@@ -110,8 +119,8 @@ const Header = React.memo(() => {
               aria-expanded={isSearchOpen}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
               </svg>
             </button>
 
@@ -125,9 +134,9 @@ const Header = React.memo(() => {
               >
                 <div className={styles.cartIconWrapper}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M9 22a1 1 0 100-2 1 1 0 000 2z"/>
-                    <path d="M20 22a1 1 0 100-2 1 1 0 000 2z"/>
-                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>
+                    <path d="M9 22a1 1 0 100-2 1 1 0 000 2z" />
+                    <path d="M20 22a1 1 0 100-2 1 1 0 000 2z" />
+                    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
                   </svg>
                   {totalItems > 0 && (
                     <span className={styles.cartBadge}>
@@ -146,8 +155,8 @@ const Header = React.memo(() => {
               aria-expanded={isUserMenuOpen}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
             </button>
 
@@ -159,19 +168,19 @@ const Header = React.memo(() => {
             >
               {isDark ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="5"/>
-                  <line x1="12" y1="1" x2="12" y2="3"/>
-                  <line x1="12" y1="21" x2="12" y2="23"/>
-                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                  <line x1="1" y1="12" x2="3" y2="12"/>
-                  <line x1="21" y1="12" x2="23" y2="12"/>
-                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  <circle cx="12" cy="12" r="5" />
+                  <line x1="12" y1="1" x2="12" y2="3" />
+                  <line x1="12" y1="21" x2="12" y2="23" />
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                  <line x1="1" y1="12" x2="3" y2="12" />
+                  <line x1="21" y1="12" x2="23" y2="12" />
+                  <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                  <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
                 </svg>
               ) : (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
                 </svg>
               )}
             </button>
@@ -201,8 +210,9 @@ const Header = React.memo(() => {
       <UserDropdown
         isOpen={isUserMenuOpen}
         onClose={handleUserMenuClose}
-        isLoggedIn={isLoggedIn} // 로그인 여부 전달
-        userInfo={member}         // 사용자 정보 전달
+        isLoggedIn={isLoggedIn}  // 로그인 여부 전달
+        userInfo={member}        // 사용자 정보 전달
+        onLogout={handleLogout}  // ★ 로그아웃 전달
       />
     </>
   );
