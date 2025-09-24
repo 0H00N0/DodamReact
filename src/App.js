@@ -40,6 +40,7 @@ import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
 
+
 // React.lazy로 코드 스플리팅
 
 // --- Logistics Guard ---
