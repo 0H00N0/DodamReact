@@ -71,7 +71,10 @@ export default function ProductsPage() {
     else navigate(`/products/page/${next}`);
   };
 
-  const onCardClick = (item) => navigate(`/products/${item.pronum}`);
+  const onCardClick = (item) => {
+  if (!item || !item.pronum) return;
+  navigate(`/products/${item.pronum}`);  //방어코드
+};
 
   const items = pageData?.content ?? [];
   const page = pageData?.number ?? 0;
@@ -101,7 +104,7 @@ export default function ProductsPage() {
         ))}
       </section>
 
-      <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
+      <Pagination page={page} totalPages={totalPages} onChange={onPageChange} /> 
     </div>
   );
 }
