@@ -31,7 +31,7 @@ const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
 
 const LoadingSpinner = () => (
   <div className="loading-container">
@@ -88,7 +88,7 @@ function App() {
                     {/* 상품 관련 라우트 추가 */}
                     <Route path="/products" element={<ProductsPage />} />
                     <Route path="/products/page/:page" element={<ProductsPage />} />
-                    <Route path="/products/:id" element={<ProductDetailPage />} />
+                    <Route path="/products/:pronum" element={<ProductDetailPage />} />
 
                     {/* 회원정보 수정 페이지 */}
                     <Route path="/member/updateProfile" element={<UpdateProfile />} />
