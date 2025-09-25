@@ -1,17 +1,18 @@
 // src/utils/api.js
 import axios from "axios";
 
-// ✅ .env의 REACT_APP_API_BASE 사용
+/** API Base */
 export const API_BASE_URL =
   process.env.REACT_APP_API_BASE || "http://localhost:8080";
 
+/** axios instance */
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 90000, // 여유롭게 90초
+  timeout: 90000,
 });
 
-// 🔧 에러 메시지 정규화(원본 err.response/status 보존)
+/** 에러 인터셉터: 메시지 표준화(원본 보존) */
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -26,52 +27,62 @@ api.interceptors.response.use(
       data?.msg ||
       data?.reason;
 
-    // ✅ 새 Error를 만들지 않고, 메시지만 바꾸고 원본을 그대로 던진다
     err.message =
-      serverMsg || (status ? `HTTP ${status}` : "") || err.message || "Request error";
-    err.status = status;                 // 편의상 별도 필드도 유지
-    err.path = err?.config?.url;
+      serverMsg || (status ? `HTTP ${status}` : "Network/Unknown error");
 
     return Promise.reject(err);
   }
 );
 
-// =========================
-// Billing Keys
-// =========================
+/* =========================
+ * Billing Keys API
+ * ======================= */
 export const billingKeysApi = {
-  list: () => api.get("/billing-keys/list"),
-
-  // PortOne confirm 호출 (billingIssueToken 확정)
-  confirm: (billingIssueToken) =>
-    api.post("/billing-keys/confirm", { billingIssueToken }),
-
-  register: (payload) => {
-    if (!payload || !payload.billingKey || !payload.rawJson) {
-      return Promise.reject(new Error("Invalid payload for register"));
-    }
-    return api.post("/billing-keys/register", payload);
+  /** 카드 목록: 항상 200 + [] */
+  list() {
+    return api.get(`/billing-keys/list?u=${Date.now()}`);
   },
 
-  remove: (id) => api.delete(`/billing-keys/${id}`),
+  /** 등록 시작 전에 payId 하나 미리 발급 (세션스토리지 regPayId 에 보관해서 사용) */
+  prepare() {
+    return api.post("/billing-keys/prepare", {});
+  },
+
+  /** PortOne 리다이렉트 확정 (토큰 + payId) */
+  confirm(billingIssueToken, payId) {
+    const payload = { billingIssueToken };
+    if (payId) payload.payId = payId;
+    return api.post("/billing-keys/confirm", payload);
+  },
 };
 
-// =========================
-// Subscriptions & Payments
-// =========================
+/* =========================
+ * Subscription API
+ * ======================= */
 export const subscriptionApi = {
-  start: (payload) => api.post("/subscriptions/start", payload),
-  chargeAndConfirm: (payload) => api.post("/subscriptions/charge-and-confirm", payload),
-  paymentStatus: (paymentId) => api.get(`/subscriptions/payments/${paymentId}`),
-  invoiceStatus: (invoiceId) => api.get(`/subscriptions/invoices/${invoiceId}/status`),
-  my: () => api.get("/subscriptions/me"),
+  /** 구독 시작(결제 실행) */
+  start(payload) {
+    return api.post("/subscriptions/start", payload);
+  },
+
+  /** 사용 금지 (백엔드 엔드포인트 없음) */
+  chargeAndConfirm() {
+    return Promise.reject(new Error("not supported"));
+  },
 };
 
 export const paymentsApi = {
   confirm: (payload) => api.post("/payments/confirm", payload),
+
   // ✅ 서버가 제공하는 두 엔드포인트 모두 호환 (/payments/{paymentId} or /payments/{paymentId}/status)
-  lookup: (paymentId) => api.get(`/payments/${encodeURIComponent(paymentId)}`),
-  status: (paymentId) => api.get(`/payments/${encodeURIComponent(paymentId)}/status`),
+  lookup: (paymentId) => {
+    if (!paymentId) return Promise.reject(new Error("paymentId is required"));
+    return api.get(`/payments/${encodeURIComponent(paymentId)}`);
+  },
+  status: (paymentId) => {
+    if (!paymentId) return Promise.reject(new Error("paymentId is required"));
+    return api.get(`/payments/${encodeURIComponent(paymentId)}/status`);
+  },
 };
 
 export default api;

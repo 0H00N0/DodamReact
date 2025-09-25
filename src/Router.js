@@ -1,75 +1,73 @@
-import React, { Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import React from "react";
+import { createHashRouter as createRouter } from "react-router-dom";
 import App from "./App";
 
-const Home = React.lazy(() => import("./pages/Home"));
-const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
-const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
-const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
-const PlanSelectPage = React.lazy(() => import("./Plan/PlanSelectPage"));
-const PlanDetailPage = React.lazy(() => import("./Plan/PlanDetailPage"));
-const ProductsPage = React.lazy(() => import("./Product/pages/ProductsPage"));
-const ProductDetailPage = React.lazy(() => import("./Product/pages/ProductDetailPage"));
-const OAuthCallback = React.lazy(() => import("./pages/member/OAuthCallback"));
-const FindIdModal = React.lazy(() => import("./pages/member/FindIdModal"));
-const FindIdByEmail = React.lazy(() => import("./pages/member/findIdByEmail"));
-const FindIdByTel = React.lazy(() => import("./pages/member/findIdByTel"));
-const ChangePw = React.lazy(() => import("./pages/member/ChangePw"));
-const FindPw = React.lazy(() => import("./pages/member/FindPw"));
-const FindPwByMemail = React.lazy(() => import("./pages/member/FindPwByMemail"));
-const FindPwByMtel = React.lazy(() => import("./pages/member/FindPwByMtel"));
-const ChangePwDirect = React.lazy(() => import("./pages/member/ChangePwDirect"));
+import PlanSelectPage from "./Plan/PlanSelectPage";
+import PlanDetailPage from "./Plan/PlanDetailPage";
+// 파일명이 PlanCheckout.jsx 라면 아래처럼!
+import CheckoutPage from "./Plan/PlanCheckout";
+import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
+import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
 
-const withSuspense = (Component) => (
-  <Suspense fallback={<div style={{ padding: 24 }}>로딩...</div>}>
-    <Component />
-  </Suspense>
-);
+import ProductsPage from "./Product/pages/ProductsPage";
+import ProductDetailPage from "./Product/pages/ProductDetailPage";
 
-export const router = createBrowserRouter([
+import CommunityPage from "./pages/CommunityPage/CommunityPage";
+import Notice from "./pages/CommunityPage/Notice";
+import Event from "./pages/CommunityPage/Event";
+import Inquiry from "./pages/CommunityPage/Inquiry";
+import FAQ from "./pages/CommunityPage/FAQ";
+import Company from "./pages/CommunityPage/Company";
+
+import Home from "./pages/Home";
+import LoginForm from "./pages/member/LoginForm";
+import SignupForm from "./pages/member/SignupForm";
+import Profile from "./pages/member/Profile";
+
+export const router = createRouter([
   {
     path: "/",
-    element: <App />,
+    element: <App />, // Header/Footer 공통
     children: [
-      { index: true, element: withSuspense(Home) },
+      { index: true, element: <Home /> },
+      { path: "login", element: <LoginForm /> },
+      { path: "signup", element: <SignupForm /> },
+      { path: "member/profile", element: <Profile /> },
 
-      // auth
-      { path: "loginForm", element: withSuspense(LoginForm) },
-      { path: "signup", element: withSuspense(SignupForm) },
-      { path: "member/profile", element: withSuspense(Profile) },
-      { path: "member/updateProfile", element: withSuspense(UpdateProfile) },
+      // 상품
+      { path: "products", element: <ProductsPage /> },
+      { path: "products/page/:page", element: <ProductsPage /> },
+      { path: "products/:id", element: <ProductDetailPage /> },
 
-      // legacy redirects
-      { path: "login", element: <Navigate to="/loginForm" replace /> },
-      { path: "member/loginForm", element: <Navigate to="/loginForm" replace /> },
-      { path: "member/signup", element: <Navigate to="/signup" replace /> },
+      // 구독 플랜 (목록/상세)
+      { path: "plans", element: <PlanSelectPage /> },
+      { path: "plans/:planCode", element: <PlanDetailPage /> },
 
-      // plans
-      { path: "plans", element: withSuspense(PlanSelectPage) },
-      { path: "plans/:planCode", element: withSuspense(PlanDetailPage) },
+      // ✅ 체크아웃 (신규 경로: /plan/checkout, /plan/checkout/result)
+      { path: "plan/checkout", element: <CheckoutPage /> },
+      { path: "plan/checkout/result", element: <CheckoutResultPage /> },
+      { path: "billing-keys/redirect", element: <BillingKeyRedirect /> },
 
-      // products
-      { path: "products", element: withSuspense(ProductsPage) },
-      { path: "products/page/:page", element: withSuspense(ProductsPage) },
-      { path: "products/:id", element: withSuspense(ProductDetailPage) },
+      // ◇ 구 경로 호환 (기존 링크가 있을 경우 404 방지)
+      { path: "checkout", element: <CheckoutPage /> },
+      { path: "checkout/result", element: <CheckoutResultPage /> },
 
-      // find id / pw
-      { path: "member/findIdModal", element: withSuspense(FindIdModal) },
-      { path: "member/findIdByEmail", element: withSuspense(FindIdByEmail) },
-      { path: "member/findIdByTel", element: withSuspense(FindIdByTel) },
-
-      { path: "member/findPw", element: withSuspense(FindPw) },
-      { path: "member/findPwByMemail", element: withSuspense(FindPwByMemail) },
-      { path: "member/findPwByMtel", element: withSuspense(FindPwByMtel) },
-      { path: "member/changePw", element: withSuspense(ChangePw) },
-      { path: "member/changePwDirect", element: withSuspense(ChangePwDirect) },
-
-      // oauth
-      { path: "oauth/callback/:provider", element: withSuspense(OAuthCallback) },
+      // 소통(Community)
+      {
+        path: "board",
+        element: <CommunityPage />,
+        children: [
+          { index: true, element: <Notice /> },
+          { path: "notice", element: <Notice /> },
+          { path: "event", element: <Event /> },
+          { path: "inquiry", element: <Inquiry /> },
+          { path: "faq", element: <FAQ /> },
+          { path: "company", element: <Company /> },
+        ],
+      },
 
       // 404
-      { path: "*", element: <div style={{ padding: 24 }}>404</div> }
-    ]
-  }
+      { path: "*", element: <div style={{ padding: 24 }}>404</div> },
+    ],
+  },
 ]);
