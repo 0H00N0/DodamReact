@@ -20,6 +20,8 @@ const CategoryManagement = React.lazy(() => import('./CategoryManagement')); // 
 const DeliverymanManagement = React.lazy(() => import('./DeliverymanManagement'));
 const EventManagement = React.lazy(() => import('./EventManagement'));
 const DiscountManagement = React.lazy(() => import('./DiscountManagement'));
+const BulkProductUpload = React.lazy(() => import('./BulkProductUpload'));
+
 
 // 로딩 스피너 컴포넌트
 const AdminLoadingSpinner = () => (
@@ -60,6 +62,9 @@ function Admin() {
               <Route path="voc/*" element={<VocManagement />} />
               <Route path="events/*" element={<EventManagement />} />
               <Route path="discounts/*" element={<DiscountManagement />} />
+              <Route path="products/bulk-upload" element={<BulkProductUpload />} />
+              <Route path="orders/:orderId" element={<OrderDetail />} />
+
 
               {/* 일치하는 경로가 없을 때 보여줄 404 페이지 */}
               <Route path="*" element={

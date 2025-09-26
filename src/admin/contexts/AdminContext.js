@@ -164,6 +164,24 @@ export function AdminProvider({ children }) {
     addNotification('상품이 성공적으로 수정되었습니다.', 'success');
     return updated;
   };
+  const bulkUploadProducts = async (csvFile, imageFiles) => {
+  const formData = new FormData();
+  formData.append("file", csvFile);
+  for (let img of imageFiles) {
+    formData.append("images", img);
+  }
+
+  const response = await fetch(`${API_BASE_URL}/admin/products/bulk-upload`, {
+    method: "POST",
+    body: formData,
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error("상품 일괄 등록 실패");
+  }
+  return response.json(); // { registeredCount: n }
+};
   const deleteProduct = async (id) => {
     await request(`${API_BASE_URL}/admin/products/${id}`, { method: 'DELETE' });
     addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
@@ -321,10 +339,13 @@ export function AdminProvider({ children }) {
   };
   const getPostById = async (postId) => request(`${API_BASE_URL}/admin/boards/posts/${postId}`);
   const createPost = async (postData) =>
-    request(`${API_BASE_URL}/admin/boards/posts`, {
-      method: 'POST',
-      body: JSON.stringify(postData),
-    });
+  request(`${API_BASE_URL}/admin/boards/posts`, {
+    method: 'POST',
+    headers: { // 👈 이 부분을 추가해주세요
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(postData),
+  });
 
   // --- Events ---
   const getAllEvents = async () => request(`${API_BASE_URL}/admin/events`);
@@ -453,7 +474,8 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     createDiscount,
     updateDiscount,
     deleteDiscount,
-    getAllPlanTerms
+    getAllPlanTerms,
+    bulkUploadProducts
   };
 
   return (

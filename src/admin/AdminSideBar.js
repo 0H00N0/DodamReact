@@ -54,7 +54,9 @@ function AdminSidebar() {
       submenu: [
         { title: '상품 목록', path: '/admin/products' },
         { title: '상품 등록', path: '/admin/products/new' },
+        { title: '일괄 등록', path: '/admin/products/bulk-upload' },
         { title: '재고 관리', path: '/admin/products/inventory' }
+        
       ]
     },
     {
@@ -75,6 +77,7 @@ function AdminSidebar() {
         { title: '연체', path: '/admin/orders/overdue' },
         { title: '손실/분실', path: '/admin/orders/lost' },
         { title: '연장', path: '/admin/orders/extended' }, // 새 서브메뉴 추가
+        
       ]
     },
     {
