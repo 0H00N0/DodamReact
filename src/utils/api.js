@@ -54,6 +54,9 @@ export const billingKeysApi = {
     if (payId) payload.payId = payId;
     return api.post("/billing-keys/confirm", payload);
   },
+  register({ billingKey, rawJson }) {
+     return api.post("/billing-keys/register", { billingKey, rawJson });
+  },
 };
 
 /* =========================

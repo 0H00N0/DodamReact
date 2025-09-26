@@ -1,7 +1,6 @@
 // src/Plan/PlanCheckout.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-// default import (중요)
 import PortOne from "@portone/browser-sdk/v2";
 import { billingKeysApi, paymentsApi, subscriptionApi } from "../utils/api";
 
@@ -27,7 +26,7 @@ export default function CheckoutPage() {
 
   // ===== 상태 정규화/판별 =====
   const norm = (v) => String(v || "").trim().toUpperCase();
-  const isSuccess = (s) => ["PAID", "SUCCEEDED", "SUCCESS"].includes(norm(s));
+  const isSuccess = (s) => ["PAID","SUCCEEDED","SUCCESS","PARTIAL_PAID"].includes(norm(s));
 
   // ===== 무기한 폴링 제어 =====
   const alive = useRef(true);
@@ -67,18 +66,23 @@ export default function CheckoutPage() {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
   };
 
+  // ★ 서버 폴링: 반드시 /payments/{paymentId} 사용
   const pollOnce = async (pid) => {
     try {
       const r = await paymentsApi.lookup(pid);
       const s = norm(r?.data?.status || r?.data?.result);
+      const done = Boolean(r?.data?.done);
       setUiStatus(s || "UNKNOWN");
 
-      if (isSuccess(s)) {
+      if (done) {
         stopElapsed();
-        setMsg("결제 완료되었습니다.");
-        navigate(
-          `/plan/checkout/result?invoiceId=${qs.get("invoiceId") || ""}&paymentId=${pid}&status=PAID`
-        );
+        if (isSuccess(s)) {
+          setMsg("결제 완료되었습니다.");
+          navigate(`/plan/checkout/result?invoiceId=${r?.data?.invoiceId ?? ""}&paymentId=${pid}&status=${s}`);
+        } else {
+          setMsg("결제가 완료되지 않았습니다.");
+          navigate(`/plan/checkout/result?invoiceId=${r?.data?.invoiceId ?? ""}&paymentId=${pid}&status=${s}`);
+        }
         return true;
       }
       setDebug((d) => d + `\n[POLL] paymentId=${pid} status=${s}`);
@@ -111,7 +115,6 @@ export default function CheckoutPage() {
       const res = await billingKeysApi.list();
       const arr = Array.isArray(res?.data) ? res.data : [];
 
-      // 백엔드 응답 필드 정규화 (brand/bin/last4/pg와 payId/billingKey 일관성)
       const normalized = arr.map((c, i) => ({
         payId: c.payId ?? c.id ?? null,
         billingKey: c.billingKey ?? c.key ?? null,
@@ -139,10 +142,7 @@ export default function CheckoutPage() {
     loadCards();
     try {
       sessionStorage.setItem("lastCheckoutUrl", window.location.href);
-      sessionStorage.setItem(
-        "lastCheckoutQuery",
-        window.location.search || ""
-      );
+      sessionStorage.setItem("lastCheckoutQuery", window.location.search || "");
     } catch {}
   }, []);
 
@@ -166,17 +166,11 @@ export default function CheckoutPage() {
 
       try {
         sessionStorage.setItem("lastCheckoutUrl", window.location.href);
-        sessionStorage.setItem(
-          "lastCheckoutQuery",
-          window.location.search || ""
-        );
+        sessionStorage.setItem("lastCheckoutQuery", window.location.search || "");
       } catch {}
 
-      const hasIssueFn =
-        typeof PortOne?.requestIssueBillingKey === "function";
-      const callDesc = hasIssueFn
-        ? "requestIssueBillingKey"
-        : "requestPayment(BILLING)";
+      const hasIssueFn = typeof PortOne?.requestIssueBillingKey === "function";
+      const callDesc = hasIssueFn ? "requestIssueBillingKey" : "requestPayment(BILLING)";
       setDebug((d) => d + `\n[SDK] Using ${callDesc}`);
 
       let resp;
@@ -235,8 +229,7 @@ export default function CheckoutPage() {
       // 3) 나머지
       setMsg("카드 등록이 취소되었거나 실패했습니다.");
       setDebug(
-        (d) =>
-          d + `\n[FAIL PATH] statusLike=${statusLike} billingKey=${resp?.billingKey}`
+        (d) => d + `\n[FAIL PATH] statusLike=${statusLike} billingKey=${resp?.billingKey}`
       );
     } catch (e) {
       setMsg("카드 등록 실패 (네트워크/서버).");
@@ -247,55 +240,55 @@ export default function CheckoutPage() {
   }
 
   // =========================
-  // 인보이스 생성 + 결제 시작(무기한 대기)
+  // 인보이스 생성 + 결제 시작(폴링)
   // =========================
   async function handleStart() {
-  if (busy || !selectedCard) return;
-  setBusy(true);
-  setDebug("");
-  setMsg("인보이스 생성 중…");
-  try {
-    // 1) 인보이스 생성 (선택 카드 식별자 전달)
-    const payload = { planCode, months };
-    if (selectedPayId) payload.payId = selectedPayId;
-    else if (selectedCard?.billingKey) payload.billingKey = selectedCard.billingKey;
+    if (busy || !selectedCard) return;
+    setBusy(true);
+    setDebug("");
+    setMsg("인보이스 생성 중…");
+    try {
+      // 1) 인보이스 생성 (선택 카드 식별자 전달)
+      const payload = { planCode, months };
+      if (selectedPayId) payload.payId = selectedPayId;
+      else if (selectedCard?.billingKey) payload.billingKey = selectedCard.billingKey;
 
-    const invRes = await subscriptionApi.start(payload);
+      const invRes = await subscriptionApi.start(payload);
 
-    const invoiceId =
-      invRes?.data?.invoiceId ??
-      invRes?.data?.id ??
-      invRes?.data?.piId ??
-      invRes?.data?.pi_id;
+      const invoiceId =
+        invRes?.data?.invoiceId ??
+        invRes?.data?.id ??
+        invRes?.data?.piId ??
+        invRes?.data?.pi_id;
 
-    if (!invoiceId) {
-      setMsg("인보이스 생성 실패: ID 없음");
-      setDebug((d) => d + `\n[INV RESP] ${safeJ(invRes?.data)}`);
-      return;
+      if (!invoiceId) {
+        setMsg("인보이스 생성 실패: ID 없음");
+        setDebug((d) => d + `\n[INV RESP] ${safeJ(invRes?.data)}`);
+        return;
+      }
+
+      // 2) 결제 트리거
+      setMsg(`인보이스 생성 완료 (ID: ${invoiceId}). 결제를 시작합니다…`);
+      const payRes = await paymentsApi.confirm({ invoiceId });
+
+      const pid =
+        payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
+      if (!pid) {
+        setMsg("결제 시작 실패: paymentId 없음");
+        setDebug((d) => d + `\n[CONFIRM RESP] ${safeJ(payRes?.data)}`);
+        return;
+      }
+      setPaymentId(pid);
+
+      // 3) 폴링 시작 (서버: /payments/{paymentId})
+      await pollForeverUntilPaid(pid);
+    } catch (e) {
+      setMsg("결제에 실패했습니다. 다시 시도해 주세요.");
+      setDebug((d) => d + `\n[CHECKOUT ERROR] ${e?.message || e}`);
+    } finally {
+      setBusy(false);
     }
-
-    // 2) 결제 트리거
-    setMsg(`인보이스 생성 완료 (ID: ${invoiceId}). 결제를 시작합니다…`);
-    const payRes = await paymentsApi.confirm({ invoiceId });
-
-    const pid =
-      payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
-    if (!pid) {
-      setMsg("결제 시작 실패: paymentId 없음");
-      setDebug((d) => d + `\n[CONFIRM RESP] ${safeJ(payRes?.data)}`);
-      return;
-    }
-    setPaymentId(pid);
-
-    // 3) 폴링 시작
-    await pollForeverUntilPaid(pid);
-  } catch (e) {
-    setMsg("결제에 실패했습니다. 다시 시도해 주세요.");
-    setDebug((d) => d + `\n[CHECKOUT ERROR] ${e?.message || e}`);
-  } finally {
-    setBusy(false);
   }
-}
 
   return (
     <div style={{ maxWidth: 720, margin: "24px auto", padding: 16 }}>
