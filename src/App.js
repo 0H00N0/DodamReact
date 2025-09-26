@@ -52,7 +52,7 @@ const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
 const Admin = React.lazy(() => import("./admin/Admin"));
 
 
