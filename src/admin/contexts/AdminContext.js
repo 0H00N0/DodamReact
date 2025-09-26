@@ -76,45 +76,59 @@ export function AdminProvider({ children }) {
 
   // --- API Request Helper ---
   const request = async (url, options = {}) => {
-    try {
-      const method = (options.method || 'GET').toUpperCase();
-      const hasBody = options.body !== undefined && options.body !== null;
-      const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
-
-      const headers = { ...(options.headers || {}) };
-      if (hasBody) {
-        if (!isFormData && !('Content-Type' in headers)) {
-          headers['Content-Type'] = 'application/json';
-        }
-      } else {
-        if ('Content-Type' in headers) delete headers['Content-Type'];
-      }
-
-      const response = await fetch(url, {
-        credentials: 'include',
-        ...options,
-        method,
-        headers
+  try {
+    console.log('=== 요청 정보 ===');
+    console.log('URL:', url);
+    console.log('Method:', options.method);
+    console.log('Headers:', options.headers);
+    console.log('Body:', options.body);
+    
+    const response = await fetch(url, options);
+    
+    console.log('=== 응답 정보 ===');
+    console.log('Status:', response.status);
+    console.log('Status Text:', response.statusText);
+    console.log('Response Headers:', {
+      'content-type': response.headers.get('content-type'),
+      'content-length': response.headers.get('content-length')
+    });
+    
+    // 응답 본문을 텍스트로 먼저 읽기
+    const responseText = await response.text();
+    console.log('Raw Response:', responseText);
+    console.log('Response Length:', responseText.length);
+    
+    if (!response.ok) {
+      // 서버 에러인 경우 더 자세한 정보 출력
+      console.error('Server Error Details:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: responseText
       });
-
-      if (!response.ok) {
-        let message = `HTTP ${response.status}`;
-        try {
-          const maybeJson = await response.clone().json();
-          message = maybeJson?.message || maybeJson?.error || message;
-        } catch (_) {
-          try { message = await response.clone().text() || message; } catch (_) {}
-        }
-        throw new Error(message);
-      }
-
-      return await parseResponse(response);
-    } catch (error) {
-      console.error('API Request failed:', error);
-      addNotification(error.message || '네트워크 오류가 발생했습니다.', 'error');
-      throw error;
+      throw new Error(`HTTP ${response.status}: ${responseText}`);
     }
-  };
+    
+    // JSON 파싱 시도
+    if (responseText.trim() === '') {
+      console.log('빈 응답 받음');
+      return null;
+    }
+    
+    try {
+      const jsonData = JSON.parse(responseText);
+      console.log('Parsed JSON:', jsonData);
+      return jsonData;
+    } catch (parseError) {
+      console.error('JSON 파싱 실패:', parseError.message);
+      console.error('파싱 시도한 텍스트:', responseText);
+      throw new Error(`Invalid JSON response: ${responseText}`);
+    }
+    
+  } catch (error) {
+    console.error('Request 전체 오류:', error);
+    throw error;
+  }
+};
 
   // --- VOC ---
   const getAllVocs = async (page = 0, size = 10) => {
@@ -345,6 +359,39 @@ const deleteEvent = async (evNum) => {
   await request(`${API_BASE_URL}/admin/events/${evNum}`, { method: 'DELETE' });
   addNotification('이벤트가 성공적으로 삭제되었습니다.', 'success');
 };
+// --- Discount ---
+const getAllDiscounts = async () => request(`${API_BASE_URL}/admin/discounts`);
+// AdminContext에서 createDiscount 함수 확인
+const createDiscount = async (data) => {
+  console.log('API 호출 전 데이터:', data);
+  console.log('JSON 문자열:', JSON.stringify(data));
+  
+  try {
+    const result = await request(`${API_BASE_URL}/admin/discounts`, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    
+    console.log('API 응답:', result);
+    return result;
+  } catch (error) {
+    console.error('createDiscount 에러:', error);
+    throw error;
+  }
+};
+
+const updateDiscount = async (id, data) =>
+  request(`${API_BASE_URL}/admin/discounts/${id}`, {
+    method: 'PUT',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+const deleteDiscount = async (id) =>
+  request(`${API_BASE_URL}/admin/discounts/${id}`, { method: 'DELETE' });
+// --- PlanTerms ---
+const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
+
 
   const contextValue = {
     ...state,
@@ -400,7 +447,13 @@ const deleteEvent = async (evNum) => {
     getEventById,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    // Discount APIs
+    getAllDiscounts,
+    createDiscount,
+    updateDiscount,
+    deleteDiscount,
+    getAllPlanTerms
   };
 
   return (
