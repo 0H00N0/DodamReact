@@ -10,8 +10,8 @@ export default function ProductCard({ item, onClick }) {
     >
       {/* 이미지 */}
       <div className="h-48 bg-gray-100 flex items-center justify-center mb-4 rounded">
-        {item.thumbnailUrl ? (
-          <img src={item.thumbnailUrl} alt={item.proname} className="max-h-44 object-contain" />
+        {item.prourl ? (
+          <img src={`/images/${item.prourl}`} alt={item.proname} className="max-h-44 object-contain" />
         ) : (
           <span className="text-gray-400">No Image</span>
         )}
