@@ -6,12 +6,15 @@ import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
-import PlanSelectPage from "./Plan/PlanSelectPage";
-import PlanDetailPage from "./Plan/PlanDetailPage";
 
-import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
-import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
-import FindIdModal from "./pages/member/FindIdModal";
+// React.lazy로 코드 스플리팅
+
+const Home = React.lazy(() => import("./pages/Home"));
+const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
+const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
+const Profile = React.lazy(() => import("./pages/member/Profile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
+
 const LoadingSpinner = () => (
   <div className="loading-container">
     <div className="loading-spinner" role="status" aria-label="페이지 로딩 중">
@@ -27,13 +30,11 @@ function App() {
         <WishlistProvider>
           <div className="App">
             <Header />
-
             <main id="main-content" role="main" className="main-content" tabIndex="-1">
               <Suspense fallback={<LoadingSpinner />}>
                 <Outlet />  {/* ✅ 여기서 라우터 children들이 렌더링됨 */}
               </Suspense>
             </main>
-
             <Footer />
           </div>
         </WishlistProvider>

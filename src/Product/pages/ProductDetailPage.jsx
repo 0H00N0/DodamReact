@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
 
 export default function ProductDetailPage() {
-  const { id } = useParams();          // /products/:id
+  const { pronum } = useParams();          // /products/:id
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
@@ -11,21 +11,21 @@ export default function ProductDetailPage() {
   const [err, setErr] = useState("");
 
   useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setErr("");
-      try {
-        const data = await fetchProductById(id);
-        setProduct(data);
-      } catch (e) {
-        console.error(e);
-        setErr("상품을 불러오는 중 오류가 발생했습니다.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, [id]);
+  const load = async () => {
+    setLoading(true);
+    setErr("");
+    try {
+      const data = await fetchProductById(pronum); // id → pronum
+      setProduct(data);
+    } catch (e) {
+      console.error(e);
+      setErr("상품을 불러오는 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  load();
+}, [pronum]);
 
   if (loading) return <div className="py-10 text-center text-gray-500">불러오는 중…</div>;
   if (err) return <div className="py-10 text-center text-red-600">{err}</div>;
@@ -63,7 +63,15 @@ export default function ProductDetailPage() {
             <span className="ml-2 text-sm text-gray-500">재고: {stock}</span>
           </div>
           <p className="text-gray-700 whitespace-pre-line">{description}</p>
-
+          
+           {/* 장바구니 버튼 추가 */}
+        <button
+          className="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          // onClick={() => { /* 추후 장바구니 기능 구현 */ }}
+        >
+          장바구니에 담기
+        </button>
+        
           <div className="text-xs text-gray-400">
             <p>등록일: {createdAt ? new Date(createdAt).toLocaleDateString() : "-"}</p>
             <p>수정일: {updatedAt ? new Date(updatedAt).toLocaleDateString() : "-"}</p>

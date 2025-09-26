@@ -44,7 +44,7 @@ export default function ProductsPage() {
       const data = await fetchProducts({ page, size, sort, ...rest });
       setPageData(data);
     } catch (e) {
-      console.error(e);
+      console.error(e); 
       setErr("목록을 불러오는 중 문제가 발생했습니다.");
     } finally {
       setLoading(false);
@@ -71,7 +71,10 @@ export default function ProductsPage() {
     else navigate(`/products/page/${next}`);
   };
 
-  const onCardClick = (id) => navigate(`/products/${id}`);
+  const onCardClick = (item) => {
+  if (!item || !item.pronum) return;
+  navigate(`/products/${item.pronum}`);  //방어코드
+};
 
   const items = pageData?.content ?? [];
   const page = pageData?.number ?? 0;
@@ -92,16 +95,16 @@ export default function ProductsPage() {
       {loading && <div className="py-10 text-center text-gray-500">불러오는 중…</div>}
       {err && !loading && <div className="py-6 text-center text-red-600">{err}</div>}
       {!loading && !err && items.length === 0 && (
-        <div className="py-10 text-center text-gray-500">결과가 없습니다.</div>
+        <div className="py-10 text-center text-gray-500">등록된 상품이 없습니다.</div>
       )}
 
       <section className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         {!loading && items.map((it) => (
-          <ProductCard key={it.productId ?? it.id} item={it} onClick={onCardClick} />
+          <ProductCard key={it.pronum} item={it} onClick={onCardClick} />
         ))}
       </section>
 
-      <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
+      <Pagination page={page} totalPages={totalPages} onChange={onPageChange} /> 
     </div>
   );
 }

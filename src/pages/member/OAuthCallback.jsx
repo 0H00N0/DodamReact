@@ -1,3 +1,4 @@
+// src/.../OAuthCallback.jsx
 import React, { useEffect, useRef, useState } from 'react';
 import { postWithSession } from '../../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -41,12 +42,32 @@ export default function OAuthCallback() {
           return;
         }
 
-        // 3) 백엔드로 전달
+        // 3) 백엔드로 전달 (변경: 응답 data 활용)
         const payload = token ? { token } : { code, state };
-        await postWithSession(`/oauth/${p}/token`, payload);
+        const data = await postWithSession(`/oauth/${p}/token`, payload);
 
-        // 4) 전역 알림(헤더 갱신용) + 홈으로 즉시 이동
+        // 4) 전역 알림(헤더 갱신용)
         try { window.dispatchEvent(new Event('auth:changed')); } catch {}
+
+        // 5) 프로필 미완성 알림 + 이동 (추가된 부분)
+        if (data?.profileIncomplete) {
+          const missing = data?.missing || {};
+          const parts = [
+            missing.tel ? '전화번호' : null,
+            missing.addr ? '주소' : null,
+            missing.post ? '우편번호' : null,
+          ].filter(Boolean).join(', ');
+
+          alert(
+            parts
+              ? `프로필에 임시 정보(${parts})가 있어요. 업데이트해 주세요.`
+              : '프로필에 임시 정보가 있어요. 업데이트해 주세요.'
+          );
+          navigate('/', { replace: true });
+          return;
+        }
+
+        // 기본 흐름: 홈으로
         navigate('/', { replace: true });
       } catch (e) {
         setMsg(e.message || '로그인 중 오류가 발생했습니다.');
