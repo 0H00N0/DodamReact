@@ -18,6 +18,8 @@ import Home from "./pages/Home";
 import LoginForm from "./pages/member/LoginForm";
 import SignupForm from "./pages/member/SignupForm";
 import Profile from "./pages/member/Profile";
+import UpdateProfile from "./pages/member/updateProfile";
+import OAuthCallback from "./pages/member/OAuthCallback";
 
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
