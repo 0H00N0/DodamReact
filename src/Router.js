@@ -2,15 +2,10 @@ import React from "react";
 import { createHashRouter as createRouter } from "react-router-dom";
 import App from "./App";
 
-import PlanSelectPage from "./Plan/PlanSelectPage";
-import PlanDetailPage from "./Plan/PlanDetailPage";
 // 파일명이 PlanCheckout.jsx 라면 아래처럼!
 import CheckoutPage from "./Plan/PlanCheckout";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
 import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
-
-import ProductsPage from "./Product/pages/ProductsPage";
-import ProductDetailPage from "./Product/pages/ProductDetailPage";
 
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
@@ -24,6 +19,20 @@ import LoginForm from "./pages/member/LoginForm";
 import SignupForm from "./pages/member/SignupForm";
 import Profile from "./pages/member/Profile";
 
+import PlanSelectPage from "./Plan/PlanSelectPage";
+import PlanDetailPage from "./Plan/PlanDetailPage";
+
+import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
+import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+import FindIdModal from "./pages/member/FindIdModal";
+import FindIdByEmail from "./pages/member/findIdByEmail";
+import FindIdByTel from "./pages/member/findIdByTel";
+import ChangePw from "./pages/member/ChangePw";
+import FindPw from "./pages/member/FindPw";
+import FindPwByMemail from "./pages/member/FindPwByMemail";
+import FindPwByMtel from "./pages/member/FindPwByMtel";
+import ChangePwDirect from "./pages/member/ChangePwDirect";
+
 export const router = createRouter([
   {
     path: "/",
@@ -32,7 +41,16 @@ export const router = createRouter([
       { index: true, element: <Home /> },
       { path: "login", element: <LoginForm /> },
       { path: "signup", element: <SignupForm /> },
-      { path: "member/profile", element: <Profile /> },
+      { path: "member/updateProfile", element: <UpdateProfile /> },
+      { path: "member/changePw", element: <ChangePw /> },
+      { path: "member/findIdModal", element: <FindIdModal /> },
+      { path: "member/findIdByEmail", element: <FindIdByEmail /> },
+      { path: "member/findIdByTel", element: <FindIdByTel /> },
+      { path: "member/findPw", element: <FindPw /> },
+      { path: "member/findPwByMemail", element: <FindPwByMemail /> },
+      { path: "member/findPwByMtel", element: <FindPwByMtel /> },
+      { path: "member/changePwDirect", element: <ChangePwDirect /> },
+      { path: "oauth/callback/:provider", element: <OAuthCallback /> },
 
       // 상품
       { path: "products", element: <ProductsPage /> },
