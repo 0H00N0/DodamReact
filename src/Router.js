@@ -1,5 +1,5 @@
 import React from "react";
-import { createHashRouter as createRouter } from "react-router-dom";
+import { createBrowserRouter as createRouter } from "react-router-dom";
 import App from "./App";
 
 // 파일명이 PlanCheckout.jsx 라면 아래처럼!

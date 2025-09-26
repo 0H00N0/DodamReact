@@ -10,6 +10,9 @@ module.exports = function (app) {
       "/plans",
       "/member",
       "/h2-console",
+      "/board",
+      "/comments",
+      "/products",
     ],
     createProxyMiddleware({
       target: "http://localhost:8080",
