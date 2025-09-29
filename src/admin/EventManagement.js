@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { useAdmin } from './contexts/AdminContext';
 
 function EventManagement() {
-  const { getAllEvents, getEventById, createEvent, updateEvent, deleteEvent } = useAdmin();
+  const { getAllEvents, getEventById, createEvent, updateEvent, deleteEvent, getFirstEventWinners } = useAdmin();
+  const [winners, setWinners] = useState([]);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [formData, setFormData] = useState({
@@ -37,6 +38,7 @@ function EventManagement() {
       endTime: data.endTime ? data.endTime.substring(0, 16) : '',
       capacity: data.capacity || ''
     });
+    setWinners([]); // 다른 이벤트 선택 시 당첨자 초기화
   };
 
   const handleChange = (e) => {
@@ -68,7 +70,13 @@ function EventManagement() {
       await deleteEvent(evNum);
       loadEvents();
       setSelectedEvent(null);
+      setWinners([]);
     }
+  };
+
+  const handleViewWinners = async (evNum) => {
+    const data = await getFirstEventWinners(evNum);
+    setWinners(data || []);
   };
 
   return (
@@ -100,6 +108,16 @@ function EventManagement() {
               <td>{ev.startTime}</td>
               <td>{ev.endTime}</td>
               <td>
+                {ev.eventType === 'FIRST' && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleViewWinners(ev.evNum);
+                    }}
+                  >
+                    당첨자 조회
+                  </button>
+                )}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -196,6 +214,32 @@ function EventManagement() {
           <p>종료: {selectedEvent.endTime}</p>
         </div>
       )}
+
+      {/* ✅ 당첨자 조회 결과 */}
+      {winners.length > 0 && (
+  <div className="dashboard-section">
+    <h2>당첨자 목록</h2>
+    <table className="admin-table">
+      <thead>
+        <tr>
+          <th>회원 ID</th>
+          <th>이름</th>
+          <th>이메일</th>
+        </tr>
+      </thead>
+      <tbody>
+        {winners.map((w, idx) => (
+          <tr key={`${w.mnum}-${idx}`}>   {/* ✅ key 충돌 방지 */}
+            <td>{w.mnum}</td>
+            <td>{w.mname}</td>             {/* ✅ mname 사용 */}
+            <td>{w.memail}</td>            {/* ✅ memail 사용 */}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
     </div>
   );
 }

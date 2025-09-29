@@ -145,31 +145,33 @@ export function AdminProvider({ children }) {
   };
 
   // --- Product ---
-  const getAllProductStates = async () => request(`${API_BASE_URL}/admin/prostates`);
-  const getAllProducts = async () => request(`${API_BASE_URL}/admin/products`);
-  const getProductById = async (id) => request(`${API_BASE_URL}/admin/products/${id}`);
-  const createProduct = async (productData) => {
-    const newProduct = await request(`${API_BASE_URL}/admin/products`, {
-      method: 'POST',
-      body: JSON.stringify(productData),
-    });
-    addNotification('상품이 성공적으로 등록되었습니다.', 'success');
-    return newProduct;
-  };
-  const updateProduct = async (id, productData) => {
-    const updated = await request(`${API_BASE_URL}/admin/products/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(productData),
-    });
-    addNotification('상품이 성공적으로 수정되었습니다.', 'success');
-    return updated;
-  };
-  const bulkUploadProducts = async (csvFile, imageFiles) => {
+const getAllProductStates = async () => request(`${API_BASE_URL}/admin/prostates`);
+const getAllProducts = async () => request(`${API_BASE_URL}/admin/products`);
+const getProductById = async (id) => request(`${API_BASE_URL}/admin/products/${id}`);
+
+const createProduct = async (productData) => {
+  const newProduct = await request(`${API_BASE_URL}/admin/products`, {
+    method: 'POST',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(productData),
+  });
+  addNotification('상품이 성공적으로 등록되었습니다.', 'success');
+  return newProduct;
+};
+
+const updateProduct = async (id, productData) => {
+  const updated = await request(`${API_BASE_URL}/admin/products/${id}`, {
+    method: 'PUT',
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(productData),
+  });
+  addNotification('상품이 성공적으로 수정되었습니다.', 'success');
+  return updated;
+};
+
+const bulkUploadProducts = async (csvFile) => {
   const formData = new FormData();
   formData.append("file", csvFile);
-  for (let img of imageFiles) {
-    formData.append("images", img);
-  }
 
   const response = await fetch(`${API_BASE_URL}/admin/products/bulk-upload`, {
     method: "POST",
@@ -182,10 +184,12 @@ export function AdminProvider({ children }) {
   }
   return response.json(); // { registeredCount: n }
 };
-  const deleteProduct = async (id) => {
-    await request(`${API_BASE_URL}/admin/products/${id}`, { method: 'DELETE' });
-    addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
-  };
+
+const deleteProduct = async (id) => {
+  await request(`${API_BASE_URL}/admin/products/${id}`, { method: 'DELETE' });
+  addNotification('상품이 성공적으로 삭제되었습니다.', 'success');
+};
+
 
   // --- Category ---
   const getAllCategories = async () => request(`${API_BASE_URL}/admin/categories`);
@@ -298,25 +302,6 @@ export function AdminProvider({ children }) {
     addNotification(`플랜(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
   };
 
-  // --- Image Upload ---
-  const uploadImage = async (imageFile) => {
-    const formData = new FormData();
-    formData.append('image', imageFile);
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/upload/image`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      if (!response.ok) throw new Error('이미지 업로드에 실패했습니다.');
-      return response.json();
-    } catch (error) {
-      console.error('Image upload failed:', error);
-      addNotification(error.message, 'error');
-      throw error;
-    }
-  };
-
   // --- Board ---
   const getAllBoardCategories = async () => request(`${API_BASE_URL}/admin/boards`);
   const createBoardCategory = async (categoryData) => {
@@ -350,6 +335,9 @@ export function AdminProvider({ children }) {
   // --- Events ---
   const getAllEvents = async () => request(`${API_BASE_URL}/admin/events`);
   const getEventById = async (evNum) => request(`${API_BASE_URL}/admin/events/${evNum}`);
+  const getFirstEventWinners = async (evNum) =>
+  request(`${API_BASE_URL}/admin/events/${evNum}/winners`);
+
   const createEvent = async (eventData) => {
   const newEvent = await request(`${API_BASE_URL}/admin/events`, {
     method: 'POST',
@@ -443,7 +431,6 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     updatePlan,
     deletePlan,
     getAllPlanNames,
-    uploadImage,
     getAllProductStates,
     getAllOrders,
     getOrderById,
@@ -475,7 +462,8 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     updateDiscount,
     deleteDiscount,
     getAllPlanTerms,
-    bulkUploadProducts
+    bulkUploadProducts,
+    getFirstEventWinners
   };
 
   return (

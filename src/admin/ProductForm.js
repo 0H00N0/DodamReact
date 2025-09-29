@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAdmin } from './contexts/AdminContext';
-import './Admin.css'; // 폼 스타일링을 위해 CSS를 import 합니다.
+import './Admin.css';
 
 // 브랜드 목록 (하드코딩)
 const BRAND_LIST = [
@@ -12,7 +12,7 @@ const BRAND_LIST = [
   { brandId: 5, brandName: '기타' }
 ];
 
-// 폼 상태 초기화 객체 (백엔드 DTO의 모든 필드 포함)
+// 초기 폼 데이터
 const initialFormData = {
   proname: '',
   prodetail: '',
@@ -27,9 +27,8 @@ const initialFormData = {
   ctnum: '',
   catenum: '',
   prosnum: '',
-  imageName: ''
+  images: [{ proimageorder: 1, prourl: '', prodetailimage: '' }]
 };
-
 
 function ProductForm() {
   const { 
@@ -37,8 +36,7 @@ function ProductForm() {
     createProduct, 
     updateProduct, 
     getAllCategories,
-    getAllProductStates,
-    uploadImage 
+    getAllProductStates
   } = useAdmin();
 
   const { id } = useParams();
@@ -46,12 +44,10 @@ function ProductForm() {
   const isEditMode = Boolean(id);
 
   const [formData, setFormData] = useState(initialFormData);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
   const [categories, setCategories] = useState([]);
   const [productStates, setProductStates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080/api/v1';
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -65,7 +61,6 @@ function ProductForm() {
         if (isEditMode) {
           const product = await getProductById(id);
           if (product) {
-            // 수정 시 기존 데이터를 폼에 채워넣기
             setFormData({
               proname: product.proname || '',
               prodetail: product.prodetail || '',
@@ -80,12 +75,14 @@ function ProductForm() {
               ctnum: product.ctnum || '',
               catenum: product.category?.catenum || '',
               prosnum: product.prostate?.prosnum || '',
-              imageName: product.imageName || ''
+              images: product.images && product.images.length > 0 
+                ? product.images.map((img, idx) => ({
+                    proimageorder: idx + 1,
+                    prourl: img.prourl || '',
+                    prodetailimage: img.prodetailimage || ''
+                  }))
+                : [{ proimageorder: 1, prourl: '', prodetailimage: '' }]
             });
-            if (product.imageName) {
-              // 그냥 파일 이름이 아닌, 서버에서 이미지를 제공하는 전체 URL로 설정
-              setImagePreview(`${API_BASE_URL}/images/${product.imageName}`);
-            }
           }
         }
       } catch (error) {
@@ -101,36 +98,26 @@ function ProductForm() {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
-    }
+
+  const handleImageChange = (index, field, value) => {
+    const newImages = [...formData.images];
+    newImages[index][field] = value;
+    setFormData({ ...formData, images: newImages });
+  };
+
+  const addImageField = () => {
+    setFormData({
+      ...formData,
+      images: [...formData.images, { proimageorder: formData.images.length + 1, prourl: '', prodetailimage: '' }]
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let finalImageName = formData.imageName;
-
-    if (imageFile) {
-      try {
-        const uploadResult = await uploadImage(imageFile);
-        finalImageName = uploadResult.imageName;
-      } catch (error) {
-        return; // 이미지 업로드 실패 시 중단
-      }
-    }
-    
-    // 백엔드 DTO 형식에 맞게 숫자형으로 변환
     const dataToSubmit = {
       ...formData,
-      imageName: finalImageName,
-      proprice: parseFloat(formData.proprice),
       proborrow: parseFloat(formData.proborrow),
-      proage: formData.proage ? parseInt(formData.proage, 10) : null, // 비어있을 수 있으므로 null 처리
+      proage: formData.proage ? parseInt(formData.proage, 10) : null,
       resernum: parseInt(formData.resernum, 10),
       ctnum: parseInt(formData.ctnum, 10),
       catenum: parseInt(formData.catenum, 10),
@@ -191,11 +178,6 @@ function ProductForm() {
         </div>
 
         <div className="form-group">
-          <label>상품 가격</label>
-          <input type="number" name="proprice" value={formData.proprice} onChange={handleInputChange} required />
-        </div>
-
-        <div className="form-group">
           <label>대여 가격</label>
           <input type="number" name="proborrow" value={formData.proborrow} onChange={handleInputChange} required />
         </div>
@@ -236,18 +218,29 @@ function ProductForm() {
         </div>
         
         <div className="form-group">
-          <label>상품 이미지</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-          {imagePreview && (
-            <div className="image-preview" style={{ marginTop: '10px' }}>
-              <img src={imagePreview} alt="상품 미리보기" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+          <label>상품 이미지 URL</label>
+          {formData.images.map((img, idx) => (
+            <div key={idx} style={{ marginBottom: "10px" }}>
+              <input
+                type="text"
+                placeholder="미리보기 이미지 URL"
+                value={img.prourl}
+                onChange={(e) => handleImageChange(idx, "prourl", e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="상세 이미지 URL"
+                value={img.prodetailimage}
+                onChange={(e) => handleImageChange(idx, "prodetailimage", e.target.value)}
+              />
             </div>
-          )}
+          ))}
+          <button type="button" onClick={addImageField}>+ 이미지 추가</button>
         </div>
         
         <div className="form-actions">
-            <button type="button" className="admin-btn secondary" onClick={() => navigate('/admin/products')}>취소</button>
-            <button type="submit" className="admin-btn primary">저장</button>
+          <button type="button" className="admin-btn secondary" onClick={() => navigate('/admin/products')}>취소</button>
+          <button type="submit" className="admin-btn primary">저장</button>
         </div>
       </form>
     </div>

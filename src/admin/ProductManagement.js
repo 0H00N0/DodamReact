@@ -53,54 +53,55 @@ function ProductList() {
           새 상품 등록
         </button>
       </div>
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>상품명</th>
-            <th>브랜드</th>
-            <th>카테고리</th>
-            <th>가격</th>
-            <th>상태</th>
-            <th>등록일</th>
-            <th>작업</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map(product => (
-            <tr key={product.pronum}>
-              <td>{product.pronum}</td>
-              <td>{product.proname}</td>
-              <td>{product.probrand}</td>
-              <td>{product.categoryName}</td>
-              <td>{product.proprice.toLocaleString()}원</td>
-              <td>{product.productGrade}</td>
-              <td>{new Date(product.procre).toLocaleDateString()}</td>
-              <td>
-                {/* ⬇️ '상세' 버튼 추가 ⬇️ */}
-                <button
-                  className="admin-btn info" // 새로운 스타일 클래스
-                  onClick={() => navigate(`/admin/products/${product.pronum}`)}
-                >
-                  상세
-                </button>
-                <button
-                  className="admin-btn secondary"
-                  onClick={() => navigate(`/admin/products/edit/${product.pronum}`)}
-                >
-                  수정
-                </button>
-                <button
-                  className="admin-btn danger"
-                  onClick={() => handleDelete(product.pronum)}
-                >
-                  삭제
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+<table className="admin-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>상품명</th>
+      <th>브랜드</th>
+      <th>카테고리</th>
+      <th>대여 가격</th> {/* ✅ 가격 → 대여가격 */}
+      <th>상태</th>
+      <th>등록일</th>
+      <th>작업</th>
+    </tr>
+  </thead>
+  <tbody>
+    {products.map(product => (
+      <tr key={product.pronum}>
+        <td>{product.pronum}</td>
+        <td>{product.proname}</td>
+        <td>{product.probrand}</td>
+        <td>{product.categoryName}</td>
+        <td>{(product.proborrow || 0).toLocaleString()}원</td>
+        <td>{product.productGrade}</td>
+        <td>{product.procre ? new Date(product.procre).toLocaleDateString() : '-'}</td>
+        <td>
+          <button
+            className="admin-btn info"
+            onClick={() => navigate(`/admin/products/${product.pronum}`)}
+          >
+            상세
+          </button>
+          <button
+            className="admin-btn secondary"
+            onClick={() => navigate(`/admin/products/edit/${product.pronum}`)}
+          >
+            수정
+          </button>
+          <button
+            className="admin-btn danger"
+            onClick={() => handleDelete(product.pronum)}
+          >
+            삭제
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+
     </div>
   );
 }
