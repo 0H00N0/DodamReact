@@ -26,6 +26,15 @@ import PlanDetailPage from "./Plan/PlanDetailPage";
 
 import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
 import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
+// --- Pages ---
+import Home from "./pages/Home";
+
+// Member
+import LoginForm from "./pages/member/LoginForm";
+import SignupForm from "./pages/member/SignupForm";
+import Profile from "./pages/member/Profile";
+import UpdateProfile from "./pages/member/UpdateProfile"; // 🔥 대문자 U 로 수정
+import OAuthCallback from "./pages/member/OAuthCallback";
 import FindIdModal from "./pages/member/FindIdModal";
 import FindIdByEmail from "./pages/member/findIdByEmail";
 import FindIdByTel from "./pages/member/findIdByTel";
@@ -34,15 +43,28 @@ import FindPw from "./pages/member/FindPw";
 import FindPwByMemail from "./pages/member/FindPwByMemail";
 import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
+// Product
+import ProductsPage from "./Product/pages/ProductsPage";
+import ProductDetailPage from "./Product/pages/ProductDetailPage";
+
+// Plan (현재 프로젝트에 존재하는 페이지만)
+import PlanSelectPage from "./Plan/PlanSelectPage";
+import PlanDetailPage from "./Plan/PlanDetailPage";
+
+// Community 페이지 폴더가 현재 없음 → 나중에 추가 시 import/route 복원
 
 export const router = createRouter([
   {
     path: "/",
-    element: <App />, // Header/Footer 공통
+    element: <App />,
     children: [
+      // Home
       { index: true, element: <Home /> },
+
+      // Member
       { path: "login", element: <LoginForm /> },
       { path: "signup", element: <SignupForm /> },
+      { path: "member/profile", element: <Profile /> },
       { path: "member/updateProfile", element: <UpdateProfile /> },
       { path: "member/changePw", element: <ChangePw /> },
       { path: "member/findIdModal", element: <FindIdModal /> },
@@ -54,7 +76,7 @@ export const router = createRouter([
       { path: "member/changePwDirect", element: <ChangePwDirect /> },
       { path: "oauth/callback/:provider", element: <OAuthCallback /> },
 
-      // 상품
+      // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:id", element: <ProductDetailPage /> },

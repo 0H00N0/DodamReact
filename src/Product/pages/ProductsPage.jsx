@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { fetchProducts } from "../api/ProductApi";
-import ProductCard from "../components/ProductCard";
+import ProductCard from "./ProductCard";
 import ProductFilters from "../components/ProductFilters";
 import Pagination from "../../common/Pagination";
 import { useNavigate, useParams } from "react-router-dom";
@@ -18,9 +18,9 @@ export default function ProductsPage() {
   const [params, setParams] = useState({
     page: initialPage,
     size: 12,
-    sort: "productId,desc",
+    sort: "pronum,desc",
     keyword: "",
-    categoryId: undefined,
+    catenum: undefined,
     status: "",
     minPrice: undefined,
     maxPrice: undefined,
@@ -55,7 +55,7 @@ export default function ProductsPage() {
   useEffect(() => {
     load(params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params.page, params.size, params.sort, params.keyword, params.categoryId, params.status, params.minPrice, params.maxPrice, params.lowStock]);
+  }, [params.page, params.size, params.sort, params.keyword, params.catenum, params.status, params.minPrice, params.maxPrice, params.lowStock]);
 
   const onFilterChange = (f) => {
     // 필터 바뀌면 0페이지로, URL은 바꾸지 않음 (깔끔한 경로 유지)
@@ -80,7 +80,7 @@ export default function ProductsPage() {
   const page = pageData?.number ?? 0;
   const totalPages = pageData?.totalPages ?? 1;
   const total = pageData?.totalElements ?? 0;
-
+  console.log(items);
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       <header className="mb-6">
@@ -102,6 +102,7 @@ export default function ProductsPage() {
         {!loading && items.map((it) => (
           <ProductCard key={it.pronum} item={it} onClick={onCardClick} />
         ))}
+
       </section>
 
       <Pagination page={page} totalPages={totalPages} onChange={onPageChange} /> 

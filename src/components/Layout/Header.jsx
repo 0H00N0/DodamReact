@@ -1,3 +1,4 @@
+// src/components/Layout/Header.jsx
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Header.module.css';
@@ -8,14 +9,16 @@ import CartDropdown from './CartDropdown';
 import UserDropdown from './UserDropdown';
 import { useCart } from '../../contexts/CartContext';
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLoginCart } from '../../contexts/LoginCartContext'; // 로그인 상태/회원정보 훅
+import { useAuth } from '../../contexts/AuthContext';     // ✅ 변경
+import { logout as apiLogout } from '../../utils/api';    // ✅ 로그아웃 API
 import logo from '../../images/logo.png';
 
 const Header = React.memo(() => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { isDark, toggleTheme } = useTheme();
-  const { isLoggedIn, member, logout } = useLoginCart(); // ★ logout 포함
+  const { user } = useAuth();                             // ✅ 전역 auth 구독
+  const isLoggedIn = !!user;
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -42,7 +45,6 @@ const Header = React.memo(() => {
 
   const handleCartToggle = useCallback(() => {
     if (!isLoggedIn) {
-      // ★ App 라우트와 통일된 경로로 이동
       navigate('/loginForm');
       return;
     }
@@ -73,17 +75,17 @@ const Header = React.memo(() => {
     toggleTheme();
   }, [toggleTheme]);
 
-  // ★ 로그아웃 처리: 세션 종료 후 홈으로 이동 + 드롭다운/패널 닫기
+  // ✅ 로그아웃: API 호출 + 힌트 삭제 + 전역 이벤트 + UI 정리
   const handleLogout = useCallback(async () => {
     try {
-      await logout(); // useLoginCart: 서버 /member/logout + auth:changed 이벤트
+      await apiLogout();
     } finally {
       setIsUserMenuOpen(false);
       setIsCartOpen(false);
       setIsSearchOpen(false);
       navigate('/');
     }
-  }, [logout, navigate]);
+  }, [navigate]);
 
   return (
     <>
@@ -147,7 +149,7 @@ const Header = React.memo(() => {
               </button>
             )}
 
-            {/* 유저 메뉴 버튼 (항상 보임, 내부에서 분기 처리) */}
+            {/* 유저 메뉴 버튼 */}
             <button
               className={`${styles.utilityButton} ${isUserMenuOpen ? styles.active : ''}`}
               onClick={handleUserMenuToggle}
@@ -210,9 +212,9 @@ const Header = React.memo(() => {
       <UserDropdown
         isOpen={isUserMenuOpen}
         onClose={handleUserMenuClose}
-        isLoggedIn={isLoggedIn}  // 로그인 여부 전달
-        userInfo={member}        // 사용자 정보 전달
-        onLogout={handleLogout}  // ★ 로그아웃 전달
+        isLoggedIn={isLoggedIn}
+        userInfo={user}
+        onLogout={handleLogout}
       />
     </>
   );

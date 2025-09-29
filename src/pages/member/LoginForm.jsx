@@ -38,6 +38,13 @@ export default function LoginForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+      // ✅ 1) 프론트 유효성 검사: 요청 전
+    if (!form.mid.trim() || !form.mpw) {
+      setMsg("아이디/비밀번호를 입력하세요.");
+      return; // 여기서 끝내면 네트워크 요청 안 감
+    }
+
     if (loading) return;
     setLoading(true);
     setMsg("");
@@ -46,6 +53,7 @@ export default function LoginForm() {
         mid: form.mid.trim(),
         mpw: form.mpw,
       });
+      sessionStorage.setItem("auth_hint", "1");
       window.dispatchEvent(new Event("auth:changed"));
       navigate("/", { replace: true }); // 로그인 성공 후 메인으로
     } catch (err) {
