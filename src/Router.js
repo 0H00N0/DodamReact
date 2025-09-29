@@ -6,28 +6,15 @@ import App from "./App";
 import CheckoutPage from "./Plan/PlanCheckout";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
 import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
+import Home from "./pages/Home";
 
+// Community
 import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
 import Event from "./pages/CommunityPage/Event";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
-
-import Home from "./pages/Home";
-import LoginForm from "./pages/member/LoginForm";
-import SignupForm from "./pages/member/SignupForm";
-import Profile from "./pages/member/Profile";
-import UpdateProfile from "./pages/member/updateProfile";
-import OAuthCallback from "./pages/member/OAuthCallback";
-
-import PlanSelectPage from "./Plan/PlanSelectPage";
-import PlanDetailPage from "./Plan/PlanDetailPage";
-
-import ProductsPage from "./Product/pages/ProductsPage"; // barrel export 사용
-import ProductDetailPage from "./Product/pages/ProductDetailPage"; // 개별 상품 상세 페이지
-// --- Pages ---
-import Home from "./pages/Home";
 
 // Member
 import LoginForm from "./pages/member/LoginForm";

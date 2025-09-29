@@ -166,50 +166,48 @@
 .dreamCard {
   position: relative;
   width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
+  max-width: 560px; /* 필요하면 100% */
+  height: var(--card-h, clamp(260px, 32vw, 420px)); /* ✅ 세로만 고정 */
   background: var(--bg-primary);
   border-radius: 32px;
   box-shadow: var(--shadow-xl);
-  padding: 40px;
+  padding: 0;
   overflow: hidden;
   animation: slideInRight 1s ease;
   border: 1px solid var(--border-light);
 }
 
+/* 글로우가 이미지를 가리지 않도록 */
 .dreamGlow {
+  pointer-events: none;
   position: absolute;
-  top: -50%;
-  left: -50%;
-  right: -50%;
-  bottom: -50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-  animation: dreamGlow 4s ease-in-out infinite;
+  inset: 0;
   z-index: 0;
 }
 
 .iconGrid {
-  position: relative;
+  position: absolute;
+  inset: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 20px;
+  grid-template-rows: 1fr 1fr;
+  gap: 0;          /* ✅ 내부 간격 제거 */
+  padding: 0;      /* ✅ 카드 모서리까지 붙임 */
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   z-index: 1;
 }
 
 .iconBlock {
-  background: var(--bg-secondary);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  border: 2px solid var(--border-light);
-  animation: iconFloat 3s ease-in-out infinite;
-  transition: all 0.4s ease;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
 }
+
 
 .iconBlock:hover {
   transform: translateY(-8px) scale(1.05);
@@ -317,6 +315,72 @@
   animation: dotPulse 2s ease-in-out infinite;
   opacity: 0.3;
 }
+
+.productThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;           /* 그리드도 꽉 차게 */
+  object-position: center center; /* ✅ 중앙 기준 */
+  display: block;
+  border-radius: 0;
+}
+
+.productImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;           /* 가로 꽉 + 위아래 크롭 */
+  object-position: center center; /* ✅ 가운데 기준으로 위아래 크롭 */
+  display: block;
+}
+
+.productImageContain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;         /* 잘림 없이 */
+  object-position: center center; /* ✅ 중앙 정렬 */
+  background: var(--bg-primary);
+  display: block;
+}
+
+.iconSolo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;                 /* 카드 내부 여백 없음 */
+}
+
+.iconCircle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(96px, 22vw, 160px);   /* 카드 크기에 비례해 커짐 */
+  height: clamp(96px, 22vw, 160px);
+  border-radius: 9999px;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  box-shadow: var(--shadow-md);
+}
+
+.bigIcon {
+  /* 아이콘 자체 크기 — 반응형으로 크게 */
+  font-size: clamp(48px, 12vw, 96px);
+  line-height: 1;
+  filter: drop-shadow(0 6px 18px rgba(0,0,0,0.15));
+  transform: translateY(0);            /* 살짝 떠 있는 느낌 원하면 translateY(-2px) */
+}
+
+/* (선택) 살짝 등장 애니메이션 */
+@keyframes popIn {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.iconCircle { animation: popIn 400ms ease; }
 
 /* 키프레임 애니메이션 */
 @keyframes slideIn {
@@ -426,6 +490,11 @@
     gap: 36px;
     text-align: center;
   }
+
+  .dreamCard {
+    max-width: 100%;
+    height: var(--card-h, clamp(240px, 48vw, 360px)); /* ✅ 세로 고정 유지 */
+  }
   
   .textContent {
     order: 1;
@@ -498,7 +567,8 @@
   }
   
   .dreamCard {
-    padding: 24px;
+    max-width: 100%;
+    height: var(--card-h, clamp(220px, 60vw, 320px)); /* ✅ 세로 고정 유지 */
   }
   
   .iconBlock {
@@ -542,7 +612,8 @@
   }
   
   .dreamCard {
-    padding: 20px;
+    max-width: 100%;
+    height: var(--card-h, clamp(200px, 64vw, 300px)); /* ✅ 세로 고정 유지 */
   }
   
   .iconBlock {

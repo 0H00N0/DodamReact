@@ -13,9 +13,9 @@ const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
 const Profile = React.lazy(() => import("./pages/member/Profile"));
-const UpdateProfile = React.lazy(() => import("./pages/member/updateProfile"));
+const UpdateProfile = React.lazy(() => import("./pages/member/UpdateProfile"));
 
-
+// 로딩 스피너 컴포넌트
 const LoadingSpinner = () => (
   <div className="loading-container">
     <div className="loading-spinner" role="status" aria-label="페이지 로딩 중">
