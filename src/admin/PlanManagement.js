@@ -1,10 +1,10 @@
-// PlanManagement.js
-import React, { Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import './PlanManagement.css'; // 스타일 import
+import React, { Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import "./PlanManagement.css";
 
-const PlanList = React.lazy(() => import('./PlanList'));
-const PlanForm = React.lazy(() => import('./PlanForm'));
+const PlanList = React.lazy(() => import("./PlanList"));
+const PlanForm = React.lazy(() => import("./PlanForm"));
+const PlanDetail = React.lazy(() => import("./PlanDetail")); // 추가
 
 function PlanManagement() {
   return (
@@ -13,6 +13,7 @@ function PlanManagement() {
         <Route index element={<PlanList />} />
         <Route path="new" element={<PlanForm />} />
         <Route path="edit/:planId" element={<PlanForm />} />
+        <Route path=":planId" element={<PlanDetail />} /> {/* 상세 조회 추가 */}
       </Routes>
     </Suspense>
   );

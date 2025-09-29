@@ -227,3 +227,44 @@
 .btn-secondary:hover {
   background-color: #d1d5db;
 }
+.plan-detail-container {
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.plan-detail-container h2 {
+  margin-bottom: 20px;
+}
+
+.plan-info p {
+  margin: 6px 0;
+}
+
+.plan-section {
+  margin-top: 24px;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detail-table th,
+.detail-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.btn-detail {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #7dd3fc;
+  margin-right: 6px;
+}
+.btn-detail:hover {
+  background-color: #bae6fd;
+}

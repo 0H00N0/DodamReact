@@ -74,17 +74,23 @@ export function AdminProvider({ children }) {
     return {};
   };
 
-  // --- API Request Helper ---
-  const request = async (url, options = {}) => {
+ // --- API Request Helper ---
+const request = async (url, options = {}) => {
   try {
     console.log('=== 요청 정보 ===');
     console.log('URL:', url);
     console.log('Method:', options.method);
     console.log('Headers:', options.headers);
     console.log('Body:', options.body);
-    
-    const response = await fetch(url, options);
-    
+
+    // ✅ 기본 헤더 설정 (FormData 아닐 때만)
+    let headers = options.headers || {};
+    if (!(options.body instanceof FormData)) {
+      headers = { 'Content-Type': 'application/json', ...headers };
+    }
+
+    const response = await fetch(url, { ...options, headers });
+
     console.log('=== 응답 정보 ===');
     console.log('Status:', response.status);
     console.log('Status Text:', response.statusText);
@@ -92,14 +98,12 @@ export function AdminProvider({ children }) {
       'content-type': response.headers.get('content-type'),
       'content-length': response.headers.get('content-length')
     });
-    
-    // 응답 본문을 텍스트로 먼저 읽기
+
     const responseText = await response.text();
     console.log('Raw Response:', responseText);
     console.log('Response Length:', responseText.length);
-    
+
     if (!response.ok) {
-      // 서버 에러인 경우 더 자세한 정보 출력
       console.error('Server Error Details:', {
         status: response.status,
         statusText: response.statusText,
@@ -107,13 +111,12 @@ export function AdminProvider({ children }) {
       });
       throw new Error(`HTTP ${response.status}: ${responseText}`);
     }
-    
-    // JSON 파싱 시도
+
     if (responseText.trim() === '') {
       console.log('빈 응답 받음');
       return null;
     }
-    
+
     try {
       const jsonData = JSON.parse(responseText);
       console.log('Parsed JSON:', jsonData);
@@ -123,12 +126,13 @@ export function AdminProvider({ children }) {
       console.error('파싱 시도한 텍스트:', responseText);
       throw new Error(`Invalid JSON response: ${responseText}`);
     }
-    
+
   } catch (error) {
     console.error('Request 전체 오류:', error);
     throw error;
   }
 };
+
 
   // --- VOC ---
   const getAllVocs = async (page = 0, size = 10) => {

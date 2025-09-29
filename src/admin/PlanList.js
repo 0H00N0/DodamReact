@@ -89,7 +89,13 @@ function PlanList() {
                     {plan.planActive ? '활성' : '비활성'}
                   </span>
                 </td>
-                <td>
+                  <td>
+                  <button
+                    className="btn-detail"
+                    onClick={() => navigate(`/admin/plans/${plan.planId}`)}
+                  >
+                    상세
+                  </button>
                   <button
                     className="btn-edit"
                     onClick={() => navigate(`/admin/plans/edit/${plan.planId}`)}
