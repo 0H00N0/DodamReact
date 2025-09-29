@@ -1,6 +1,7 @@
+// src/pages/CommunityBoardForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBoard } from "../../api/boardApi";
+import { createBoard } from "../../api/boardApi"; // axios POST 호출 함수
 
 function CommunityBoardForm({ currentUser }) {
   const navigate = useNavigate();
@@ -9,17 +10,18 @@ function CommunityBoardForm({ currentUser }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 작성자 자동 설정
+  // 작성자 자동 설정: 로그인 유저가 없으면 '익명'
   const writer = currentUser?.username || "익명";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!title || !content) {
       setError("제목과 내용을 모두 입력해주세요.");
       return;
     }
 
-    // 👉 서버 DTO 필드명과 맞추세요 (boardTitle, boardWriter, boardContent 같은 식일 수도 있음)
+    // ✅ 서버 엔티티 필드명과 정확히 맞춤
     const newBoard = {
       title: title,
       content: content,
@@ -30,28 +32,27 @@ function CommunityBoardForm({ currentUser }) {
     setError("");
 
     try {
-      const res = await createBoard(newBoard); // res = response.data
+      const res = await createBoard(newBoard); // axios POST
       console.log("서버 응답:", res);
 
-      const newPostId = res.id || res.bnum;
+      // 엔티티에서 id 필드 기준
+      const newPostId = res.id;
 
       alert("게시글이 등록되었습니다!");
       navigate(`/board/community/${newPostId}`);
     } catch (err) {
       console.error("게시글 등록 실패:", err);
-
       if (err.response) {
         console.error("응답 상태코드:", err.response.status);
         console.error("응답 데이터:", err.response.data);
       } else {
         console.error("서버 응답 없음:", err.message);
+      }
+      setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
     }
-
-    setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-8 bg-white rounded-2xl shadow-lg">
@@ -110,7 +111,7 @@ function CommunityBoardForm({ currentUser }) {
               <span>등록하기</span>
               <span>💌</span>
             </>
-          )}   
+          )}
         </button>
       </form>
     </div>
