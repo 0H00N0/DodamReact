@@ -38,7 +38,7 @@ export default function MainFeedVertical() {
       <div className={styles.block}>
         <div className={styles.blockHead}>
           <h3>최근 리뷰</h3>
-          <button className={styles.more} onClick={() => nav("/reviews")}>더보기</button>
+          <button className={styles.more} onClick={() => nav("/board/reviews")}>더보기</button>
         </div>
         <ul className={styles.list}>
           {reviews.map((it) => (
