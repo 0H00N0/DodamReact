@@ -9,7 +9,7 @@ import Home from "./pages/Home";
 import LoginForm from "./pages/member/LoginForm";
 import SignupForm from "./pages/member/SignupForm";
 import Profile from "./pages/member/Profile";
-import UpdateProfile from "./pages/member/UpdateProfile"; // 🔥 대문자 U 로 수정
+import UpdateProfile from "./pages/member/UpdateProfile"; 
 import OAuthCallback from "./pages/member/OAuthCallback";
 import FindIdModal from "./pages/member/FindIdModal";
 import FindIdByEmail from "./pages/member/findIdByEmail";
@@ -59,7 +59,7 @@ export const router = createRouter([
       // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
-      { path: "products/:id", element: <ProductDetailPage /> },
+      { path: "products/:pronum", element: <ProductDetailPage /> },
 
       // Plan (체크아웃/결제 리다이렉트는 파일 없음 → 제외)
       { path: "plans", element: <PlanSelectPage /> },
