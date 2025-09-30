@@ -46,6 +46,9 @@ import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
 
+//Main
+import Search from "./pages/Search";
+
 export const router = createRouter([
   {
     path: "/",
@@ -86,6 +89,9 @@ export const router = createRouter([
       // ◇ 구 경로 호환 (기존 링크가 있을 경우 404 방지)
       { path: "checkout", element: <CheckoutPage /> },
       { path: "checkout/result", element: <CheckoutResultPage /> },
+
+      { path: "search/:keyword", element: <Search /> },
+      { path: "search", element: <Search /> },
 
       // 소통(Community)
       {

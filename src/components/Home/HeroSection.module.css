@@ -1,297 +1,125 @@
-/* HeroSection 스타일 - 꿈 테마 슬라이드 */
-.hero {
-  background: var(--bg-secondary);
-  padding: 80px 0 100px 0;
-  min-height: 640px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  transition: var(--transition-base);
+/* =========================
+   HeroSection.module.css
+   ========================= */
+
+/* 레이아웃 */
+.hero{
+  background:var(--bg-secondary);
+  padding:80px 0 120px;
+  min-height:640px;
+  display:flex; align-items:center;
+  position:relative; overflow:hidden;
+}
+.slideBackground{position:absolute; inset:0; opacity:.1; transition:all .8s ease; z-index:0;}
+.container{max-width:1200px; margin:0 auto; padding:0 24px; width:100%; position:relative; z-index:1;}
+
+.content{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:60px;
+  align-items:stretch;      /* 두 칼럼 높이 동일 */
 }
 
-/* 슬라이드 배경 그라데이션 */
-.slideBackground {
-  position: absolute;
-  inset: 0;
-  opacity: 0.1;
-  transition: all 0.8s ease;
-  z-index: 0;
+/* 데스크톱: 텍스트 칼럼이 이미지 카드와 정확히 같은 높이 */
+.textContent{
+  --card-h: clamp(260px, 32vw, 420px); /* dreamCard 높이와 동일한 기준 */
+  height: var(--card-h);
+  display:grid;
+  grid-template-rows: auto 1fr auto; /* 상단(제목/설명) / 중간Spacer / 하단(버튼) */
+  max-width:500px;
+}
+.textTop{display:block;}
+.slideIndicator{margin-bottom:16px;}
+.dreamLabel{
+  display:inline-block; background:var(--state-hover); color:var(--text-secondary);
+  padding:6px 16px; border-radius:20px; font-size:.85rem; font-weight:600; letter-spacing:.5px;
+}
+.title{font-size:clamp(2.5rem,5vw,3.5rem); font-weight:700; color:var(--text-primary); line-height:1.15; margin-bottom:20px; letter-spacing:-.02em;}
+.subtitle{font-size:clamp(1rem,2.5vw,1.25rem); color:var(--text-secondary); line-height:1.6; margin-bottom:16px;}
+.description{font-size:clamp(1rem,2.2vw,1.15rem); color:var(--text-secondary); line-height:1.5; margin-bottom:0;}
+
+.ctaRow{
+  display:flex; gap:16px;
+  align-self:end;          /* 텍스트 칼럼의 '하단'에 버튼 붙이기 */
+}
+.primaryButton,.secondaryButton{
+  border-radius:12px; min-height:52px; min-width:140px; font-weight:600; cursor:pointer; padding:14px 28px;
+}
+.primaryButton{background:var(--text-primary); color:var(--bg-primary); border:none;}
+.secondaryButton{background:var(--bg-primary); color:var(--text-primary); border:2px solid var(--border-light);}
+
+/* 이미지 카드 — 텍스트 칼럼과 동일 높이 */
+.imageContent{
+  display:flex; justify-content:center; align-items:flex-start; /* 위쪽 정렬(제목 상단과 맞춤) */
+  padding-top:0;
+}
+.dreamCard{
+  position:relative; width:100%; max-width:560px;
+  height: var(--card-h, clamp(260px, 32vw, 420px));  /* 카드 높이 */
+  background:var(--bg-primary); border-radius:32px; box-shadow:var(--shadow-xl);
+  overflow:hidden; border:1px solid var(--border-light);
+}
+.dreamGlow{pointer-events:none; position:absolute; inset:0; z-index:0;}
+
+.iconGrid{position:absolute; inset:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:0;}
+.iconBlock{width:100%; height:100%; overflow:hidden;}
+.productThumb,.productImage{width:100%; height:100%; object-fit:contain; object-position:center center; display:block;}
+
+/* 하단 네비게이션 */
+.slideNavigation{
+  position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+  display:flex; align-items:center; gap:24px; z-index:10;
+}
+.navButton{
+  background:var(--bg-primary); border:2px solid var(--border-light);
+  border-radius:50%; width:46px; height:46px; display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:var(--text-secondary); cursor:pointer; box-shadow:var(--shadow-base);
+}
+.dotNavigation{display:flex; gap:12px; align-items:center;}
+.dot{width:12px; height:12px; border-radius:50%; background:var(--text-muted); opacity:.35; border:none; cursor:pointer; transition:all .25s ease;}
+.activeDot{background:var(--text-secondary); opacity:1; transform:scale(1.25);}
+
+/* =========================
+   반응형
+   ========================= */
+@media (max-width:1024px){
+  .content{gap:48px;}
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-  width: 100%;
-  position: relative;
-  z-index: 1;
-}
-
-/* ✅ 데스크탑: 텍스트/이미지 2열 + 버튼은 텍스트 아래 행 */
-.content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "text  image"
-    "cta   image";
-  column-gap: 60px;
-  row-gap: 24px;
-  align-items: center;
-}
-
-.textContent { grid-area: text; max-width: 500px; }
-.imageContent { grid-area: image; display: flex; justify-content: center; align-items: center; }
-
-/* ✅ 버튼 전용 영역 */
-.ctaRow {
-  grid-area: cta;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-/* 슬라이드 인디케이터 */
-.slideIndicator { margin-bottom: 16px; }
-
-.dreamLabel {
-  display: inline-block;
-  background: var(--state-hover);
-  color: var(--text-secondary);
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  animation: slideIn 0.6s ease;
-}
-
-/* 텍스트 */
-.description {
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  color: var(--text-secondary);
-  line-height: 1.5;
-  margin-bottom: 32px;
-  font-weight: 400;
-  word-break: keep-all;
-  animation: fadeInUp 0.8s ease;
-}
-.title {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.15;
-  margin-bottom: 20px;
-  letter-spacing: -0.02em;
-  word-break: keep-all;
-  animation: slideInLeft 0.8s ease;
-}
-.subtitle {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 16px;
-  font-weight: 400;
-  word-break: keep-all;
-  max-width: 480px;
-  animation: slideInLeft 0.8s ease 0.2s both;
-}
-
-/* 버튼 */
-.primaryButton {
-  background: var(--text-primary);
-  color: var(--bg-primary);
-  border: none;
-  padding: 16px 32px;
-  border-radius: 12px;
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-md);
-  min-height: 52px;
-  min-width: 140px;
-  display: flex; align-items: center; justify-content: center; white-space: nowrap;
-}
-.primaryButton:hover { background: var(--text-secondary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-.primaryButton:active { transform: translateY(0); }
-
-.secondaryButton {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  border: 2px solid var(--border-light);
-  padding: 14px 30px;
-  border-radius: 12px;
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-height: 52px;
-  min-width: 140px;
-  display: flex; align-items: center; justify-content: center; white-space: nowrap;
-}
-.secondaryButton:hover { border-color: var(--text-primary); background: var(--state-hover); }
-.secondaryButton:active { transform: scale(0.98); }
-
-/* 드림 카드 (이미지 박스) */
-.dreamCard {
-  position: relative;
-  width: 100%;
-  max-width: 560px;
-  height: var(--card-h, clamp(260px, 32vw, 420px)); /* 세로 고정 */
-  background: var(--bg-primary);
-  border-radius: 32px;
-  box-shadow: var(--shadow-xl);
-  overflow: hidden;
-  padding: 0;
-  animation: slideInRight 1s ease;
-  border: 1px solid var(--border-light);
-}
-.dreamGlow { pointer-events: none; position: absolute; inset: 0; z-index: 0; }
-
-/* 그리드 이미지 (2x2) */
-.iconGrid {
-  position: absolute; inset: 0;
-  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
-  gap: 0; padding: 0; box-sizing: border-box; width: 100%; height: 100%; z-index: 1;
-}
-.iconBlock { width: 100%; height: 100%; overflow: hidden; background: transparent; border: 0; border-radius: 0; }
-.iconBlock:hover { transform: translateY(-8px) scale(1.05); box-shadow: var(--shadow-lg); background: var(--bg-primary); }
-
-/* 네비게이션 */
-.slideNavigation {
-  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 20px; z-index: 10;
-}
-.navButton {
-  background: var(--bg-primary); backdrop-filter: blur(10px);
-  border: 2px solid var(--border-light); border-radius: 50%;
-  width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
-  font-size: 1.2rem; font-weight: bold; color: var(--text-secondary);
-  cursor: pointer; transition: all 0.3s ease; box-shadow: var(--shadow-base);
-}
-.navButton:hover { background: var(--bg-primary); border-color: var(--text-primary); color: var(--text-primary); transform: scale(1.1); box-shadow: var(--shadow-md); }
-.navButton:active { transform: scale(0.95); }
-
-.dotNavigation { display: flex; gap: 12px; align-items: center; }
-.dot { width: 12px; height: 12px; border-radius: 50%; border: none; background: var(--text-muted); cursor: pointer; transition: all 0.3s ease; position: relative; opacity: 0.3; }
-.dot:hover { opacity: 0.5; transform: scale(1.2); }
-.activeDot { background: var(--text-secondary); transform: scale(1.4); opacity: 1; }
-.activeDot::after {
-  content: ""; position: absolute; inset: -4px;
-  border: 2px solid var(--text-secondary); border-radius: 50%;
-  animation: dotPulse 2s ease-in-out infinite; opacity: 0.3;
-}
-
-/* 이미지 fit: PC/모바일 공통 — 박스에 보기 좋게 */
-.productThumb,
-.productImage,
-.productImageContain {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  display: block; background: var(--bg-primary);
-}
-.productThumb { object-fit: contain; object-position: center center; }
-.productImage { object-fit: contain; object-position: center center; }
-.productImageContain { object-fit: contain; object-position: center center; }
-
-/* 아이콘 fallback */
-.iconSolo { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0; }
-.iconCircle {
-  display: flex; align-items: center; justify-content: center;
-  width: clamp(96px, 22vw, 160px); height: clamp(96px, 22vw, 160px);
-  border-radius: 9999px; background: var(--bg-primary);
-  border: 2px solid var(--border-light); box-shadow: var(--shadow-md);
-}
-.bigIcon { font-size: clamp(48px, 12vw, 96px); line-height: 1; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.15)); transform: translateY(0); }
-
-/* 반응형 */
-@media (max-width: 1024px) {
-  .hero { padding: 60px 0; min-height: 560px; }
-  .container { padding: 0 20px; }
-}
-
+/* 모바일(≤768px): 텍스트 → 이미지 → 버튼 순서 강제 */
 @media (max-width: 768px) {
-  .hero { padding: 48px 0; min-height: auto; text-align: center; }
-  .container { padding: 0 16px; }
+  .hero { padding: 48px 0 128px; }
 
-  /* ✅ 모바일: 순서 = text → image → cta */
+  /* 1) 한열 그리드 + 영역 정의 */
   .content {
+    display: grid;
     grid-template-columns: 1fr;
+    grid-auto-rows: auto;
     grid-template-areas:
       "text"
       "image"
       "cta";
-    row-gap: 24px;
-    text-align: center;
+    gap: 28px;
+    align-items: start;
   }
-  .ctaRow { justify-content: center; }
 
-  .dreamCard { max-width: 100%; height: var(--card-h, clamp(240px, 48vw, 360px)); }
-  .title { margin-bottom: 16px; line-height: 1.2; }
-  .subtitle { margin-bottom: 28px; max-width: 100%; }
-  .primaryButton, .secondaryButton { padding: 14px 24px; min-width: 120px; min-height: 48px; }
+  /* 2) .textContent를 평탄화해서 내부의 .textTop, .ctaRow를
+        .content 그리드의 '직접 자식'처럼 동작시킴 */
+  .textContent {
+    display: contents;     /* ✅ 핵심 */
+    height: auto;          /* 데스크톱 높이 고정 해제 */
+  }
+
+  /* 3) 각 영역 배치 */
+  .textTop     { grid-area: text; }
+  .imageContent{ grid-area: image; }
+  .ctaRow      { grid-area: cta; justify-content: center; margin-top: 8px; }
+
+  /* 4) 네비 버튼 크기 유지 */
+  .slideNavigation { bottom: 16px; gap: 18px; }
+  .navButton { width: 42px; height: 42px; }
 }
 
 @media (max-width: 480px) {
-  .hero { padding: 36px 0; }
-  .container { padding: 0 12px; }
-  .content { row-gap: 20px; }
-
-  .buttonGroup { flex-direction: column; align-items: center; gap: 12px; width: 100%; }
-  .primaryButton, .secondaryButton { width: 100%; max-width: 280px; padding: 16px 24px; font-size: 0.95rem; }
-
-  .dreamCard { max-width: 100%; height: var(--card-h, clamp(220px, 60vw, 320px)); }
-  .slideNavigation { bottom: 20px; gap: 16px; }
-  .navButton { width: 44px; height: 44px; font-size: 1rem; }
-}
-
-@media (max-width: 360px) {
-  .hero { padding: 28px 0; }
-  .container { padding: 0 8px; }
-  .primaryButton, .secondaryButton { padding: 14px 20px; font-size: 0.9rem; min-height: 44px; }
-  .dreamCard { height: var(--card-h, clamp(200px, 64vw, 300px)); }
-  .slideNavigation { bottom: 15px; gap: 12px; }
-  .navButton { width: 40px; height: 40px; font-size: 0.9rem; }
-  .dot { width: 10px; height: 10px; }
-}
-
-/* 고해상도 화면 최적화 */
-@media (min-width: 1400px) {
-  .hero { padding: 100px 0; min-height: 720px; }
-  .container { padding: 0 32px; }
-  .content { column-gap: 80px; }
-  .title { font-size: 4rem; margin-bottom: 28px; }
-  .subtitle { font-size: 1.3rem; margin-bottom: 48px; }
-  .primaryButton, .secondaryButton { padding: 18px 36px; font-size: 1.1rem; min-height: 56px; min-width: 160px; }
-}
-
-/* 키프레임 */
-@keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideInLeft { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes dotPulse { 0%,100%{opacity:.3;transform:scale(1)} 50%{opacity:.8;transform:scale(1.2)} }
-
-/* 접근성/환경설정 */
-@media (hover: none) and (pointer: coarse) {
-  .primaryButton, .secondaryButton { min-height: 48px; font-size: 1rem; }
-  .primaryButton:active, .secondaryButton:active { transform: scale(0.98); }
-}
-@media (prefers-contrast: high) {
-  .title { color: #000; font-weight: 800; }
-  .subtitle { color: #333; font-weight: 500; }
-  .primaryButton, .secondaryButton { border: 2px solid; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .primaryButton, .secondaryButton, .iconBlock, .navButton, .dot { transition: none; }
-  .primaryButton:hover, .secondaryButton:hover, .navButton:hover { transform: none; }
-  .iconBlock:hover { transform: none; }
-  .title, .subtitle, .description, .dreamCard, .dreamLabel { animation: none; }
-  .activeDot::after { animation: none; }
-}
-@media print {
-  .hero { background: white; padding: 20px 0; min-height: auto; }
-  .slideBackground, .slideNavigation { display: none; }
-  .dreamCard { box-shadow: none; border: 1px solid #ddd; }
+  .slideNavigation { bottom: 14px; }
 }

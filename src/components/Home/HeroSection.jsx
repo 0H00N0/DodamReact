@@ -1,5 +1,5 @@
 // src/components/Home/HeroSection.jsx
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./HeroSection.module.css";
 import {
@@ -8,10 +8,9 @@ import {
   fetchProductImages,
 } from "../MainProductApi";
 
-// 이미지가 전혀 없을 때 쓸 플레이스홀더
-const PLACEHOLDER_IMG = "https://dummyimage.com/480x360/eeeeee/999999&text=No+Image";
+const PLACEHOLDER_IMG =
+  "https://dummyimage.com/480x360/eeeeee/999999&text=No+Image";
 
-// (고정) 커뮤니티/공지 이미지
 const COMMUNITY_IMAGES = [
   "https://private-cyan-i5ea7ssejx.edgeone.app/%EC%97%AC%EC%9E%90%EC%95%84%EC%9D%B4.jpg",
 ];
@@ -20,6 +19,7 @@ const NOTICE_IMAGES = [
 ];
 
 const USE_DETAIL_IMAGES = true;
+const AUTO_MS = 7000;
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -27,22 +27,29 @@ export default function HeroSection() {
   const [newest, setNewest] = useState(null);
   const [topRented, setTopRented] = useState(null);
 
-  // 상세 이미지 리스트
   const [newestImages, setNewestImages] = useState([]);
   const [topRentedImages, setTopRentedImages] = useState([]);
 
-  const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 카드 비율 자동 맞춤(이미지 naturalWidth/Height 기반)
+  // 자동 슬라이드 타이머
+  const timerRef = useRef(null);
+  const restartTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slidesLenRef.current);
+    }, AUTO_MS);
+  };
+  useEffect(() => () => timerRef.current && clearInterval(timerRef.current), []);
+
+  // 동적 카드 높이 계산을 위한 비율(필요 시)
   const [cardRatioById, setCardRatioById] = useState({});
   const setAutoRatio = (slideId) => (e) => {
     const w = e?.target?.naturalWidth || 4;
     const h = e?.target?.naturalHeight || 3;
-    setCardRatioById((prev) => ({ ...prev, [slideId]: `${w} / ${h}` }));
+    setCardRatioById((p) => ({ ...p, [slideId]: `${w} / ${h}` }));
   };
 
-  // ✅ 숫자 ID만 리턴 (0, null, undefined, 빈문자 → undefined)
   const getProductId = (p) => {
     const cand =
       p?.pronum ??
@@ -62,7 +69,6 @@ export default function HeroSection() {
     return Number.isFinite(n) && n > 0 ? n : undefined;
   };
 
-  // 최초: 최신/인기 1개씩 가져오기
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -71,22 +77,14 @@ export default function HeroSection() {
           fetchNewProducts(1),
           fetchPopularProducts(1),
         ]);
-
         if (!mounted) return;
-
         const newestList = Array.isArray(nRes?.data) ? nRes.data : [];
         const popularList = Array.isArray(pRes?.data) ? pRes.data : [];
-
         setNewest(newestList[0] || null);
         setTopRented(popularList[0] || null);
-      } catch (e) {
-        console.warn("[Hero] fetch product error:", e);
-        if (mounted) {
-          setNewest(null);
-          setTopRented(null);
-        }
-      } finally {
-        if (mounted) setLoading(false);
+      } catch {
+        setNewest(null);
+        setTopRented(null);
       }
     })();
     return () => {
@@ -94,7 +92,6 @@ export default function HeroSection() {
     };
   }, []);
 
-  // --- 최신 상품 이미지 ---
   useEffect(() => {
     let mounted = true;
     if (!USE_DETAIL_IMAGES) {
@@ -103,7 +100,6 @@ export default function HeroSection() {
         mounted = false;
       };
     }
-
     const id = getProductId(newest);
     if (!id) {
       setNewestImages([]);
@@ -111,18 +107,15 @@ export default function HeroSection() {
         mounted = false;
       };
     }
-
     (async () => {
-      const urls = await fetchProductImages(id, 4); // 실패해도 [] 반환
+      const urls = await fetchProductImages(id, 4);
       if (mounted) setNewestImages(Array.isArray(urls) ? urls : []);
     })();
-
     return () => {
       mounted = false;
     };
   }, [newest]);
 
-  // --- 인기 상품 이미지 ---
   useEffect(() => {
     let mounted = true;
     if (!USE_DETAIL_IMAGES) {
@@ -131,7 +124,6 @@ export default function HeroSection() {
         mounted = false;
       };
     }
-
     const id = getProductId(topRented);
     if (!id) {
       setTopRentedImages([]);
@@ -139,18 +131,15 @@ export default function HeroSection() {
         mounted = false;
       };
     }
-
     (async () => {
       const urls = await fetchProductImages(id, 4);
       if (mounted) setTopRentedImages(Array.isArray(urls) ? urls : []);
     })();
-
     return () => {
       mounted = false;
     };
   }, [topRented]);
 
-  // 안전 접근 유틸
   const pick = (obj, keys, fallback = "") =>
     (obj &&
       keys.reduce(
@@ -158,10 +147,8 @@ export default function HeroSection() {
         undefined
       )) ?? fallback;
 
-  // 상품 슬라이드 생성: 항상 사진만 사용(기본 contain)
   const productToSlide = (product, opts) => {
     if (!product) return null;
-
     const id =
       pick(product, ["pronum", "proId", "proid", "id", "productId", "pid"]) ||
       pick(product, ["code", "productCode"]);
@@ -186,7 +173,6 @@ export default function HeroSection() {
         (repImage ? [repImage] : [PLACEHOLDER_IMG]),
       productId: id,
       primaryText: "상품 상세 정보",
-      // 상세 경로: /product/:id
       onPrimary: () => navigate(id ? `/product/${id}` : "/products"),
       imageFit: opts.imageFit ?? "contain",
       aspectRatio: opts.aspectRatio,
@@ -194,7 +180,6 @@ export default function HeroSection() {
     };
   };
 
-  // 커뮤니티 / 공지 슬라이드
   const communitySlide = {
     id: "community",
     type: "link",
@@ -227,7 +212,6 @@ export default function HeroSection() {
     onPrimary: () => navigate("/board/notice"),
   };
 
-  // 동적 상품 2 + 고정 2
   const slides = useMemo(() => {
     const results = [];
 
@@ -277,19 +261,20 @@ export default function HeroSection() {
     return results;
   }, [newest, topRented, newestImages, topRentedImages, navigate]);
 
-  // 자동 슬라이드
+  // 자동 슬라이드 시작/재시작
+  const slidesLenRef = useRef(slides.length);
   useEffect(() => {
-    if (!slides.length) return;
-    const t = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 7000);
-    return () => clearInterval(t);
-  }, [slides.length]);
+    slidesLenRef.current = slides.length;
+    restartTimer();
+  }, [slides.length, currentSlide]);
 
+  const go = (idx) => {
+    setCurrentSlide(idx);
+    restartTimer(); // ➜ 화살표/점 클릭 시 7초 타이머 리셋
+  };
   const prevSlide = () =>
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  const nextSlide = () =>
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    go((currentSlide - 1 + slides.length) % slides.length);
+  const nextSlide = () => go((currentSlide + 1) % slides.length);
 
   const current = slides[currentSlide] || {};
 
@@ -302,171 +287,79 @@ export default function HeroSection() {
 
       <div className={styles.container}>
         <div className={styles.content}>
-          {/* 텍스트 */}
+          {/* 왼쪽: 텍스트(상단 = 제목, 하단 = 버튼) */}
           <div className={styles.textContent}>
-            <div className={styles.slideIndicator}>
-              <span className={styles.dreamLabel}>
-                {currentSlide + 1} / {slides.length}
-              </span>
+            <div className={styles.textTop}>
+              <div className={styles.slideIndicator}>
+                <span className={styles.dreamLabel}>
+                  {currentSlide + 1} / {slides.length}
+                </span>
+              </div>
+              <h1 className={styles.title}>{current.title}</h1>
+              {current.subtitle && (
+                <p className={styles.subtitle}>{current.subtitle}</p>
+              )}
+              {current.description && (
+                <p className={styles.description}>{current.description}</p>
+              )}
             </div>
 
-            <h1 className={styles.title}>{current.title}</h1>
-            {current.subtitle && (
-              <p className={styles.subtitle}>{current.subtitle}</p>
-            )}
-            {current.description && (
-              <p className={styles.description}>{current.description}</p>
-            )}
+            <div className={styles.ctaRow}>
+              {current.onPrimary && (
+                <button className={styles.primaryButton} onClick={current.onPrimary}>
+                  {current.primaryText || "바로가기"}
+                </button>
+              )}
+              {current.onSecondary && (
+                <button
+                  className={styles.secondaryButton}
+                  onClick={current.onSecondary}
+                >
+                  {current.secondaryText || "자세히 보기"}
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* 이미지 */}
+          {/* 오른쪽: 이미지 카드(텍스트 칼럼과 동일 높이) */}
           <div className={styles.imageContent}>
-            {current.type === "product" ? (
-              (current.imageUrls?.length ?? 0) >= 2 ? (
-                // 2장 이상 → 2×2 그리드
-                <div
-                  className={styles.dreamCard}
-                  style={{ "--card-h": current.cardHeight || undefined }}
-                >
-                  <div className={styles.iconGrid}>
-                    {current.imageUrls.slice(0, 4).map((url, i) => (
-                      <div
-                        key={i}
-                        className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                      >
-                        <img
-                          src={url || PLACEHOLDER_IMG}
-                          alt={`${current.title} #${i + 1}`}
-                          className={
-                            current.imageFit === "contain"
-                              ? styles.productThumbContain
-                              : styles.productThumb
-                          }
-                          style={{
-                            objectPosition: current.imagePosition || "center",
-                          }}
-                          onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className={styles.dreamGlow} />
-                </div>
-              ) : (
-                // 1장 → 단일 큰 이미지
-                <div
-                  className={styles.dreamCard}
-                  style={{
-                    "--card-ratio":
-                      cardRatioById[current.id] || current.aspectRatio || "4 / 3",
-                  }}
-                >
-                  <img
-                    src={current.imageUrls?.[0] || PLACEHOLDER_IMG}
-                    alt={current.title}
-                    className={
-                      current.imageFit === "contain"
-                        ? styles.productImageContain
-                        : styles.productImage
-                    }
-                    style={{ objectPosition: current.imagePosition || "center" }}
-                    onLoad={setAutoRatio(current.id)}
-                  />
-                  <div className={styles.dreamGlow} />
-                </div>
-              )
-            ) : (current.imageUrls?.length ?? 0) >= 2 ? (
-              <div
-                className={styles.dreamCard}
-                style={{
-                  "--card-ratio":
-                    cardRatioById[current.id] || current.aspectRatio || "4 / 3",
-                }}
-              >
+            <div
+              className={styles.dreamCard}
+              style={{
+                "--card-ratio":
+                  cardRatioById[current.id] || current.aspectRatio || "4 / 3",
+              }}
+            >
+              {Array.isArray(current.imageUrls) && current.imageUrls.length > 1 ? (
                 <div className={styles.iconGrid}>
                   {current.imageUrls.slice(0, 4).map((url, i) => (
-                    <div
-                      key={i}
-                      className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
-                      style={{ animationDelay: `${i * 0.1}s` }}
-                    >
+                    <div key={i} className={styles.iconBlock}>
                       <img
                         src={url || PLACEHOLDER_IMG}
                         alt={`${current.title} #${i + 1}`}
-                        className={
-                          current.imageFit === "contain"
-                            ? styles.productThumbContain
-                            : styles.productThumb
-                        }
-                        style={{
-                          objectPosition: current.imagePosition || "center",
-                        }}
+                        className={styles.productThumb}
                         onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
                       />
                     </div>
                   ))}
                 </div>
-                <div className={styles.dreamGlow} />
-              </div>
-            ) : (current.imageUrls?.length ?? 0) === 1 ? (
-              <div
-                className={styles.dreamCard}
-                style={{
-                  "--card-ratio":
-                    cardRatioById[current.id] || current.aspectRatio || "4 / 3",
-                }}
-              >
+              ) : (
                 <img
-                  src={current.imageUrls[0] || PLACEHOLDER_IMG}
+                  src={current.imageUrls?.[0] || PLACEHOLDER_IMG}
                   alt={current.title}
-                  className={
-                    current.imageFit === "contain"
-                      ? styles.productImageContain
-                      : styles.productImage
-                  }
-                  style={{ objectPosition: current.imagePosition || "center" }}
+                  className={styles.productImage}
                   onLoad={setAutoRatio(current.id)}
                 />
-                <div className={styles.dreamGlow} />
-              </div>
-            ) : (
-              // 이미지 없으면 아이콘 fallback
-              <div className={styles.dreamCard}>
-                <div className={styles.iconSolo}>
-                  <div className={styles.iconCircle}>
-                    <span className={styles.bigIcon}>
-                      {(current.icons && current.icons[0]) || "📢"}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.dreamGlow} />
-              </div>
-            )}
-          </div>
-
-          {/* ✅ 버튼을 별도의 행으로 분리: 모바일에서 이미지 아래로 자동 배치됨 */}
-          <div className={styles.ctaRow}>
-            {current.onPrimary && (
-              <button className={styles.primaryButton} onClick={current.onPrimary}>
-                {current.primaryText || "바로가기"}
-              </button>
-            )}
-            {current.onSecondary && (
-              <button
-                className={styles.secondaryButton}
-                onClick={current.onSecondary}
-              >
-                {current.secondaryText || "자세히 보기"}
-              </button>
-            )}
+              )}
+              <div className={styles.dreamGlow} />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 네비게이션 */}
+      {/* 하단 네비게이션 — 버튼과 겹치지 않게 중앙 하단 고정 */}
       <div className={styles.slideNavigation}>
-        <button className={styles.navButton} onClick={prevSlide} aria-label="이전 슬라이드">
+        <button className={styles.navButton} onClick={prevSlide} aria-label="이전">
           ←
         </button>
         <div className={styles.dotNavigation}>
@@ -474,12 +367,12 @@ export default function HeroSection() {
             <button
               key={i}
               className={`${styles.dot} ${i === currentSlide ? styles.activeDot : ""}`}
-              onClick={() => setCurrentSlide(i)}
+              onClick={() => go(i)}
               aria-label={`${i + 1}번 슬라이드로 이동`}
             />
           ))}
         </div>
-        <button className={styles.navButton} onClick={nextSlide} aria-label="다음 슬라이드">
+        <button className={styles.navButton} onClick={nextSlide} aria-label="다음">
           →
         </button>
       </div>

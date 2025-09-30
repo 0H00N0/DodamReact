@@ -89,3 +89,9 @@ export async function fetchProductImages(productId, limit = 4) {
     return [];
   }
 }
+
+export async function searchProductsByName({ q, sort = "RECENT", page = 0, size = 24 }) {
+  const params = { q, sort, page, size };
+  const { data } = await api.get("/api/products/search", { params });
+  return data; // Spring Page<ProductSearchDto>
+}
