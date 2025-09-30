@@ -9,6 +9,19 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
+  const addCart = async () => {
+  await fetch("/cart", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mnum, pronum, catenum, resernum })
+  });
+  alert("장바구니에 담겼습니다!");
+};
+
+const goToBuyPage = () => {
+  navigate(`/buy/${pronum}`); // 나중에 구매 페이지 url로 수정
+};
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -80,16 +93,21 @@ export default function ProductDetailPage() {
           </div>
           <div>
             <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>
-            <span className="ml-2 text-sm text-gray-500">재고: {stock}</span>
           </div>
           <div className="text-gray-700 whitespace-pre-line">{prodetail}</div>
 
           {/* 장바구니 버튼 */}
           <button
             className="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-            // onClick={() => { /* 추후 장바구니 기능 구현 */ }}
+            onClick={addCart}
           >
             장바구니에 담기
+          </button>
+          <button
+            className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+            onClick={goToBuyPage}
+          >
+            바로 구매하기
           </button>
 
           <div className="text-xs text-gray-400">
