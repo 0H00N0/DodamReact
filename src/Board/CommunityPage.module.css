@@ -1,48 +1,60 @@
+/* Container 전체 */
 .container {
-  padding: 2rem;
-}
-
-.title {
-  margin-bottom: 1rem;
-  font-size: 1.8rem;
-  font-weight: bold;
-}
-
-.tabNav {
-  border-bottom: 2px solid #eee;
-  margin-bottom: 1.5rem;
-}
-
-.tabList {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: center;     /* 가로 중앙 정렬 */
+}
+
+/* 페이지 제목 */
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;          /* 🔥 가운데 정렬 확실하게 */
+}
+
+/* 탭 메뉴 wrapper - 가로 중앙 */
+.tabNavWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 탭 메뉴 가로 중앙 */
+  margin-bottom: 20px;
+}
+
+/* 메뉴 리스트 */
+.tabList {
+  display: flex;       /* ul 안 li 가로 배치 */
+  justify-content: center; /* li들 중앙 배치 */
+  gap: 20px;
   list-style: none;
   padding: 0;
   margin: 0;
+  width: auto;         /* ul이 100% 차지하지 않게 */
 }
 
-.tabItem {}
-
+/* 메뉴 링크 */
 .tabLink {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  color: #555;
   text-decoration: none;
-  border-bottom: 2px solid transparent;
-  font-weight: 500;
-  transition: color 0.2s, border-color 0.2s;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  padding: 0.3rem 0.6rem;
 }
 
 .tabLink:hover {
-  color: #000;
+  color: #2563eb;
 }
 
-.active {
-  color: #000;
-  border-color: #007bff; /* 강조색 */
-  font-weight: 600;
+.tabLink.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff; /* 선택된 탭 강조 */
 }
 
+/* 내용 영역 */
 .content {
-  min-height: 200px;
+  width: 100%;
+  max-width: 900px;
+  text-align: left; /* 내용 왼쪽 정렬 */
+  margin-top: 20px;
 }
