@@ -2,26 +2,43 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
 
-export default function ProductDetailPage() {
+// 예시: 로그인 회원 정보가 있다면 아래처럼 받아올 수 있음
+
+export default function ProductDetailPage({ mid }) {
   const { pronum } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-
-  const addCart = async () => {
-  await fetch("/cart", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mnum, pronum, catenum, resernum })
-  });
-  alert("장바구니에 담겼습니다!");
+const styles = {
+  linkBtn: {
+    padding: "12px 24px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#2563eb",
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: "16px",
+    cursor: "pointer",
+    marginTop: "16px",
+    marginRight: "8px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+    transition: "background 0.2s",
+  },
+  buyBtn: {
+    padding: "12px 24px",
+    borderRadius: "8px",
+    border: "none",
+    background: "#059669",
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: "16px",
+    cursor: "pointer",
+    marginTop: "16px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+    transition: "background 0.2s",
+  }
 };
-
-const goToBuyPage = () => {
-  navigate(`/buy/${pronum}`); // 나중에 구매 페이지 url로 수정
-};
-
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -48,6 +65,7 @@ const goToBuyPage = () => {
     return <div className="py-10 text-center text-gray-500">상품 정보가 없습니다.</div>;
   }
 
+  // 상품 정보에서 필요한 값 추출
   const {
     proname,
     proprice,
@@ -58,11 +76,33 @@ const goToBuyPage = () => {
     stock,
     createdAt,
     updatedAt,
+    catenum,
+    resernum,
   } = product;
+
+  // 로그인 회원번호 예시
+  const mnum = mid?.mnum || 1; // 실제 로그인 정보로 대체
+
+  // 장바구니 버튼 함수
+  const addCart = async () => {
+    const ok = window.confirm("장바구니에 담으시겠습니까?");
+    if (!ok) return;
+    await fetch("/cart", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mnum, pronum, catenum, resernum })
+    });
+    window.confirm("장바구니에 담겼습니다!");
+  };
+
+  // 구매하기 버튼 함수
+  const goToBuyPage = () => {
+    navigate(`/buy/${pronum}`); // 구매 페이지로 이동
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <button
+      <button 
         onClick={() => navigate(-1)}
         className="mb-6 px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100"
       >
@@ -97,15 +137,19 @@ const goToBuyPage = () => {
           <div className="text-gray-700 whitespace-pre-line">{prodetail}</div>
 
           {/* 장바구니 버튼 */}
-          <button
-            className="mt-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+          <button 
+            style={styles.linkBtn}
             onClick={addCart}
+            onMouseOver={e => e.currentTarget.style.background = "#1d4ed8"}
+            onMouseOut={e => e.currentTarget.style.background = "#2563eb"}
           >
             장바구니에 담기
           </button>
           <button
-            className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700"
+            style={styles.buyBtn}
             onClick={goToBuyPage}
+            onMouseOver={e => e.currentTarget.style.background = "#047857"}
+            onMouseOut={e => e.currentTarget.style.background = "#059669"}
           >
             바로 구매하기
           </button>
