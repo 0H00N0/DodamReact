@@ -1,22 +1,25 @@
-// HeroSection.jsx
+// src/components/Home/HeroSection.jsx
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./HeroSection.module.css";
 import {
-  fetchNewestProduct,
-  fetchTopRentedProduct,
+  fetchNewProducts,
+  fetchPopularProducts,
   fetchProductImages,
 } from "../MainProductApi";
 
-// 🔸 이미지가 전혀 없을 때 쓸 플레이스홀더(원하면 로컬 에셋으로 교체)
+// 이미지가 전혀 없을 때 쓸 플레이스홀더
 const PLACEHOLDER_IMG = "https://dummyimage.com/480x360/eeeeee/999999&text=No+Image";
+
+// (고정) 커뮤니티/공지 이미지
 const COMMUNITY_IMAGES = [
-  "https://private-cyan-i5ea7ssejx.edgeone.app/%EC%97%AC%EC%9E%90%EC%95%84%EC%9D%B4.jpg"
+  "https://private-cyan-i5ea7ssejx.edgeone.app/%EC%97%AC%EC%9E%90%EC%95%84%EC%9D%B4.jpg",
+];
+const NOTICE_IMAGES = [
+  "https://dodamdodam.edgeone.app/%EC%95%8C%EB%A0%A4%20%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4%EC%99%80%20%EC%9E%A5%EB%82%9C%EA%B0%90%EB%93%A4.png",
 ];
 
-const NOTICE_IMAGES = [
- "https://dodamdodam.edgeone.app/%EC%95%8C%EB%A0%A4%20%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4%EC%99%80%20%EC%9E%A5%EB%82%9C%EA%B0%90%EB%93%A4.png"
-];
+const USE_DETAIL_IMAGES = true;
 
 export default function HeroSection() {
   const navigate = useNavigate();
@@ -39,60 +42,112 @@ export default function HeroSection() {
     setCardRatioById((prev) => ({ ...prev, [slideId]: `${w} / ${h}` }));
   };
 
-  // 상품 ID 추출 (proId 우선)
-  const getProductId = (p) =>
-    (p &&
-      (p.proId ?? p.id ?? p.productId ?? p.pid ?? p.code ?? p.productCode)) ||
-    null;
+  // ✅ 숫자 ID만 리턴 (0, null, undefined, 빈문자 → undefined)
+  const getProductId = (p) => {
+    const cand =
+      p?.pronum ??
+      p?.proId ??
+      p?.proid ??
+      p?.id ??
+      p?.productId ??
+      p?.pid ??
+      p?.code ??
+      p?.productCode;
+    const n =
+      typeof cand === "string"
+        ? parseInt(cand, 10)
+        : typeof cand === "number"
+        ? cand
+        : NaN;
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  };
 
   // 최초: 최신/인기 1개씩 가져오기
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
-        const [n, p] = await Promise.all([fetchNewestProduct(), fetchTopRentedProduct()]);
+        const [nRes, pRes] = await Promise.all([
+          fetchNewProducts(1),
+          fetchPopularProducts(1),
+        ]);
+
         if (!mounted) return;
-        setNewest(n || null);
-        setTopRented(p || null);
+
+        const newestList = Array.isArray(nRes?.data) ? nRes.data : [];
+        const popularList = Array.isArray(pRes?.data) ? pRes.data : [];
+
+        setNewest(newestList[0] || null);
+        setTopRented(popularList[0] || null);
       } catch (e) {
         console.warn("[Hero] fetch product error:", e);
+        if (mounted) {
+          setNewest(null);
+          setTopRented(null);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // 최신 상품 이미지
+  // --- 최신 상품 이미지 ---
   useEffect(() => {
     let mounted = true;
+    if (!USE_DETAIL_IMAGES) {
+      setNewestImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+
     const id = getProductId(newest);
-    if (!id) return;
+    if (!id) {
+      setNewestImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+
     (async () => {
-      try {
-        const urls = await fetchProductImages(id, 4);
-        if (mounted) setNewestImages(Array.isArray(urls) && urls.length ? urls : []);
-      } catch (e) {
-        console.warn("[Hero] fetch newest images error:", e);
-      }
+      const urls = await fetchProductImages(id, 4); // 실패해도 [] 반환
+      if (mounted) setNewestImages(Array.isArray(urls) ? urls : []);
     })();
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, [newest]);
 
-  // 인기 상품 이미지
+  // --- 인기 상품 이미지 ---
   useEffect(() => {
     let mounted = true;
+    if (!USE_DETAIL_IMAGES) {
+      setTopRentedImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+
     const id = getProductId(topRented);
-    if (!id) return;
+    if (!id) {
+      setTopRentedImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+
     (async () => {
-      try {
-        const urls = await fetchProductImages(id, 4);
-        if (mounted) setTopRentedImages(Array.isArray(urls) && urls.length ? urls : []);
-      } catch (e) {
-        console.warn("[Hero] fetch topRented images error:", e);
-      }
+      const urls = await fetchProductImages(id, 4);
+      if (mounted) setTopRentedImages(Array.isArray(urls) ? urls : []);
     })();
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, [topRented]);
 
   // 안전 접근 유틸
@@ -103,16 +158,21 @@ export default function HeroSection() {
         undefined
       )) ?? fallback;
 
-  // 상품 슬라이드 생성: 아이콘 제거, 항상 사진만
+  // 상품 슬라이드 생성: 항상 사진만 사용(기본 contain)
   const productToSlide = (product, opts) => {
     if (!product) return null;
 
     const id =
-      pick(product, ["proId", "id", "productId", "pid"]) ||
+      pick(product, ["pronum", "proId", "proid", "id", "productId", "pid"]) ||
       pick(product, ["code", "productCode"]);
-    const name = pick(product, ["name", "productName", "title"], "상품");
+    const name = pick(
+      product,
+      ["name", "productName", "title", "proname"],
+      "상품"
+    );
     const repImage =
-      pick(product, ["imageUrl", "mainImage", "thumbnailUrl", "img"]) || null;
+      pick(product, ["imageUrl", "mainImage", "thumbnailUrl", "img", "proimg"]) ||
+      null;
 
     return {
       id: opts.id,
@@ -121,48 +181,52 @@ export default function HeroSection() {
       subtitle: opts.subtitle ?? "",
       description: opts.description ?? "",
       bgGradient: opts.bgGradient,
-      // 상세 이미지 배열이 우선, 없으면 대표 1장, 그것도 없으면 플레이스홀더
       imageUrls:
         (opts.imageUrls && opts.imageUrls.length && opts.imageUrls) ||
         (repImage ? [repImage] : [PLACEHOLDER_IMG]),
       productId: id,
       primaryText: "상품 상세 정보",
-      onPrimary: () => navigate(id ? `/products/${id}` : "/products"),
+      // 상세 경로: /product/:id
+      onPrimary: () => navigate(id ? `/product/${id}` : "/products"),
+      imageFit: opts.imageFit ?? "contain",
+      aspectRatio: opts.aspectRatio,
+      imagePosition: opts.imagePosition,
     };
   };
 
   // 커뮤니티 / 공지 슬라이드
   const communitySlide = {
-  id: "community",
-  type: "link",
-  title: "도담 커뮤니티",
-  subtitle: "우리 아이 장난감 사용팁, 인증샷, 리뷰를 공유해요",
-  description: "다른 가족들의 실제 후기와 팁을 확인해 보세요.",
-  bgGradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
-  imageUrls: COMMUNITY_IMAGES.filter(Boolean),
-  imageFit: "contain",           // ✅ 잘림 방지
-  aspectRatio: "1 / 1",          // ✅ 이미지가 정사각형이면 1/1
-  imagePosition: "center center",// 필요시 "center top" 등
-  icons: ["💬"],
-  primaryText: "커뮤니티 바로가기",
-  onPrimary: () => navigate("/board/community"),
-};
+    id: "community",
+    type: "link",
+    title: "도담 커뮤니티",
+    subtitle: "우리 아이 장난감 사용팁, 인증샷, 리뷰를 공유해요",
+    description: "다른 가족들의 실제 후기와 팁을 확인해 보세요.",
+    bgGradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    imageUrls: COMMUNITY_IMAGES.filter(Boolean),
+    imageFit: "contain",
+    aspectRatio: "1 / 1",
+    imagePosition: "center center",
+    icons: ["💬"],
+    primaryText: "커뮤니티 바로가기",
+    onPrimary: () => navigate("/board/community"),
+  };
 
-const noticeSlide = {
-  id: "notice",
-  type: "link",
-  title: "공지사항",
-  subtitle: "서비스 업데이트, 이벤트, 점검 일정을 안내합니다",
-  description: "가장 빠른 새 소식을 확인하세요.",
-  bgGradient: "linear-gradient(135deg, #ffd3a5 0%, #fd6585 100%)",
-  imageUrls: NOTICE_IMAGES.filter(Boolean),
-  imageFit: "contain",           // ✅ 잘림 방지
-  aspectRatio: "1 / 1",          // 배너가 가로형이면 "16 / 9" 등으로 변경
-  imagePosition: "center center",
-  icons: ["📢"],
-  primaryText: "공지사항 바로가기",
-  onPrimary: () => navigate("/board/notice"),
-};
+  const noticeSlide = {
+    id: "notice",
+    type: "link",
+    title: "공지사항",
+    subtitle: "서비스 업데이트, 이벤트, 점검 일정을 안내합니다",
+    description: "가장 빠른 새 소식을 확인하세요.",
+    bgGradient: "linear-gradient(135deg, #ffd3a5 0%, #fd6585 100%)",
+    imageUrls: NOTICE_IMAGES.filter(Boolean),
+    imageFit: "contain",
+    aspectRatio: "1 / 1",
+    imagePosition: "center center",
+    icons: ["📢"],
+    primaryText: "공지사항 바로가기",
+    onPrimary: () => navigate("/board/notice"),
+  };
+
   // 동적 상품 2 + 고정 2
   const slides = useMemo(() => {
     const results = [];
@@ -176,7 +240,6 @@ const noticeSlide = {
         bgGradient: "linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)",
         imageUrls: newestImages,
       }) ||
-      // 데이터가 아직 없을 때도 아이콘 대신 사진(플레이스홀더)로
       {
         id: "newest-fallback",
         type: "product",
@@ -239,6 +302,7 @@ const noticeSlide = {
 
       <div className={styles.container}>
         <div className={styles.content}>
+          {/* 텍스트 */}
           <div className={styles.textContent}>
             <div className={styles.slideIndicator}>
               <span className={styles.dreamLabel}>
@@ -247,136 +311,164 @@ const noticeSlide = {
             </div>
 
             <h1 className={styles.title}>{current.title}</h1>
-            {current.subtitle && <p className={styles.subtitle}>{current.subtitle}</p>}
-            {current.description && <p className={styles.description}>{current.description}</p>}
-
-            <div className={styles.buttonGroup}>
-              {current.onPrimary && (
-                <button className={styles.primaryButton} onClick={current.onPrimary}>
-                  {current.primaryText || "바로가기"}
-                </button>
-              )}
-              {current.onSecondary && (
-                <button className={styles.secondaryButton} onClick={current.onSecondary}>
-                  {current.secondaryText || "자세히 보기"}
-                </button>
-              )}
-            </div>
+            {current.subtitle && (
+              <p className={styles.subtitle}>{current.subtitle}</p>
+            )}
+            {current.description && (
+              <p className={styles.description}>{current.description}</p>
+            )}
           </div>
 
+          {/* 이미지 */}
           <div className={styles.imageContent}>
-  {current.type === "product" ? (
-    (current.imageUrls?.length ?? 0) >= 2 ? (
-      // ✅ 상품: 2장 이상 → 2×2 그리드 (좌우 공백 없음)
-      <div
-        className={styles.dreamCard}
-        style={{ "--card-h": current.cardHeight || undefined }}
-      >
-        <div className={styles.iconGrid}>
-          {current.imageUrls.slice(0, 4).map((url, i) => (
-            <div
-              key={i}
-              className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <img
-                src={url}
-                alt={`${current.title} #${i + 1}`}
-                className={
-                  current.imageFit === "contain" ? styles.productThumbContain : styles.productThumb
-                }
-                style={{ objectPosition: current.imagePosition || "center" }}
-                onLoad={i === 0 ? setAutoRatio(current.id) : undefined} // 첫 장으로 비율 세팅
-              />
-            </div>
-          ))}
-        </div>
-        <div className={styles.dreamGlow} />
-      </div>
-    ) : (
-      // ✅ 상품: 1장 → 단일 큰 이미지, 좌우 공백 없이 꽉
-      <div
-        className={styles.dreamCard}
-        style={{ "--card-ratio": cardRatioById[current.id] || current.aspectRatio || "4 / 3" }}
-      >
-        <img
-          src={current.imageUrls?.[0] || current.imageUrl}
-          alt={current.title}
-          className={
-            current.imageFit === "contain" ? styles.productImageContain : styles.productImage
-          }
-          style={{ objectPosition: current.imagePosition || "center" }}
-          onLoad={setAutoRatio(current.id)}
-        />
-        <div className={styles.dreamGlow} />
-      </div>
-    )
-  ) : (
-    // ✅ 링크형(공지/커뮤니티): 이미지 우선, 없으면 아이콘 fallback
-    (current.imageUrls?.length ?? 0) >= 2 ? (
-      <div
-        className={styles.dreamCard}
-        style={{ "--card-ratio": cardRatioById[current.id] || current.aspectRatio || "4 / 3" }}
-      >
-        <div className={styles.iconGrid}>
-          {current.imageUrls.slice(0, 4).map((url, i) => (
-            <div
-              key={i}
-              className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              <img
-                src={url}
-                alt={`${current.title} #${i + 1}`}
-                className={
-                  current.imageFit === "contain" ? styles.productThumbContain : styles.productThumb
-                }
-                style={{ objectPosition: current.imagePosition || "center" }}
-                onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
-              />
-            </div>
-          ))}
-        </div>
-        <div className={styles.dreamGlow} />
-      </div>
-    ) : (current.imageUrls?.length ?? 0) === 1 ? (
-      <div
-        className={styles.dreamCard}
-        style={{ "--card-ratio": cardRatioById[current.id] || current.aspectRatio || "4 / 3" }}
-      >
-        <img
-          src={current.imageUrls[0]}
-          alt={current.title}
-          className={
-            current.imageFit === "contain" ? styles.productImageContain : styles.productImage
-          }
-          style={{ objectPosition: current.imagePosition || "center" }}
-          onLoad={setAutoRatio(current.id)}
-        />
-        <div className={styles.dreamGlow} />
-      </div>
-    ) : (
-      // 이미지 없으면 아이콘(기존)
-      <div className={styles.dreamCard}>
-        <div className={styles.iconSolo}>
-          <div className={styles.iconCircle}>
-            <span className={styles.bigIcon}>
-              {(current.icons && current.icons[0]) || "📢"}
-            </span>
+            {current.type === "product" ? (
+              (current.imageUrls?.length ?? 0) >= 2 ? (
+                // 2장 이상 → 2×2 그리드
+                <div
+                  className={styles.dreamCard}
+                  style={{ "--card-h": current.cardHeight || undefined }}
+                >
+                  <div className={styles.iconGrid}>
+                    {current.imageUrls.slice(0, 4).map((url, i) => (
+                      <div
+                        key={i}
+                        className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      >
+                        <img
+                          src={url || PLACEHOLDER_IMG}
+                          alt={`${current.title} #${i + 1}`}
+                          className={
+                            current.imageFit === "contain"
+                              ? styles.productThumbContain
+                              : styles.productThumb
+                          }
+                          style={{
+                            objectPosition: current.imagePosition || "center",
+                          }}
+                          onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.dreamGlow} />
+                </div>
+              ) : (
+                // 1장 → 단일 큰 이미지
+                <div
+                  className={styles.dreamCard}
+                  style={{
+                    "--card-ratio":
+                      cardRatioById[current.id] || current.aspectRatio || "4 / 3",
+                  }}
+                >
+                  <img
+                    src={current.imageUrls?.[0] || PLACEHOLDER_IMG}
+                    alt={current.title}
+                    className={
+                      current.imageFit === "contain"
+                        ? styles.productImageContain
+                        : styles.productImage
+                    }
+                    style={{ objectPosition: current.imagePosition || "center" }}
+                    onLoad={setAutoRatio(current.id)}
+                  />
+                  <div className={styles.dreamGlow} />
+                </div>
+              )
+            ) : (current.imageUrls?.length ?? 0) >= 2 ? (
+              <div
+                className={styles.dreamCard}
+                style={{
+                  "--card-ratio":
+                    cardRatioById[current.id] || current.aspectRatio || "4 / 3",
+                }}
+              >
+                <div className={styles.iconGrid}>
+                  {current.imageUrls.slice(0, 4).map((url, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.iconBlock} ${styles[`icon${i + 1}`]}`}
+                      style={{ animationDelay: `${i * 0.1}s` }}
+                    >
+                      <img
+                        src={url || PLACEHOLDER_IMG}
+                        alt={`${current.title} #${i + 1}`}
+                        className={
+                          current.imageFit === "contain"
+                            ? styles.productThumbContain
+                            : styles.productThumb
+                        }
+                        style={{
+                          objectPosition: current.imagePosition || "center",
+                        }}
+                        onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className={styles.dreamGlow} />
+              </div>
+            ) : (current.imageUrls?.length ?? 0) === 1 ? (
+              <div
+                className={styles.dreamCard}
+                style={{
+                  "--card-ratio":
+                    cardRatioById[current.id] || current.aspectRatio || "4 / 3",
+                }}
+              >
+                <img
+                  src={current.imageUrls[0] || PLACEHOLDER_IMG}
+                  alt={current.title}
+                  className={
+                    current.imageFit === "contain"
+                      ? styles.productImageContain
+                      : styles.productImage
+                  }
+                  style={{ objectPosition: current.imagePosition || "center" }}
+                  onLoad={setAutoRatio(current.id)}
+                />
+                <div className={styles.dreamGlow} />
+              </div>
+            ) : (
+              // 이미지 없으면 아이콘 fallback
+              <div className={styles.dreamCard}>
+                <div className={styles.iconSolo}>
+                  <div className={styles.iconCircle}>
+                    <span className={styles.bigIcon}>
+                      {(current.icons && current.icons[0]) || "📢"}
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.dreamGlow} />
+              </div>
+            )}
           </div>
-        </div>
-        <div className={styles.dreamGlow} />
-      </div>
-    )
-  )}
-</div>
 
+          {/* ✅ 버튼을 별도의 행으로 분리: 모바일에서 이미지 아래로 자동 배치됨 */}
+          <div className={styles.ctaRow}>
+            {current.onPrimary && (
+              <button className={styles.primaryButton} onClick={current.onPrimary}>
+                {current.primaryText || "바로가기"}
+              </button>
+            )}
+            {current.onSecondary && (
+              <button
+                className={styles.secondaryButton}
+                onClick={current.onSecondary}
+              >
+                {current.secondaryText || "자세히 보기"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 네비게이션 */}
       <div className={styles.slideNavigation}>
-        <button className={styles.navButton} onClick={prevSlide} aria-label="이전 슬라이드">←</button>
+        <button className={styles.navButton} onClick={prevSlide} aria-label="이전 슬라이드">
+          ←
+        </button>
         <div className={styles.dotNavigation}>
           {slides.map((_, i) => (
             <button
@@ -387,7 +479,9 @@ const noticeSlide = {
             />
           ))}
         </div>
-        <button className={styles.navButton} onClick={nextSlide} aria-label="다음 슬라이드">→</button>
+        <button className={styles.navButton} onClick={nextSlide} aria-label="다음 슬라이드">
+          →
+        </button>
       </div>
     </section>
   );
