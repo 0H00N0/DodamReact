@@ -21,6 +21,11 @@ function PlanInvoices() {
     fetchInvoices();
   }, [getAllInvoices]);
 
+  const handleInvoiceDetail = (piId) => {
+    // 상세 조회 로직 (모달 열기 or 라우팅)
+    console.log("결제 상세 조회:", piId);
+  };
+
   if (loading) return <div>결제 내역을 불러오는 중...</div>;
 
   return (
@@ -33,6 +38,7 @@ function PlanInvoices() {
               <th>결제 ID</th>
               <th>구독 ID</th>
               <th>회원 번호</th>
+              <th>회원 이름</th>
               <th>플랜명</th>
               <th>금액</th>
               <th>통화</th>
@@ -41,15 +47,17 @@ function PlanInvoices() {
               <th>결제 시작</th>
               <th>결제 종료</th>
               <th>결제 완료일</th>
+              <th>상세</th>
             </tr>
           </thead>
           <tbody>
             {invoices.map((i) => (
               <tr key={i.piId}>
                 <td>{i.piId}</td>
-                <td>{i.planMember?.pmId}</td>
-                <td>{i.planMember?.member?.mnum}</td>
-                <td>{i.planMember?.plan?.planName}</td>
+                <td>{i.pmId}</td>
+                <td>{i.memberId}</td>
+                <td>{i.memberName}</td>
+                <td>{i.planName}</td>
                 <td>
                   {new Intl.NumberFormat("ko-KR", {
                     style: "currency",
@@ -58,10 +66,13 @@ function PlanInvoices() {
                 </td>
                 <td>{i.piCurr}</td>
                 <td>{i.piStat}</td>
-                <td>{i.piUid}</td>
+                <td>{i.piUid || "-"}</td>
                 <td>{i.piStart}</td>
                 <td>{i.piEnd}</td>
-                <td>{i.piPaid}</td>
+                <td>{i.piPaid || "-"}</td>
+                <td>
+                  <button onClick={() => handleInvoiceDetail(i.piId)}>상세</button>
+                </td>
               </tr>
             ))}
           </tbody>

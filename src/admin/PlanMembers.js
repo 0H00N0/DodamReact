@@ -21,6 +21,11 @@ function PlanMembers() {
     fetchSubs();
   }, [getAllSubscriptions]);
 
+  const handleDetail = (pmId) => {
+    // 상세 조회 로직 (모달 열기 or 라우팅)
+    console.log("구독 상세 조회:", pmId);
+  };
+
   if (loading) return <div>구독 회원 목록을 불러오는 중...</div>;
 
   return (
@@ -32,6 +37,7 @@ function PlanMembers() {
             <tr>
               <th>구독 ID</th>
               <th>회원 번호</th>
+              <th>회원 이름</th>
               <th>플랜명</th>
               <th>상태</th>
               <th>청구 방식</th>
@@ -40,14 +46,16 @@ function PlanMembers() {
               <th>기간 종료</th>
               <th>다음 결제일</th>
               <th>취소 여부</th>
+              <th>상세</th>
             </tr>
           </thead>
           <tbody>
             {subscriptions.map((s) => (
               <tr key={s.pmId}>
                 <td>{s.pmId}</td>
-                <td>{s.member?.mnum}</td>
-                <td>{s.plan?.planName}</td>
+                <td>{s.memberId}</td>
+                <td>{s.memberName}</td>
+                <td>{s.planName}</td>
                 <td>{s.pmStat}</td>
                 <td>{s.pmBilMode}</td>
                 <td>{s.pmStart}</td>
@@ -55,6 +63,9 @@ function PlanMembers() {
                 <td>{s.pmTermEnd}</td>
                 <td>{s.pmNextBil}</td>
                 <td>{s.pmCancelCheck ? "예" : "아니오"}</td>
+                <td>
+                  <button onClick={() => handleDetail(s.pmId)}>상세</button>
+                </td>
               </tr>
             ))}
           </tbody>
