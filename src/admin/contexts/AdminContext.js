@@ -305,7 +305,12 @@ const deleteProduct = async (id) => {
     await request(`${API_BASE_URL}/admin/plans/${id}`, { method: 'DELETE' });
     addNotification(`플랜(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
   };
-
+    const getAllSubscriptions = async () => {
+  return await request(`${API_BASE_URL}/admin/plans/subscriptions`);
+};
+const getAllInvoices = async () => {
+  return await request(`${API_BASE_URL}/admin/plans/invoices`);
+};
   // --- Board ---
   const getAllBoardCategories = async () => request(`${API_BASE_URL}/admin/boards`);
   const createBoardCategory = async (categoryData) => {
@@ -467,7 +472,10 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     deleteDiscount,
     getAllPlanTerms,
     bulkUploadProducts,
-    getFirstEventWinners
+    getFirstEventWinners,
+    // Plan related APIs
+    getAllSubscriptions,
+    getAllInvoices
   };
 
   return (

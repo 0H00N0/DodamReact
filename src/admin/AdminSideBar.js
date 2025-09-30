@@ -76,7 +76,6 @@ function AdminSidebar() {
         { title: '회수', path: '/admin/orders/returns' },
         { title: '연체', path: '/admin/orders/overdue' },
         { title: '손실/분실', path: '/admin/orders/lost' },
-        { title: '연장', path: '/admin/orders/extended' }, // 새 서브메뉴 추가
         
       ]
     },
@@ -136,7 +135,9 @@ function AdminSidebar() {
       path: '/admin/plans',
       submenu: [
         { title: '플랜 목록', path: '/admin/plans' },
-        { title: '플랜 등록', path: '/admin/plans/new' }
+        { title: '플랜 등록', path: '/admin/plans/new' },
+        { title: '구독 회원 목록', path: '/admin/plans/members' },
+        { title: '결제 내역', path: '/admin/plans/invoices' }        
       ]
     },
     {

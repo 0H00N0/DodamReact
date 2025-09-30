@@ -12,11 +12,10 @@ const BRAND_LIST = [
   { brandId: 5, brandName: '기타' }
 ];
 
-// 초기 폼 데이터
+// ✅ 수정 후
 const initialFormData = {
   proname: '',
   prodetail: '',
-  proprice: '',
   proborrow: '',
   probrand: '',
   promade: '',
@@ -24,7 +23,6 @@ const initialFormData = {
   procertif: '',
   prodate: '',
   resernum: '',
-  ctnum: '',
   catenum: '',
   prosnum: '',
   images: [{ proimageorder: 1, prourl: '', prodetailimage: '' }]
@@ -64,7 +62,6 @@ function ProductForm() {
             setFormData({
               proname: product.proname || '',
               prodetail: product.prodetail || '',
-              proprice: product.proprice || '',
               proborrow: product.proborrow || '',
               probrand: product.probrand || '',
               promade: product.promade || '',
@@ -72,7 +69,6 @@ function ProductForm() {
               procertif: product.procertif || '',
               prodate: product.prodate || '',
               resernum: product.resernum || '',
-              ctnum: product.ctnum || '',
               catenum: product.category?.catenum || '',
               prosnum: product.prostate?.prosnum || '',
               images: product.images && product.images.length > 0 
@@ -114,12 +110,12 @@ function ProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // ✅ 수정 후
     const dataToSubmit = {
       ...formData,
       proborrow: parseFloat(formData.proborrow),
       proage: formData.proage ? parseInt(formData.proage, 10) : null,
       resernum: parseInt(formData.resernum, 10),
-      ctnum: parseInt(formData.ctnum, 10),
       catenum: parseInt(formData.catenum, 10),
       prosnum: parseInt(formData.prosnum, 10)
     };
@@ -205,11 +201,6 @@ function ProductForm() {
         <div className="form-group">
           <label>대여 예약 번호(임시)</label>
           <input type="number" name="resernum" value={formData.resernum} onChange={handleInputChange} required />
-        </div>
-        
-        <div className="form-group">
-          <label>쿠폰 종류(임시)</label>
-          <input type="number" name="ctnum" value={formData.ctnum} onChange={handleInputChange} required />
         </div>
 
         <div className="form-group">

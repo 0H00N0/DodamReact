@@ -104,6 +104,7 @@ function PlanDetail() {
         )}
       </div>
     </div>
+    
   );
 }
 
