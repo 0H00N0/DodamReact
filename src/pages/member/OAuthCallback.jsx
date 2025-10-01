@@ -1,9 +1,11 @@
 // src/pages/member/OAuthCallback.jsx
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
+import { useAuth } from '../../contexts/AuthContext';  
 import { postWithSession } from '../../utils/api';
 import { useNavigate, useParams } from 'react-router-dom';
 
 export default function OAuthCallback() {
+  const { setUser } = useAuth();  
   const { provider } = useParams();
   const p = (provider || '').toLowerCase();   // 'kakao' | 'naver'
   const navigate = useNavigate();
@@ -50,6 +52,18 @@ export default function OAuthCallback() {
         // 5) 백엔드로 전달
         const payload = token ? { token } : { code, state };
         const data = await postWithSession(`/oauth/${p}/token`, payload);
+
+        // 로그인 즉시 헤더에 반영 (깜빡임 최소화)
+        if (data?.login) {
+          // ✅ 컨텍스트와 동일한 shape로 맞춤
+          setUser({
+            isAuthenticated: true,
+            mid: data.mid || '',
+            // name: data.name || '',
+            mname: data.name || '',
+            email: data.email || '',
+          });
+        }
 
         // 6) 전역 알림 + 힌트 저장
         try {

@@ -53,7 +53,6 @@ const Footer = React.memo(() => {
               <li><a href="/guide/order">주문 방법</a></li>
               <li><a href="/guide/payment">결제 안내</a></li>
               <li><a href="/guide/membership">회원 혜택</a></li>
-              <li><a href="/guide/points">적립금 안내</a></li>
               <li><a href="/guide/safety">안전성 인증</a></li>
             </ul>
           </nav>

@@ -1,73 +1,208 @@
 :root {
---pink-25: #fff7fa;
---pink-50: #fff1f4;
---pink-100: #ffe4eb;
---pink-200: #ffc9d7;
---pink-300: #ff9fb7;
---pink-400: #ff7aa0;
---pink-500: #ff5a8d;
---ink-900: #19181b;
---ink-700: #36343a;
---ink-500: #6b6972;
---ink-300: #a3a0aa;
---ink-200: #c8c6cf;
---panel: #ffffff;
---panel-muted: var(--pink-50);
+  --pink-25: #fff7fa;
+  --pink-50: #fff1f4;
+  --pink-100: #ffe4eb;
+  --pink-200: #ffc9d7;
+  --pink-300: #ff9fb7;
+  --pink-400: #ff7aa0;
+  --pink-500: #ff5a8d;
+  --ink-900: #19181b;
+  --ink-700: #36343a;
+  --ink-500: #6b6972;
+  --ink-300: #a3a0aa;
+  --ink-200: #c8c6cf;
+  --panel: #ffffff;
+  --panel-muted: var(--pink-50);
 }
-
 
 .searchPage {
-max-width: 1200px;
-margin: 0 auto;
-padding: 24px;
-min-height: 60vh;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 60vh;
 }
-
 
 /* 검색 헤더 */
 .searchHeader { margin-bottom: 24px; }
 
-
 .searchForm {
-display: grid;
-grid-template-columns: 1fr auto;
-gap: 10px;
-margin-bottom: 16px;
-max-width: 680px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-width: 720px;
 }
 
-
+/* ✅ 검색창 */
 .searchInput {
-height: 48px;
-padding: 0 16px;
-border-radius: 12px;
-border: 2px solid var(--pink-100);
-background: var(--pink-50);
-font-size: 16px;
-transition: border-color .15s ease, background .15s ease;
+  height: 50px;
+  padding: 0 16px;
+  border-radius: 12px;              /* 사각형 + 둥근 모서리 */
+  border: 2px solid var(--pink-100);
+  background: var(--pink-50);
+  color: var(--ink-900);
+  caret-color: var(--pink-400);
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
 }
-.searchInput:focus { outline: none; border-color: var(--pink-300); background: #fff; }
+.searchInput::placeholder {
+  color: var(--ink-300);
+  opacity: 1;
+}
+.searchInput:focus {
+  background: #fff;
+  border-color: var(--pink-300);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--pink-300) 30%, transparent);
+}
 
-
+/* ✅ 버튼: 단색 연핑크 */
 .searchBtn {
-height: 48px;
-padding: 0 18px;
-border-radius: 12px;
-border: none;
-background: linear-gradient(180deg, var(--pink-400), var(--pink-500));
-color: #fff; font-weight: 700; cursor: pointer;
-box-shadow: 0 6px 20px rgba(255, 90, 141, .25);
+  height: 50px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: none;
+  background: var(--pink-300);   /* ← 단색 */
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 154, 183, 0.25);
+  transition: all 0.15s ease;
 }
-.searchBtn:hover { filter: brightness(.97); }
+.searchBtn:hover {
+  background: var(--pink-400);   /* hover 시 조금 진해짐 */
+}
+.searchBtn:active {
+  background: var(--pink-500);   /* active 시 더 진해짐 */
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(255, 154, 183, 0.25);
+}
 
-
+/* 검색 결과 상단 */
 .searchInfo {
-display: flex; justify-content: space-between; align-items: flex-end;
-padding-bottom: 16px; border-bottom: 2px solid var(--pink-100);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--pink-100);
 }
-.searchTitle { font-size: 28px; font-weight: 800; color: var(--ink-900); margin: 0; }
-.resultCount { color: var(--ink-500); }
+.searchTitle {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0;
+}
+.resultCount {
+  color: var(--ink-500);
+}
 
+/* 검색 결과 */
+.searchResults {
+  margin-top: 32px;
+}
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.productGrid > div {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.productGrid > div:hover {
+  transform: translateY(-4px);
+}
 
-/* 로딩 */
-.loading { display: grid; place-items: center; gap: 10px; min-height: 300px; }
+/* 안내 메시지 */
+.noQuery, .noResults {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 24px;
+  border-radius: 16px;
+  background: var(--pink-25);
+  border: 1px solid var(--pink-100);
+  color: var(--ink-500);
+  min-height: 300px;
+}
+.noQuery h2, .noResults h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--ink-700);
+}
+.noQuery p, .noResults p {
+  font-size: 16px;
+  color: var(--ink-500);
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .productGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .productGrid {
+    grid-template-columns: 1fr;
+  }
+}
+/* === Filters === */
+.filterBar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--pink-100);
+  margin-bottom: 16px;
+}
+
+.filterGroup {
+  display: grid;
+  gap: 8px;
+}
+
+.filterGroupRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.filterLabel {
+  font-weight: 700;
+  color: var(--ink-700);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--pink-100);
+  background: #fff;
+  color: var(--ink-700);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all .15s ease;
+}
+.chip:hover { border-color: var(--pink-200); transform: translateY(-1px); }
+.chip.active { background: var(--pink-50); border-color: var(--pink-300); color: var(--ink-900); }
+
+.select {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--pink-100);
+  background: #fff;
+  color: var(--ink-900);
+}
