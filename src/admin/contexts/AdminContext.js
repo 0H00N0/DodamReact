@@ -74,7 +74,7 @@ export function AdminProvider({ children }) {
     return {};
   };
 
- // --- API Request Helper ---
+// --- API Request Helper ---
 const request = async (url, options = {}) => {
   try {
     console.log('=== 요청 정보 ===');
@@ -89,7 +89,12 @@ const request = async (url, options = {}) => {
       headers = { 'Content-Type': 'application/json', ...headers };
     }
 
-    const response = await fetch(url, { ...options, headers });
+    // ✅ 세션 쿠키(JSESSIONID) 포함시키기
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      credentials: "include"   // <<<<<<<<<<<<<<<< 요거 추가
+    });
 
     console.log('=== 응답 정보 ===');
     console.log('Status:', response.status);
@@ -132,6 +137,7 @@ const request = async (url, options = {}) => {
     throw error;
   }
 };
+
 
 
   // --- VOC ---
