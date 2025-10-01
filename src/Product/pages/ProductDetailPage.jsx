@@ -1,44 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
+import { useAuth } from '../../contexts/AuthContext';
 
-// 예시: 로그인 회원 정보가 있다면 아래처럼 받아올 수 있음
-
-export default function ProductDetailPage({ mid }) {
+export default function ProductDetailPage() {
+  const { user } = useAuth(); // user = 로그인 정보
   const { pronum } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-const styles = {
-  linkBtn: {
-    padding: "12px 24px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#2563eb",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "16px",
-    cursor: "pointer",
-    marginTop: "16px",
-    marginRight: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-    transition: "background 0.2s",
-  },
-  buyBtn: {
-    padding: "12px 24px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#059669",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "16px",
-    cursor: "pointer",
-    marginTop: "16px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-    transition: "background 0.2s",
-  }
-};
+  const styles = {
+    linkBtn: {
+      padding: "12px 24px",
+      borderRadius: "8px",
+      border: "none",
+      background: "#2563eb",
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "16px",
+      cursor: "pointer",
+      marginTop: "16px",
+      marginRight: "8px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+      transition: "background 0.2s",
+    },
+    buyBtn: {
+      padding: "12px 24px",
+      borderRadius: "8px",
+      border: "none",
+      background: "#059669",
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "16px",
+      cursor: "pointer",
+      marginTop: "16px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+      transition: "background 0.2s",
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -76,27 +77,36 @@ const styles = {
     stock,
     createdAt,
     updatedAt,
-    catenum,
-    resernum,
+    catenum
   } = product;
 
-  // 로그인 회원번호 예시
-  const mnum = mid?.mnum || 1; // 실제 로그인 정보로 대체
+  // 로그인 회원 번호
+  const mnum = user?.mnum;
 
   // 장바구니 버튼 함수
   const addCart = async () => {
+    if (!user) {
+      alert("로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
     const ok = window.confirm("장바구니에 담으시겠습니까?");
     if (!ok) return;
     await fetch("/cart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mnum, pronum, catenum, resernum })
+      body: JSON.stringify({ mnum, pronum, catenum })
     });
-    window.confirm("장바구니에 담겼습니다!");
+    window.confirm("상품이 장바구니에 담겼습니다.");
   };
 
-  // 구매하기 버튼 함수
+  // 구매하기 버튼
   const goToBuyPage = () => {
+    if (!user) {
+      alert("로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
     navigate(`/buy/${pronum}`); // 구매 페이지로 이동
   };
 
