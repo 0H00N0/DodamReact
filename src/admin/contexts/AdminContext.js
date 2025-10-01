@@ -235,10 +235,19 @@ const deleteProduct = async (id) => {
   // --- Members ---
   const getAllMembers = async () => request(`${API_BASE_URL}/admin/members`);
   const getMemberById = async (id) => request(`${API_BASE_URL}/admin/members/${id}`);
-  const deleteMember = async (id) => {
-    await request(`${API_BASE_URL}/admin/members/${id}`, { method: 'DELETE' });
-    addNotification(`회원(ID: ${id})이 성공적으로 삭제되었습니다.`, 'success');
-  };
+  // ✅ 기존 deleteMember → forceDeleteMember로 변경
+  const forceDeleteMember = async (id, reason) => {
+  await request(`${API_BASE_URL}/admin/members/${id}`, {
+    method: 'DELETE',
+    headers: { "Content-Type": "application/json" },
+    body: reason ? JSON.stringify({ reason }) : null
+  });
+  addNotification(`회원(ID: ${id})이 성공적으로 탈퇴 처리되었습니다.`, 'success');
+};
+// ✅ 상태별 회원 조회
+  const getMembersByStatus = async (status) => {
+  return await request(`${API_BASE_URL}/admin/members/status/${status}`);
+};
 
   // --- Deliveryman ---
   const getAllDeliverymen = async () => request(`${API_BASE_URL}/admin/deliverymen`);
@@ -424,7 +433,8 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     getAllMembers,
     getMemberById,
     getDeliveryEligibleMembers,
-    deleteMember,
+    forceDeleteMember, // ✅ 이름 변경된 함수
+    getMembersByStatus, // ✅ 상태별 회원 조회 함수 추가
     getAllProducts,
     getProductById,
     createProduct,
