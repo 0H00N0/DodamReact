@@ -83,29 +83,11 @@ export default function LoginForm() {
     <div style={styles.wrapper}>
       <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>로그인</h2>
-
         <label htmlFor="mid">아이디</label>
-        <input
-          id="mid"
-          name="mid"
-          value={form.mid}
-          onChange={onChange}
-          placeholder="아이디"
-          autoComplete="username"
-          required
-        />
+        <input id="mid" name="mid" value={form.mid} onChange={onChange} />
 
         <label htmlFor="mpw">비밀번호</label>
-        <input
-          id="mpw"
-          name="mpw"
-          type="password"
-          value={form.mpw}
-          onChange={onChange}
-          placeholder="비밀번호"
-          autoComplete="current-password"
-          required
-        />
+        <input id="mpw" name="mpw" type="password" value={form.mpw} onChange={onChange} />
 
         {msg && <div style={styles.error}>{msg}</div>}
 

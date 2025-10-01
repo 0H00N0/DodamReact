@@ -24,6 +24,7 @@ export default function Profile() {
   const goToUpdate = () => {
     navigate("/member/updateProfile");
   };
+
   const goToChangePw = () => {
     navigate("/member/changePw");
   }

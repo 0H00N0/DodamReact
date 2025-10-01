@@ -8,7 +8,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  padding-left: 140px; /* 네비게이션 공간 확보 */
+  padding-left: 40px; /* 큰 화면에서 네비게이션 공간 확보 */
 }
 
 .header {
@@ -34,23 +34,24 @@
 
 .productsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 카드 크기 줄임 */
   gap: 32px;
   margin-bottom: 60px;
+  justify-content: center; /* ✅ 그리드 중앙 정렬 */
 }
 
 .productCard {
-  background: white;
+  background: #ffe6f0; /* 🎨 파스텔톤 핑크 */
   border-radius: 20px;
   overflow: hidden;
   transition: all 0.3s ease;
-  border: 2px solid #f1f3f4;
+  border: 2px solid #f8cdda; /* 연핑크 테두리 */
 }
 
 .productCard:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  border-color: #e9ecef;
+  box-shadow: 0 20px 40px rgba(255, 192, 203, 0.3); /* 핑크빛 그림자 */
+  border-color: #f4a6c3;
 }
 
 .productImageWrapper {
@@ -129,6 +130,7 @@
   transition: all 0.3s ease;
   font-size: 1.2rem;
   color: #6c757d;
+  display: none !important; /* 위시리스트 버튼 숨기기 */
 }
 
 .wishlistButton:hover {
@@ -209,6 +211,7 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: none !important;
 }
 
 .addToCartButton:hover {
@@ -253,7 +256,7 @@
 @media (max-width: 1024px) {
   .container {
     padding: 0 20px;
-    padding-left: 110px; /* 태블릿에서 네비게이션 공간 조정 */
+    padding-left: 32px;
   }
 }
 
@@ -266,12 +269,30 @@
   
   .container {
     padding: 0 16px;
-    padding-left: 16px; /* 모바일에서는 네비게이션이 하단에 위치하므로 좌측 패딩 제거 */
+    padding-left: 16px;
   }
   
   .productsGrid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* ✅ 한 칸 폭 약간 축소 */
+    gap: 20px; /* ✅ 간격 살짝 줄임 */
+  }
+
+  .productCard {
+    border-radius: 12px;
+    transform: scale(0.96);  /* ✅ 전체적으로 살짝 작게 보이게 */
+    transform-origin: center top;
+  }
+
+  .productInfo {
+    padding: 16px;
+  }
+
+  .productName {
+    font-size: 1rem; /* ✅ 글씨 크기도 줄임 */
+  }
+
+  .price {
+    font-size: 1.1rem;
   }
   
   .title {
@@ -281,42 +302,33 @@
   .subtitle {
     font-size: 1rem;
   }
-  
-  .productInfo {
-    padding: 20px;
-  }
 }
 
 @media (max-width: 480px) {
   .container {
     padding: 0 12px;
-    padding-left: 12px; /* 작은 모바일에서도 좌측 패딩 제거 */
   }
   
   .productsGrid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+    grid-template-columns: 1fr; /* ✅ 한 줄에 하나 */
+    gap: 16px;
   }
-  
-  .productImage {
-    width: 100px;
-    height: 100px;
+
+  .productCard {
+    transform: scale(0.9); /* ✅ 조금 더 줄임 */
+    border-radius: 10px;
   }
-  
-  .productIcon {
-    font-size: 3rem;
-  }
-  
+
   .productInfo {
-    padding: 16px;
+    padding: 12px;
   }
-  
+
   .productName {
-    font-size: 1.2rem;
+    font-size: 0.95rem;
   }
-  
+
   .price {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
 }
 
@@ -324,6 +336,71 @@
 @media (min-width: 1400px) {
   .container {
     padding: 0 32px;
-    padding-left: 160px; /* 큰 화면에서 네비게이션 공간 확대 */
+    padding-left: 56px;
+  }
+}
+
+/* ===========================
+   🔧 홈 섹션 카드 테마 오버라이드 (아주 연한 핑크)
+   =========================== */
+.productCard {
+  background: #FFFDFE !important;        /* 거의 흰색에 가까운 연핑크 */
+  border: 2px solid #FDE6EF !important;  /* 옅은 핑크 테두리 */
+  border-radius: 20px;
+}
+
+.productCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 14px 28px rgba(255, 182, 193, 0.12) !important;
+  border-color: #F6CFE0 !important;
+}
+
+/* ProductCard 내부 영역들도 톤 맞추기 */
+:global(.imageContainer) {
+  background: #FFFAFC !important;
+  border-bottom: 2px solid #FDE6EF !important;
+}
+
+/* 내부 액션(하트/장바구니/호버) 전부 숨김 */
+:global(.wishlistBtn),
+:global(.hoverActions),
+:global(.addToCartBtn),
+:global(.wishlistButton),
+:global(.addToCartButton) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 별점 관련은 안 보이게 */
+:global(.ratingContainer),
+:global(.stars),
+:global(.starFull),
+:global(.starHalf),
+:global(.starEmpty) {
+  display: none !important;
+}
+
+/* 리뷰 개수 라인(컴포넌트에서 사용) */
+:global(.reviewOnlyRow) {
+  font-size: 13px;
+  color: #666;
+  margin: 4px 0 8px;
+}
+
+/* 텍스트 톤 보정 (선택) */
+:global(.productName)   { color: #262626 !important; }
+:global(.price)         { color: #1e1e1e !important; }
+:global(.originalPrice) { color: #8a8a8a !important; }
+:global(.discountPrice) { color: #e0567c !important; }
+
+/* 다크모드에서도 연핑크 유지 */
+@media (prefers-color-scheme: dark) {
+  .productCard {
+    background: #FFFDFE !important;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.16) !important;
+  }
+  :global(.imageContainer) {
+    background: #FFFAFC !important;
   }
 }

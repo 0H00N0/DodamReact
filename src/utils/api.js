@@ -1,17 +1,18 @@
 // src/utils/api.js
 import axios from "axios";
 
+/** API Base */
 export const API_BASE_URL =
   process.env.REACT_APP_API_BASE || "http://localhost:8080";
 
+/** axios instance */
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true, // ✅ 세션 쿠키 왕복
-  timeout: 10000,
-  headers: { "Content-Type": "application/json" },
+  withCredentials: true,
+  timeout: 90000,
 });
 
-// 🔧 에러 메시지 정규화(원본 err.response/status 보존)
+/** 에러 인터셉터: 메시지 표준화(원본 보존) */
 api.interceptors.response.use(
   (res) => res,
   (err) => {
@@ -34,6 +35,62 @@ api.interceptors.response.use(
     return Promise.reject(err);
   }
 );
+
+/* =========================
+ * Billing Keys API
+ * ======================= */
+export const billingKeysApi = {
+  /** 카드 목록: 항상 200 + [] */
+  list() {
+    return api.get(`/billing-keys/list?u=${Date.now()}`);
+  },
+
+  /** 등록 시작 전에 payId 하나 미리 발급 (세션스토리지 regPayId 에 보관해서 사용) */
+  prepare() {
+    return api.post("/billing-keys/prepare", {});
+  },
+
+  /** PortOne 리다이렉트 확정 (토큰 + payId) */
+  confirm(billingIssueToken, payId) {
+    const payload = { billingIssueToken };
+    if (payId) payload.payId = payId;
+    return api.post("/billing-keys/confirm", payload);
+  },
+  register({ billingKey, rawJson }) {
+     return api.post("/billing-keys/register", { billingKey, rawJson });
+  },
+};
+
+/* =========================
+ * Subscription API
+ * ======================= */
+export const subscriptionApi = {
+  /** 구독 시작(결제 실행) */
+  start(payload) {
+    return api.post("/subscriptions/start", payload);
+  },
+
+  /** 사용 금지 (백엔드 엔드포인트 없음) */
+  chargeAndConfirm() {
+    return Promise.reject(new Error("not supported"));
+  },
+};
+
+export const paymentsApi = {
+  confirm: (payload) => api.post("/payments/confirm", payload),
+
+  // ✅ 서버가 제공하는 두 엔드포인트 모두 호환 (/payments/{paymentId} or /payments/{paymentId}/status)
+  lookup: (paymentId) => {
+    if (!paymentId) return Promise.reject(new Error("paymentId is required"));
+    return api.get(`/payments/${encodeURIComponent(paymentId)}`);
+  },
+  status: (paymentId) => {
+    if (!paymentId) return Promise.reject(new Error("paymentId is required"));
+    return api.get(`/payments/${encodeURIComponent(paymentId)}/status`);
+  },
+};
+
+export default api;
 
 // === 공용 호출 ===
 export async function postWithSession(path, data, config) {

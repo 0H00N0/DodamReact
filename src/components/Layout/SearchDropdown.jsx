@@ -45,7 +45,7 @@ const SearchDropdown = ({ isOpen, onClose }) => {
         setSearchHistory(prev => [searchQuery.trim(), ...prev.slice(0, 4)]);
       }
       // 검색 페이지로 이동
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      navigate(`/search/${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
       onClose();
     }
@@ -53,7 +53,7 @@ const SearchDropdown = ({ isOpen, onClose }) => {
 
   const handleHistoryClick = (query) => {
     // 검색 페이지로 이동
-    navigate(`/search?q=${encodeURIComponent(query)}`);
+    navigate(`/search/${encodeURIComponent(query)}`);
     onClose();
   };
 

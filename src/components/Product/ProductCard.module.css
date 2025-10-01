@@ -1,8 +1,9 @@
-/* 상품 카드 컨테이너 */
+/* 상품 카드 컨테이너 (아주 연한 핑크) */
 .productCard {
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
+  background: #FFFDFE;                 /* 매우 연한 연핑크 */
+  border: 2px solid #FDE6EF;           /* 옅은 핑크 테두리 */
   border-radius: 16px;
   box-shadow: var(--shadow-base);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -10,12 +11,12 @@
   cursor: pointer;
   position: relative;
   height: 100%;
-  min-height: 360px; /* 카드 최소 높이 통일 */
+  min-height: 360px;
 }
 
 .productCard:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 20px rgba(255, 182, 193, 0.12);
 }
 
 /* 이미지 컨테이너 */
@@ -24,158 +25,60 @@
   width: 100%;
   height: 240px;
   overflow: hidden;
-  background: var(--bg-secondary);
+  background: #FFFAFC;
   border-radius: 16px 16px 0 0;
+  border-bottom: 2px solid #FDE6EF;
+  display: flex;            /* ✅ 이미지 가운데 정렬 */
+  align-items: center;
+  justify-content: center;
 }
 
 .productImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+  object-fit: contain;       /* ✅ 이미지 잘림 방지 */
+  transition: transform 0.3s ease, opacity .2s ease;
   opacity: 0;
 }
+.productImage.loaded { opacity: 1; }
+.productCard:hover .productImage { transform: scale(1.05); }
 
-.productImage.loaded {
-  opacity: 1;
-}
-
-.productCard:hover .productImage {
-  transform: scale(1.05);
-}
-
-/* 이미지 로딩 상태 */
-.imagePlaceholder {
+/* 로딩/에러 */
+.imagePlaceholder,
+.imageError {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
 }
+.imagePlaceholder { background: var(--bg-tertiary); }
+.imageError { background: #FFFAFC; color: #777; font-size: 14px; padding: 20px; }
 
 .loadingSpinner {
-  width: 24px;
-  height: 24px;
+  width: 24px; height: 24px;
   border: 2px solid var(--border-light);
   border-top: 2px solid var(--text-secondary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-.imageError {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-  font-size: 14px;
-  text-align: center;
-  padding: 20px;
-}
-
 /* 할인율 배지 */
 .discountBadge {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 12px; left: 12px;
   background: var(--text-primary);
-  color: #ffffff;
+  color: #fff;
   padding: 6px 10px;
   border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 12px; font-weight: 600;
   z-index: 2;
 }
 
-/* 위시리스트 버튼 */
-.wishlistBtn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 44px; /* 터치 친화적 크기 증가 */
-  height: 44px;
-  border: none;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 2;
-  backdrop-filter: blur(4px);
-  min-width: 44px; /* 최소 터치 타겟 크기 */
-  min-height: 44px;
-}
+/* (하트/장바구니 요소가 남아있어도 표시 안 함) */
+.wishlistBtn, .hoverActions, .addToCartBtn { display: none !important; }
 
-.wishlistBtn:hover {
-  background: var(--bg-primary);
-  transform: scale(1.1);
-}
-
-.heartIcon {
-  font-size: 16px;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
-}
-
-.wishlistBtn.wishlisted .heartIcon {
-  color: var(--text-primary);
-}
-
-/* 호버 액션 */
-.hoverActions {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-}
-
-.productCard:hover .hoverActions {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.addToCartBtn {
-  width: 100%;
-  padding: 14px 16px;
-  background: var(--text-primary);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  min-height: 48px; /* 터치 친화적 높이 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.addToCartBtn:hover {
-  background: var(--text-secondary);
-  transform: translateY(-1px);
-}
-
-.addToCartBtn:active {
-  transform: translateY(0);
-}
-
-/* 상품 정보 영역 */
+/* 정보 영역 */
 .productInfo {
   padding: 16px;
   flex: 1;
@@ -187,7 +90,7 @@
 .productName {
   font-size: 16px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: #262626;
   margin: 0;
   line-height: 1.4;
   overflow: hidden;
@@ -198,38 +101,11 @@
   min-height: 44px;
 }
 
-/* 평점 */
-.ratingContainer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-
-.starFull {
-  color: var(--text-primary);
-  font-size: 14px;
-}
-
-.starHalf {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.starEmpty {
-  color: var(--border-light);
-  font-size: 14px;
-}
-
-.ratingText {
-  font-size: 12px;
-  color: var(--text-secondary);
-  white-space: nowrap;
+/* ✅ 리뷰 개수만 표시 */
+.reviewOnlyRow {
+  font-size: 13px;
+  color: #666;
+  margin: 2px 0 6px;
 }
 
 /* 가격 */
@@ -240,492 +116,74 @@
   flex-wrap: wrap;
   margin-top: auto;
 }
-
-.price {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.originalPrice {
-  font-size: 14px;
-  color: var(--text-secondary);
-  text-decoration: line-through;
-}
-
-.discountPrice {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
+.price { font-size: 18px; font-weight: 600; color: #1e1e1e; }
+.originalPrice { font-size: 14px; color: #8a8a8a; text-decoration: line-through; }
+.discountPrice { font-size: 18px; font-weight: 600; color: #e0567c; }
 
 /* 애니메이션 */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* 반응형 디자인 */
+/* 반응형 */
 @media (max-width: 1024px) {
-  .productCard {
-    min-height: 340px;
-  }
-  
-  .imageContainer {
-    height: 220px;
-  }
-  
-  .productInfo {
-    padding: 14px;
-  }
+  .productCard { min-height: 340px; }
+  .imageContainer { height: 220px; }
+  .productInfo { padding: 14px; }
 }
 
 @media (max-width: 768px) {
-  .productCard {
-    border-radius: 12px;
-    min-height: 320px;
+  .productCard { border-radius: 12px; min-height: 300px; }
+  .imageContainer { 
+    height: 230px;
+    border-radius: 12px 12px 0 0; 
+    padding: 6px;                 /* ✅ 여백 추가 */
+    background: #fff;             /* ✅ 흰 배경으로 contain시 깔끔 */
   }
-  
-  .imageContainer {
-    height: 200px;
-    border-radius: 12px 12px 0 0;
+  .productImage { 
+    object-fit: contain !important; /* ✅ 모바일에서 잘리지 않도록 */
+    transform: none !important;     /* hover 효과 제거 */
   }
-  
-  .discountBadge {
-    top: 10px;
-    left: 10px;
-    padding: 4px 8px;
-    font-size: 11px;
-  }
-  
-  .wishlistBtn {
-    top: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    min-height: 40px;
-  }
-  
-  .heartIcon {
-    font-size: 14px;
-  }
-  
-  .hoverActions {
-    bottom: 10px;
-    left: 10px;
-    right: 10px;
-  }
-  
-  .productInfo {
-    padding: 12px;
-    gap: 6px;
-  }
-  
-  .productName {
-    font-size: 14px;
-    min-height: 38px;
-    -webkit-line-clamp: 2;
-  }
-  
-  .ratingContainer {
-    margin: 2px 0;
-  }
-  
-  .stars {
-    gap: 1px;
-  }
-  
-  .starFull,
-  .starHalf,
-  .starEmpty {
-    font-size: 12px;
-  }
-  
-  .ratingText {
-    font-size: 11px;
-  }
-  
-  .price,
-  .discountPrice {
-    font-size: 15px;
-  }
-  
-  .originalPrice {
-    font-size: 13px;
-  }
-  
-  .addToCartBtn {
-    padding: 12px 14px;
-    font-size: 13px;
-    min-height: 44px;
-  }
+  .productInfo { padding: 12px; gap: 6px; }
+  .productName { font-size: 14px; min-height: 38px; }
+  .price, .discountPrice { font-size: 15px; }
+  .originalPrice { font-size: 13px; }
 }
 
 @media (max-width: 480px) {
-  .productCard {
-    min-height: 300px;
-    border-radius: 10px;
-  }
-  
-  .imageContainer {
-    height: 180px;
-    border-radius: 10px 10px 0 0;
-  }
-  
-  .discountBadge {
-    top: 8px;
-    left: 8px;
-    padding: 3px 6px;
-    font-size: 10px;
-    border-radius: 12px;
-  }
-  
-  .wishlistBtn {
-    top: 8px;
-    right: 8px;
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
-  }
-  
-  .heartIcon {
-    font-size: 12px;
-  }
-  
-  .hoverActions {
-    bottom: 8px;
-    left: 8px;
-    right: 8px;
-  }
-  
-  .productInfo {
-    padding: 10px;
-    gap: 4px;
-  }
-  
-  .productName {
-    font-size: 13px;
-    min-height: 34px;
-    line-height: 1.3;
-  }
-  
-  .ratingContainer {
-    margin: 1px 0;
-  }
-  
-  .starFull,
-  .starHalf,
-  .starEmpty {
-    font-size: 11px;
-  }
-  
-  .ratingText {
-    font-size: 10px;
-  }
-  
-  .price,
-  .discountPrice {
-    font-size: 14px;
-  }
-  
-  .originalPrice {
-    font-size: 12px;
-  }
-  
-  .addToCartBtn {
-    padding: 10px 12px;
-    font-size: 12px;
-    min-height: 40px;
-    border-radius: 6px;
-  }
+  .productCard { min-height: 280px; border-radius: 10px; }
+  .imageContainer { height: 200px; border-radius: 10px 10px 0 0; padding: 6px; }
+  .productImage { object-fit: contain !important; }
+  .productInfo { padding: 10px; gap: 4px; }
+  .productName { font-size: 13px; min-height: 34px; line-height: 1.3; }
+  .price, .discountPrice { font-size: 14px; }
+  .originalPrice { font-size: 12px; }
 }
 
-@media (max-width: 360px) {
-  .productCard {
-    min-height: 280px;
-  }
-  
-  .imageContainer {
-    height: 160px;
-  }
-  
-  .productInfo {
-    padding: 8px;
-    gap: 3px;
-  }
-  
-  .productName {
-    font-size: 12px;
-    min-height: 30px;
-  }
-  
-  .price,
-  .discountPrice {
-    font-size: 13px;
-  }
-  
-  .originalPrice {
-    font-size: 11px;
-  }
-  
-  .addToCartBtn {
-    padding: 8px 10px;
-    font-size: 11px;
-    min-height: 36px;
-  }
-}
-
-/* 고해상도 화면 최적화 */
+/* 고해상도 */
 @media (min-width: 1400px) {
-  .productCard {
-    min-height: 400px;
-    border-radius: 20px;
-  }
-  
-  .imageContainer {
-    height: 280px;
-    border-radius: 20px 20px 0 0;
-  }
-  
-  .discountBadge {
-    top: 16px;
-    left: 16px;
-    padding: 8px 12px;
-    font-size: 13px;
-    border-radius: 24px;
-  }
-  
-  .wishlistBtn {
-    top: 16px;
-    right: 16px;
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-  }
-  
-  .heartIcon {
-    font-size: 18px;
-  }
-  
-  .hoverActions {
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-  }
-  
-  .productInfo {
-    padding: 18px;
-    gap: 10px;
-  }
-  
-  .productName {
-    font-size: 17px;
-    min-height: 48px;
-  }
-  
-  .starFull,
-  .starHalf,
-  .starEmpty {
-    font-size: 15px;
-  }
-  
-  .ratingText {
-    font-size: 13px;
-  }
-  
-  .price,
-  .discountPrice {
-    font-size: 20px;
-  }
-  
-  .originalPrice {
-    font-size: 15px;
-  }
-  
-  .addToCartBtn {
-    padding: 16px 18px;
-    font-size: 15px;
-    min-height: 52px;
-    border-radius: 10px;
-  }
+  .productCard { min-height: 400px; border-radius: 20px; }
+  .imageContainer { height: 280px; border-radius: 20px 20px 0 0; }
+  .productInfo { padding: 18px; gap: 10px; }
+  .productName { font-size: 17px; min-height: 48px; }
+  .price, .discountPrice { font-size: 20px; }
+  .originalPrice { font-size: 15px; }
 }
 
-/* 터치 기기 최적화 */
+/* 터치 최적화 */
 @media (hover: none) and (pointer: coarse) {
-  .productCard {
-    /* 터치 기기에서 항상 액션 버튼 표시 */
-  }
-  
-  .hoverActions {
-    opacity: 1;
-    transform: translateY(0);
-    position: static;
-    margin-top: auto;
-    padding: 0;
-  }
-  
-  .wishlistBtn {
-    min-width: 48px;
-    min-height: 48px;
-  }
-  
-  .addToCartBtn {
-    min-height: 48px;
-    font-size: 14px;
-  }
-  
-  /* 터치 피드백 강화 */
-  .productCard:active {
-    transform: scale(0.98);
-    transition: transform 0.1s ease;
-  }
-  
-  .wishlistBtn:active {
-    transform: scale(0.9);
-  }
-  
-  .addToCartBtn:active {
-    transform: scale(0.98);
-  }
+  .productCard:active { transform: scale(0.98); transition: transform 0.1s ease; }
 }
 
-/* 다크 모드 지원 */
+/* 🌙 다크모드에서도 연핑크 유지 */
 @media (prefers-color-scheme: dark) {
-  .productCard {
-    background: #2a2a2a;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  }
-  
-  .productCard:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  }
-  
-  .imageContainer {
-    background: #1a1a1a;
-  }
-  
-  .imagePlaceholder {
-    background: var(--text-secondary);
-  }
-  
-  .imageError {
-    background: #1a1a1a;
-    color: #b0b0b0;
-  }
-  
-  .discountBadge {
-    background: var(--bg-primary);
-    color: #1a1a1a;
-  }
-  
-  .wishlistBtn {
-    background: rgba(42, 42, 42, 0.9);
-  }
-  
-  .wishlistBtn:hover {
-    background: var(--text-secondary);
-  }
-  
-  .productName {
-    color: #ffffff;
-  }
-  
-  .starFull {
-    color: #ffffff;
-  }
-  
-  .ratingText {
-    color: #b0b0b0;
-  }
-  
-  .price,
-  .discountPrice {
-    color: #ffffff;
-  }
-  
-  .originalPrice {
-    color: #888888;
-  }
-  
-  .addToCartBtn {
-    background: var(--bg-primary);
-    color: #1a1a1a;
-  }
-  
-  .addToCartBtn:hover {
-    background: #e0e0e0;
-  }
+  .productCard { background: #FFFDFE; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+  .imageContainer { background: #FFFAFC; }
 }
 
-/* 고대비 모드 지원 */
-@media (prefers-contrast: high) {
-  .productCard {
-    border: 2px solid;
-    box-shadow: none;
-  }
-  
-  .productName {
-    color: var(--text-primary);
-    font-weight: 600;
-  }
-  
-  .discountBadge,
-  .addToCartBtn {
-    border: 2px solid;
-  }
-  
-  .wishlistBtn {
-    border: 2px solid;
-    background: var(--bg-primary);
-  }
-}
-
-/* 애니메이션 감소 모드 지원 */
+/* ✅ 애니메이션 감소 모드: 전환만 제거 */
 @media (prefers-reduced-motion: reduce) {
   .productCard,
-  .productImage,
-  .wishlistBtn,
-  .addToCartBtn,
-  .hoverActions {
-    transition: none;
-  }
-  
-  .productCard:hover {
-    transform: none;
-  }
-  
-  .productCard:hover .productImage {
-    transform: none;
-  }
-}
-
-/* 인쇄 스타일 */
-@media print {
-  .productCard {
-    box-shadow: none;
-    border: 1px solid #000000;
-    break-inside: avoid;
-  }
-  
-  .hoverActions,
-  .wishlistBtn {
-    display: none;
-  }
-  
-  .productName,
-  .ratingText,
-  .price,
-  .discountPrice,
-  .originalPrice {
-    color: black;
-  }
-  
-  .discountBadge {
-    background: white;
-    color: black;
-    border: 1px solid black;
+  .productImage {
+    transition: none !important;
+    animation: none !important;
   }
 }

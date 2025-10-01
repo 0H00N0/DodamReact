@@ -2,7 +2,10 @@ import React from "react";
 import { createBrowserRouter as createRouter } from "react-router-dom";
 import App from "./App";
 
-// --- Pages ---
+// 파일명이 PlanCheckout.jsx 라면 아래처럼!
+import CheckoutPage from "./Plan/PlanCheckout";
+import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
+import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
 import Home from "./pages/Home";
 
 // Member
@@ -30,7 +33,24 @@ import ProductDetailPage from "./Product/pages/ProductDetailPage";
 import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
-// Community 페이지 폴더가 현재 없음 → 나중에 추가 시 import/route 복원
+// Community
+import CommunityPage from "./pages/CommunityPage/CommunityPage";
+import Notice from "./pages/CommunityPage/Notice";
+import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
+import Event from "./pages/CommunityPage/Event";
+import EventDetail from "./pages/CommunityPage/EventDetail";
+import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
+import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
+import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
+
+import Inquiry from "./pages/CommunityPage/Inquiry";
+import FAQ from "./pages/CommunityPage/FAQ";
+import Company from "./pages/CommunityPage/Company";
+
+//Main
+import Search from "./pages/Search";
 
 export const router = createRouter([
   {
@@ -61,10 +81,42 @@ export const router = createRouter([
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
 
-      // Plan (체크아웃/결제 리다이렉트는 파일 없음 → 제외)
+      // 구독 플랜 (목록/상세)
       { path: "plans", element: <PlanSelectPage /> },
       { path: "plans/:planCode", element: <PlanDetailPage /> },
 
+      // ✅ 체크아웃 (신규 경로: /plan/checkout, /plan/checkout/result)
+      { path: "plan/checkout", element: <CheckoutPage /> },
+      { path: "plan/checkout/result", element: <CheckoutResultPage /> },
+      { path: "billing-keys/redirect", element: <BillingKeyRedirect /> },
+
+      // ◇ 구 경로 호환 (기존 링크가 있을 경우 404 방지)
+      { path: "checkout", element: <CheckoutPage /> },
+      { path: "checkout/result", element: <CheckoutResultPage /> },
+
+      { path: "search/:keyword", element: <Search /> },
+      { path: "search", element: <Search /> },
+
+      // 소통(Community)
+      {
+        path: "board",
+        element: <CommunityPage />,
+        children: [
+          { index: true, element: <Notice /> },
+          { path: "notice", element: <Notice /> },
+          { path: "notice/:noticeId", element: <NoticeDetail /> },
+          { path: "event", element: <Event /> },
+          { path: "event/:eventId", element: <EventDetail /> },
+          { path: "community", element: <CommunityBoard /> },
+          { path: "community/:postId", element: <CommunityBoardDetail /> },
+          { path: "community/write", element: <CommunityBoardForm /> },
+          { path: "community/edit/:postId", element: <CommunityBoardEdit /> },
+          { path: "community/delete/:postId", element: <CommunityBoardDelete /> },
+          { path: "inquiry", element: <Inquiry /> },
+          { path: "faq", element: <FAQ /> },
+          { path: "company", element: <Company /> },
+        ],
+      },
       // 404
       { path: "*", element: <div style={{ padding: 24 }}>404</div> },
     ],
