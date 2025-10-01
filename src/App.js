@@ -26,6 +26,17 @@ import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; /
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
+// ...existing code...
+import SmartBoard from "./Board/SmartBoard";
+// ...existing code...
+import './index.css';
+
+<Routes>
+  {/* ...기존 라우트... */}
+  <Route path="/smartboard" element={<SmartBoard />} />
+  {/* ...기존 라우트... */}
+</Routes>
+// ...existing code...
 
 // Lazy 로딩 페이지
 const Home = React.lazy(() => import("./pages/Home"));
@@ -74,6 +85,7 @@ function App() {
                       <Route path="inquiry" element={<Inquiry />} />
                       <Route path="faq" element={<FAQ />} />
                       <Route path="company" element={<Company />} />
+                      <Route path="smartboard" element={<SmartBoard />} />
                     </Route>
    
 

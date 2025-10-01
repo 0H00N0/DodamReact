@@ -4,6 +4,7 @@
 // - 모의 저장: localStorage (USE_MOCK=true). Spring Boot 연동시 USE_MOCK=false 로 바꾸고 BASE_URL 수정.
 
 import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 /*** ▼▼ 환경 설정 ▼▼ ***/
 const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
