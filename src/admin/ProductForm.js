@@ -22,7 +22,6 @@ const initialFormData = {
   proage: '',
   procertif: '',
   prodate: '',
-  resernum: '',
   catenum: '',
   prosnum: '',
   images: [{ proimageorder: 1, prourl: '', prodetailimage: '' }]
@@ -68,7 +67,6 @@ function ProductForm() {
               proage: product.proage || '',
               procertif: product.procertif || '',
               prodate: product.prodate || '',
-              resernum: product.resernum || '',
               catenum: product.category?.catenum || '',
               prosnum: product.prostate?.prosnum || '',
               images: product.images && product.images.length > 0 
@@ -115,7 +113,6 @@ function ProductForm() {
       ...formData,
       proborrow: parseFloat(formData.proborrow),
       proage: formData.proage ? parseInt(formData.proage, 10) : null,
-      resernum: parseInt(formData.resernum, 10),
       catenum: parseInt(formData.catenum, 10),
       prosnum: parseInt(formData.prosnum, 10)
     };
@@ -196,11 +193,6 @@ function ProductForm() {
         <div className="form-group">
           <label>출시일</label>
           <input type="date" name="prodate" value={formData.prodate} onChange={handleInputChange} />
-        </div>
-        
-        <div className="form-group">
-          <label>대여 예약 번호(임시)</label>
-          <input type="number" name="resernum" value={formData.resernum} onChange={handleInputChange} required />
         </div>
 
         <div className="form-group">
