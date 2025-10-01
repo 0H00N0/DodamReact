@@ -3,6 +3,8 @@ import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
+const yyyyMMdd = (v) => (v ? String(v).slice(0, 10) : '');
+
 const UpdateProfile = () => {
   const [form, setForm] = useState({
     mname: '',
@@ -47,30 +49,38 @@ const UpdateProfile = () => {
     }).open();
   };
 
-  // 회원 정보 불러오기
+  // ✅ 회원 정보 불러오기 (/member/me: { login, member })
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { data } = await api.get('/member/me');
         if (cancelled) return;
+
+        if (!data?.login) {
+          alert('로그인이 필요합니다.');
+          navigate('/member/login', { replace: true });
+          return;
+        }
+
+        const m = data.member || {};
         setForm({
-          mname:  data?.mname  ?? '',
-          mbirth: data?.mbirth ?? '',
-          memail: data?.memail ?? '',
-          mtel:   data?.mtel   ?? '',
-          maddr:  data?.maddr  ?? '',
-          mpost:  data?.mpost  ?? '',
-          mnic:   data?.mnic   ?? '',
-          children: data?.children ?? []
+          mname:  m.mname  ?? '',
+          mbirth: yyyyMMdd(m.mbirth),
+          memail: m.memail ?? '',
+          mtel:   m.mtel   ?? '',
+          maddr:  m.maddr  ?? '',
+          mpost:  m.mpost  ?? '',
+          mnic:   m.mnic   ?? '',
+          children: (m.children ?? []).map(c => ({
+            chname:  c?.chname ?? '',
+            chbirth: yyyyMMdd(c?.chbirth)
+          }))
         });
       } catch (err) {
         console.error('회원 정보 로딩 실패:', err);
-        if (err?.response?.status === 401) {
-          alert('로그인이 필요합니다.');
-          navigate('/login', { replace: true });
-          return;
-        }
+        // 백엔드가 200 + {login:false}로 주는 구조라 401은 드뭅니다.
+        alert('회원 정보를 불러오지 못했습니다.');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -110,13 +120,21 @@ const UpdateProfile = () => {
     }));
   };
 
-  // 수정 요청
+  // ✅ 수정 요청 (빈 날짜는 null로 변환해서 전송)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMessage('');
     try {
-      await api.put('/member/updateProfile', form);
+      const payload = {
+        ...form,
+        mbirth: form.mbirth || null,
+        children: (form.children || []).map(c => ({
+          chname: c.chname ?? '',
+          chbirth: c.chbirth || null
+        }))
+      };
+      await api.put('/member/updateProfile', payload);
       alert('회원정보 수정이 완료되었습니다.');
       navigate('/member/profile', { replace: true });
     } catch (err) {
@@ -137,6 +155,7 @@ const UpdateProfile = () => {
         <label>생년월일: <input type="date" name="mbirth" value={form.mbirth || ""} onChange={handleChange} /></label><br />
         <label>이메일: <input type="email" name="memail" value={form.memail} onChange={handleChange} /></label><br />
         <label>전화번호: <input type="text"  name="mtel"   value={form.mtel}   onChange={handleChange} /></label><br />
+
         <label>주소:</label>
         <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
           <input
@@ -148,12 +167,17 @@ const UpdateProfile = () => {
             style={{ width: "250px" }} 
             autoComplete="address-line1"
           />
-          <button type="button" onClick={handleAddressSearch} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
-          주소검색
+          <button
+            type="button"
+            onClick={handleAddressSearch}
+            style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}
+          >
+            주소검색
           </button>
         </div>
-        <label>우편번호: <input type="text"  name="mpost"  value={form.mpost}  onChange={handleChange} /></label><br />
-        <label>닉네임: <input type="text"  name="mnic"   value={form.mnic}   onChange={handleChange} /></label><br />
+
+        <label>우편번호: <input type="text" name="mpost" value={form.mpost} onChange={handleChange} /></label><br />
+        <label>닉네임: <input type="text" name="mnic" value={form.mnic} onChange={handleChange} /></label><br />
 
         <fieldset style={{ border: "1px solid #eee", padding: 12, borderRadius: 8, marginTop: 16 }}>
           <legend>자녀 정보 (선택)</legend>
@@ -164,16 +188,20 @@ const UpdateProfile = () => {
                 value={c.chname}
                 onChange={e => handleChildChange(idx, e)}
                 placeholder="자녀 이름"
-                 style={{ width: "250px" }} 
+                style={{ width: "250px" }} 
               />
               <input
                 name="chbirth"
                 type="date"
-                value={c.chbirth}
+                value={c.chbirth || ''}
                 onChange={e => handleChildChange(idx, e)}
-                 style={{ width: "250px" }} 
+                style={{ width: "250px" }} 
               />
-              <button type="button" onClick={() => removeChild(idx)} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
+              <button
+                type="button"
+                onClick={() => removeChild(idx)}
+                style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}
+              >
                 삭제
               </button>
             </div>
@@ -205,7 +233,7 @@ const UpdateProfile = () => {
           {saving ? '저장 중…' : '수정하기'}
         </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p style={{ color: 'crimson', marginTop: 12 }}>{message}</p>}
     </div>
   );
 };
