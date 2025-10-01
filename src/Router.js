@@ -23,7 +23,8 @@ import FindPwByMemail from "./pages/member/FindPwByMemail";
 import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
-
+import Membership from "./pages/member/Membership";
+import Cash from "./pages/member/Cash";
 
 // Product
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -74,6 +75,8 @@ export const router = createRouter([
       { path: "member/findPwByMtel", element: <FindPwByMtel /> },
       { path: "member/changePwDirect", element: <ChangePwDirect /> },
       { path: "oauth/callback/:provider", element: <OAuthCallback /> },
+      { path: "member/membership", element: <Membership /> },
+      { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
 
       // Product
