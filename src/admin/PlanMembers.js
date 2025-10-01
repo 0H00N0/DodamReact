@@ -21,11 +21,6 @@ function PlanMembers() {
     fetchSubs();
   }, [getAllSubscriptions]);
 
-  const handleDetail = (pmId) => {
-    // 상세 조회 로직 (모달 열기 or 라우팅)
-    console.log("구독 상세 조회:", pmId);
-  };
-
   if (loading) return <div>구독 회원 목록을 불러오는 중...</div>;
 
   return (
@@ -63,9 +58,6 @@ function PlanMembers() {
                 <td>{s.pmTermEnd}</td>
                 <td>{s.pmNextBil}</td>
                 <td>{s.pmCancelCheck ? "예" : "아니오"}</td>
-                <td>
-                  <button onClick={() => handleDetail(s.pmId)}>상세</button>
-                </td>
               </tr>
             ))}
           </tbody>
