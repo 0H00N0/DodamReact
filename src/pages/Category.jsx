@@ -26,8 +26,10 @@ const Category = () => {
   useEffect(() => {
     setIsLoading(true);
     Promise.all([
-      fetch(`/api/categories/${encodeURIComponent(categoryName)}`).then(res => res.ok ? res.json() : null),
-      fetch(`/api/products/category/${encodeURIComponent(categoryName)}`).then(res => res.ok ? res.json() : [])
+      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
+        .then(res => res.ok ? res.json() : null),
+      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
+        .then(res => res.ok ? res.json() : [])
     ]).then(([categoryData, categoryProducts]) => {
       setCategory(categoryData);
       setProducts(categoryProducts);
@@ -109,7 +111,7 @@ const Category = () => {
       <div className={styles.categoryHeader}>
         <div className={styles.categoryInfo}>
           <span className={styles.categoryIcon}>{category.icon}</span>
-          <h1 className={styles.categoryName}>{category.name}</h1>
+          <h1 className={styles.categoryName}>{category.catename || category.name}</h1>
         </div>
         <p className={styles.productCount}>
           총 {filteredProducts.length}개의 상품
@@ -168,9 +170,9 @@ const Category = () => {
       {filteredProducts.length > 0 ? (
         <div className={styles.productGrid}>
           {filteredProducts.map(product => (
-            <div key={product.id} onClick={() => handleProductClick(product.id)}>
+            <div key={product.pronum} onClick={() => handleProductClick(product.pronum)}>
               <ProductCard
-                id={product.id}
+                id={product.pronum}
                 name={product.name}
                 price={product.price}
                 discountPrice={product.discountPrice}
