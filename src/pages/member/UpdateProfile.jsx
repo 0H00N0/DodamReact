@@ -3,7 +3,18 @@ import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
-const yyyyMMdd = (v) => (v ? String(v).slice(0, 10) : '');
+// ---- 날짜/빈값 유틸 (콤마/슬래시 등 포함해도 YYYY-MM-DD로 정규화) ----
+const toYYYYMMDD = (v) => {
+  if (!v) return '';
+  const s = String(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;                  // 이미 yyyy-MM-dd
+  const m = s.match(/(\d{4})\D?(\d{1,2})\D?(\d{1,2})/);          // 2025,10,16 / 2025.10.16 / 2025/10/16 ...
+  if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); // 마지막 방어선
+};
+const nullIfBlank = (v) => (v === '' || v == null ? null : v);
+const numOrNull   = (v) => (v === '' || v == null ? null : Number(v));
 
 const UpdateProfile = () => {
   const [form, setForm] = useState({
@@ -66,20 +77,19 @@ const UpdateProfile = () => {
         const m = data.member || {};
         setForm({
           mname:  m.mname  ?? '',
-          mbirth: yyyyMMdd(m.mbirth),
+          mbirth: toYYYYMMDD(m.mbirth),             // ★ 날짜 정규화
           memail: m.memail ?? '',
           mtel:   m.mtel   ?? '',
           maddr:  m.maddr  ?? '',
-          mpost:  m.mpost  ?? '',
+          mpost:  (m.mpost ?? '').toString(),       // ★ 입력창은 문자열
           mnic:   m.mnic   ?? '',
           children: (m.children ?? []).map(c => ({
             chname:  c?.chname ?? '',
-            chbirth: yyyyMMdd(c?.chbirth)
+            chbirth: toYYYYMMDD(c?.chbirth)         // ★ 날짜 정규화
           }))
         });
       } catch (err) {
         console.error('회원 정보 로딩 실패:', err);
-        // 백엔드가 200 + {login:false}로 주는 구조라 401은 드뭅니다.
         alert('회원 정보를 불러오지 못했습니다.');
       } finally {
         if (!cancelled) setLoading(false);
@@ -120,7 +130,7 @@ const UpdateProfile = () => {
     }));
   };
 
-  // ✅ 수정 요청 (빈 날짜는 null로 변환해서 전송)
+  // ✅ 수정 요청 (빈 날짜/숫자 변환)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -128,10 +138,11 @@ const UpdateProfile = () => {
     try {
       const payload = {
         ...form,
-        mbirth: form.mbirth || null,
+        mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)),     // "" -> null, 형식 보정
+        mpost:  numOrNull(form.mpost),                    // "" -> null, "7031" -> 7031
         children: (form.children || []).map(c => ({
-          chname: c.chname ?? '',
-          chbirth: c.chbirth || null
+          chname:  (c.chname || '').trim(),
+          chbirth: nullIfBlank(toYYYYMMDD(c.chbirth))     // "" -> null, 형식 보정
         }))
       };
       await api.put('/member/updateProfile', payload);
