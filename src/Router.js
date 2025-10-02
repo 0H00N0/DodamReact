@@ -29,6 +29,8 @@ import Cash from "./pages/member/Cash";
 // Product
 import ProductsPage from "./Product/pages/ProductsPage";
 import ProductDetailPage from "./Product/pages/ProductDetailPage";
+import Category from './pages/Category';
+
 
 // Plan (현재 프로젝트에 존재하는 페이지만)
 import PlanSelectPage from "./Plan/PlanSelectPage";
@@ -83,6 +85,7 @@ export const router = createRouter([
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
+      { path: "category/:categoryName", element: <Category /> },
 
       // 구독 플랜 (목록/상세)
       { path: "plans", element: <PlanSelectPage /> },
