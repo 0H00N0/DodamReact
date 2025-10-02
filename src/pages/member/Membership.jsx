@@ -16,7 +16,6 @@ export default function Membership() {
       } catch (e) {
         const status = e?.response?.status;
         if (status === 401) {
-          // 비로그인 → 로그인 화면 유도 (필요 시 경로 수정)
           navigate("/member/login");
           return;
         }
@@ -27,6 +26,25 @@ export default function Membership() {
     })();
   }, [navigate]);
 
+  // ✅ 구독 변경 버튼 핸들러 (Plans로 이동 + 변경 모드)
+  const goChangePlans = (current) => {
+    navigate("/plans", {
+      state: {
+        mode: "change",
+        from: "/member/membership",
+        currentPlan: {
+          pmId: current?.pmId ?? null,
+          planCode: current?.planCode ?? null,
+          planName: current?.planName ?? null,
+          status: current?.status ?? null,
+        },
+      },
+    });
+  };
+
+  // 신규 구독(구독 없음)일 때 바로 플랜으로
+  const goNewPlans = () => navigate("/plans");
+
   if (loading) return <div style={{ padding: 24 }}>불러오는 중...</div>;
   if (err) return <div style={{ padding: 24, color: "tomato" }}>{err}</div>;
 
@@ -35,7 +53,12 @@ export default function Membership() {
       <h2 style={{ marginBottom: 16 }}>내 구독</h2>
 
       {subs.length === 0 ? (
-        <div>활성화된 구독이 없습니다.</div>
+        <div style={{ marginBottom: 12 }}>
+          활성화된 구독이 없습니다.
+          <div style={{ marginTop: 12 }}>
+            <button onClick={goNewPlans}>플랜 보러가기</button>
+          </div>
+        </div>
       ) : (
         subs.map((s) => (
           <div
@@ -59,8 +82,11 @@ export default function Membership() {
               기간: {s.termStart ?? "-"} ~ {s.termEnd ?? "-"}
             </div>
             <div>다음 결제일: {s.nextBillingAt ?? "-"}</div>
-            <div>
-              결제수단: {s.cardBrand ?? "-"} •••• {s.cardLast4 ?? "----"}
+            <div>결제수단: {s.cardBrand ?? "-"} •••• {s.cardLast4 ?? "----"}</div>
+
+            {/* ✅ 구독 변경 버튼 */}
+            <div style={{ marginTop: 12 }}>
+              <button onClick={() => goChangePlans(s)}>구독 변경</button>
             </div>
           </div>
         ))
