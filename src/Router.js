@@ -25,6 +25,7 @@ import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
 import Cash from "./pages/member/Cash";
+import Cart from "./pages/Cart";
 
 // Product
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -79,6 +80,10 @@ export const router = createRouter([
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
 
+      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
+      { path: "cart", element: <Cart /> },           // 헤더 카트
+      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
+      
       // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
