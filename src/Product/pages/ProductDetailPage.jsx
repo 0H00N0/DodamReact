@@ -95,6 +95,7 @@ export default function ProductDetailPage() {
     await fetch("/cart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include", // 로그인 세션 유지
       body: JSON.stringify({ mnum, pronum, catenum })
     });
     window.confirm("상품이 장바구니에 담겼습니다.");
