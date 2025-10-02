@@ -92,11 +92,11 @@ export default function ProductDetailPage() {
     }
     const ok = window.confirm("장바구니에 담으시겠습니까?");
     if (!ok) return;
-    await fetch("/cart", {
+    await fetch("http://localhost:8080/cart", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   credentials: "include", // 세션 유지
-  body: JSON.stringify({ mnum, pronum, catenum })
+  body: JSON.stringify({ mnum, pronum: Number(pronum), catenum })
 });
     window.confirm("상품이 장바구니에 담겼습니다.");
   };
