@@ -14,14 +14,13 @@ const PostDetailModal = ({ post, onClose }) => {
                     <span>작성자: {post.authorNickname} ({post.authorId})</span>
                     <span>작성일: {new Date(post.createdAt).toLocaleString()}</span>
                 </div>
-                {/* HTML 태그를 포함한 내용을 안전하게 렌더링하고, 줄바꿈(\n)을 <br>로 변환 */}
                 <div className="post-content" dangerouslySetInnerHTML={{ __html: post.content ? post.content.replace(/\n/g, '<br />') : '' }} />
             </div>
         </div>
     );
 };
 
-// --- 컴포넌트: 글 작성 모달 ---
+// --- 글 작성 모달 ---
 const CreatePostModal = ({ category, onClose, onPostCreated }) => {
     const { createPost, addNotification } = useAdmin();
     const [title, setTitle] = useState('');
@@ -38,9 +37,8 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
         try {
             await createPost({ categoryId: category.id, title, content });
             addNotification('게시글이 성공적으로 등록되었습니다.', 'success');
-            onPostCreated(); // 부모 컴포넌트에 성공 알림 (모달 닫기 및 목록 새로고침)
+            onPostCreated();
         } catch (error) {
-            // 에러 알림은 context의 request 헬퍼가 처리할 수 있습니다.
         } finally {
             setIsSubmitting(false);
         }
@@ -63,11 +61,68 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
     );
 };
 
+// --- 카테고리 수정 모달 ---
+const EditCategoryModal = ({ category, onClose, onUpdated }) => {
+    const { updateBoardCategory } = useAdmin();
+    const [name, setName] = useState(category.name);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await updateBoardCategory(category.id, { name });
+            onUpdated();
+            onClose();
+        } catch (err) {}
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                <h2>게시판 수정</h2>
+                <form onSubmit={handleSubmit}>
+                    <input value={name} onChange={e => setName(e.target.value)} />
+                    <button type="submit" className="create-btn">수정하기</button>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- 글 수정 모달 ---
+const EditPostModal = ({ post, onClose, onUpdated }) => {
+    const { updatePost } = useAdmin();
+    const [title, setTitle] = useState(post.title);
+    const [content, setContent] = useState(post.content);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await updatePost(post.id, { title, content, categoryId: post.categoryId });
+            onUpdated();
+            onClose();
+        } catch (err) {}
+    };
+
+    return (
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-content wide" onClick={e => e.stopPropagation()}>
+                <button className="modal-close-btn" onClick={onClose}>&times;</button>
+                <h2>글 수정</h2>
+                <form onSubmit={handleSubmit} className="post-create-form">
+                    <input value={title} onChange={e => setTitle(e.target.value)} />
+                    <textarea value={content} onChange={e => setContent(e.target.value)} />
+                    <button type="submit" className="create-btn">수정하기</button>
+                </form>
+            </div>
+        </div>
+    );
+};
 
 // --- 메인 컴포넌트 ---
 const BoardManagement = () => {
     const { 
-        getAllBoardCategories, createBoardCategory, deleteBoardCategory, // <-- 이 부분을 수정했습니다.
+        getAllBoardCategories, createBoardCategory, deleteBoardCategory,
         getPostsByCategory, deletePost, getPostById, addNotification 
     } = useAdmin();
 
@@ -78,6 +133,10 @@ const BoardManagement = () => {
     const [isLoading, setIsLoading] = useState({ categories: true, posts: false });
     const [viewingPost, setViewingPost] = useState(null);
     const [isCreatingPost, setIsCreatingPost] = useState(false);
+
+    // 새로 추가된 state
+    const [editingCategory, setEditingCategory] = useState(null);
+    const [editingPost, setEditingPost] = useState(null);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -96,7 +155,6 @@ const BoardManagement = () => {
     }, [fetchCategories]);
 
     const handleSelectCategory = useCallback(async (category) => {
-        // Clear viewing post when changing category
         setViewingPost(null);
 
         if (selectedCategory?.id === category.id) {
@@ -123,7 +181,7 @@ const BoardManagement = () => {
             await createBoardCategory({ categoryName: newCategoryName });
             setNewCategoryName('');
             fetchCategories();
-        } catch (error) { /* 에러 알림은 context에서 처리 */ }
+        } catch (error) {}
     };
 
     const handleDeleteCategory = async (e, categoryId) => {
@@ -136,7 +194,7 @@ const BoardManagement = () => {
                     setPosts([]);
                 }
                 fetchCategories();
-            } catch (error) { /* 에러 알림은 context에서 처리 */ }
+            } catch (error) {}
         }
     };
     
@@ -145,10 +203,9 @@ const BoardManagement = () => {
             try {
                 await deletePost(postId);
                 if (selectedCategory) {
-                    // This re-fetches the posts for the current category
                     handleSelectCategory(selectedCategory); 
                 }
-            } catch (error) { /* 에러 알림은 context에서 처리 */ }
+            } catch (error) {}
         }
     };
 
@@ -165,7 +222,6 @@ const BoardManagement = () => {
         setIsCreatingPost(false);
         if (selectedCategory) {
             const currentCategory = { ...selectedCategory };
-            // Temporarily deselect and then reselect to trigger a fresh data load
             setSelectedCategory(null);
             handleSelectCategory(currentCategory);
         }
@@ -190,7 +246,10 @@ const BoardManagement = () => {
                                             <p className="board-name">{cat.name}</p>
                                             <p className="board-id">ID: {cat.id}</p>
                                         </div>
-                                        <button onClick={(e) => handleDeleteCategory(e, cat.id)} className="delete-btn">삭제</button>
+                                        <div>
+                                            <button onClick={(e) => { e.stopPropagation(); setEditingCategory(cat); }} className="edit-btn">수정</button>
+                                            <button onClick={(e) => handleDeleteCategory(e, cat.id)} className="delete-btn">삭제</button>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
@@ -246,6 +305,7 @@ const BoardManagement = () => {
                                                 <td>{post.authorNickname} ({post.authorId})</td>
                                                 <td>{new Date(post.createdAt).toLocaleString()}</td>
                                                 <td>
+                                                    <button onClick={() => setEditingPost(post)} className="edit-btn">수정</button>
                                                     <button onClick={() => handleDeletePost(post.id)} className="delete-btn">삭제</button>
                                                 </td>
                                             </tr>
@@ -265,6 +325,20 @@ const BoardManagement = () => {
                     category={selectedCategory} 
                     onClose={() => setIsCreatingPost(false)} 
                     onPostCreated={handlePostCreated}
+                />
+            )}
+            {editingCategory && (
+                <EditCategoryModal 
+                    category={editingCategory} 
+                    onClose={() => setEditingCategory(null)} 
+                    onUpdated={fetchCategories}
+                />
+            )}
+            {editingPost && (
+                <EditPostModal 
+                    post={editingPost} 
+                    onClose={() => setEditingPost(null)} 
+                    onUpdated={() => handleSelectCategory(selectedCategory)}
                 />
             )}
         </div>

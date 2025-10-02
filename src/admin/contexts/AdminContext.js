@@ -340,6 +340,15 @@ const getAllInvoices = async () => {
     await request(`${API_BASE_URL}/admin/boards/${id}`, { method: 'DELETE' });
     addNotification('게시판이 성공적으로 삭제되었습니다.', 'success');
   };
+  // ✅ 새로 추가
+const updateBoardCategory = async (id, data) => {
+  const updated = await request(`${API_BASE_URL}/admin/boards/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  addNotification('게시판이 성공적으로 수정되었습니다.', 'success');
+  return updated;
+};
   const getPostsByCategory = async (categoryId) =>
     request(`${API_BASE_URL}/admin/boards/${categoryId}/posts`);
   const deletePost = async (postId) => {
@@ -355,6 +364,15 @@ const getAllInvoices = async () => {
     },
     body: JSON.stringify(postData),
   });
+  // ✅ 새로 추가
+const updatePost = async (postId, data) => {
+  const updated = await request(`${API_BASE_URL}/admin/boards/posts/${postId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+  addNotification('게시글이 성공적으로 수정되었습니다.', 'success');
+  return updated;
+};
 
   // --- Events ---
   const getAllEvents = async () => request(`${API_BASE_URL}/admin/events`);
@@ -473,6 +491,8 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     createBoardCategory,
     deleteBoardCategory,
     getPostsByCategory,
+    updateBoardCategory, // ✅ 새로 추가
+    updatePost,         // ✅ 새로 추가
     deletePost,
     getPostById,
     createPost,
