@@ -16,6 +16,14 @@ const toYYYYMMDD = (v) => {
 const nullIfBlank = (v) => (v === '' || v == null ? null : v);
 const numOrNull   = (v) => (v === '' || v == null ? null : Number(v));
 
+// ---- 자녀 유효성 유틸 ----
+const isFilledChild = (c) => (c.chname || '').trim() !== '' && toYYYYMMDD(c.chbirth) !== '';
+const isPartialChild = (c) => {
+  const name = (c.chname || '').trim();
+  const birth = toYYYYMMDD(c.chbirth);
+  return (name !== '' || birth !== '') && !(name !== '' && birth !== '');
+};
+
 const UpdateProfile = () => {
   const [form, setForm] = useState({
     mname: '',
@@ -130,21 +138,35 @@ const UpdateProfile = () => {
     }));
   };
 
-  // ✅ 수정 요청 (빈 날짜/숫자 변환)
+  // ✅ 수정 요청 (회원 생일은 비워도 OK, 자녀는 둘 다 채운 행만 전송)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMessage('');
     try {
+      // 부분 입력된 자녀행이 있으면 저장 차단 (원치 않으면 이 블록 제거 가능)
+      const partial = (form.children || []).find(isPartialChild);
+      if (partial) {
+        setSaving(false);
+        setMessage('자녀 행을 추가했다면 이름과 생년월일을 모두 입력해주세요.');
+        return;
+      }
+
+      // 둘 다 채운 자녀행만 서버로 전송
+      const cleanedChildren = (form.children || [])
+        .filter(isFilledChild)
+        .map(c => ({
+          chname: (c.chname || '').trim(),
+          chbirth: toYYYYMMDD(c.chbirth)           // yyyy-MM-dd 보장
+        }));
+
       const payload = {
         ...form,
-        mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)),     // "" -> null, 형식 보정
-        mpost:  numOrNull(form.mpost),                    // "" -> null, "7031" -> 7031
-        children: (form.children || []).map(c => ({
-          chname:  (c.chname || '').trim(),
-          chbirth: nullIfBlank(toYYYYMMDD(c.chbirth))     // "" -> null, 형식 보정
-        }))
+        mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)), // 회원 생일: 비워두면 null
+        mpost:  numOrNull(form.mpost),                // 숫자 변환 (빈값 null)
+        children: cleanedChildren
       };
+
       await api.put('/member/updateProfile', payload);
       alert('회원정보 수정이 완료되었습니다.');
       navigate('/member/profile', { replace: true });
