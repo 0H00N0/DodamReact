@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
 import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 
 export default function ProductDetailPage() {
   const { user } = useAuth(); // user = 로그인 정보
   const { pronum } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();   // ✅ CartContext
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -92,13 +94,21 @@ export default function ProductDetailPage() {
     }
     const ok = window.confirm("장바구니에 담으시겠습니까?");
     if (!ok) return;
-    await fetch("http://localhost:8080/cart", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  credentials: "include", // 세션 유지
-  body: JSON.stringify({ mnum, pronum: Number(pronum), catenum })
-});
-    window.confirm("상품이 장바구니에 담겼습니다.");
+    // ✅ 1) 화면 먼저 갱신 (헤더 미니카트/장바구니 페이지 즉시 반영)
+    addToCart(Number(pronum), 1, {}); // 선택 옵션이 있으면 {} 대신 { colors: '레드', ... }
+
+    // ✅ 2) (선택) 서버에도 저장 — 실패해도 UI는 유지
+    try {
+      await fetch("http://localhost:8080/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mnum, pronum: Number(pronum), catenum })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    window.alert("상품이 장바구니에 담겼습니다.");
   };
 
   // 구매하기 버튼
