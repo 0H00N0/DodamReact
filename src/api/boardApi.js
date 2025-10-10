@@ -1,7 +1,7 @@
 // src/api/boardApi.js
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/boards";
+const API_URL = "http://localhost:8080/board/community/write";
 
 // 게시글 작성
 export const createBoard = async ({
