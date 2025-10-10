@@ -112,14 +112,31 @@ export default function ProductDetailPage() {
   };
 
   // 구매하기 버튼
-  const goToBuyPage = () => {
-    if (!user) {
-      alert("로그인 후 이용 가능합니다.");
-      navigate("/login");
-      return;
-    }
-    navigate(`/buy/${pronum}`); // 구매 페이지로 이동
-  };
+  const goToBuyPage = async () => {
+  if (!user) {
+    alert("로그인 후 이용 가능합니다.");
+    navigate("/login");
+    return;
+  }
+  const ok = window.confirm("구매하시겠습니까?");
+  if (!ok) return;
+
+  try {
+    const res = await fetch("http://localhost:8080/rent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mnum, pronum: Number(pronum) })
+    });
+    if (!res.ok) throw new Error("대여 등록 실패");
+    window.alert("대여신청이 정상적으로 등록되었습니다.");
+    // 구매(대여) 페이지로 이동
+    // navigate("/rent/pronum");
+  } catch (e) {
+    window.alert("대여 처리 중 오류가 발생했습니다.");
+    console.error(e);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -150,8 +167,10 @@ export default function ProductDetailPage() {
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold">{proname}</h1>
           <div className="text-lg font-semibold">
-            {proprice ? Number(proprice).toLocaleString() + "원" : ""}
-          </div>
+            {proprice !== undefined && proprice !== null && proprice !== ""
+              ? Number(proprice).toLocaleString() + "원"
+              : "가격정보 없음"}
+</div>
           <div>
             <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>
           </div>
