@@ -1,4 +1,3 @@
-// src/Plan/PlanCheckout.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import PortOne from "@portone/browser-sdk/v2";
@@ -24,18 +23,21 @@ export default function CheckoutPage() {
   );
   const selectedPayId = selectedCard?.payId ?? selectedCard?.id ?? null;
 
-  // ===== 상태 정규화/판별 =====
   const norm = (v) => String(v || "").trim().toUpperCase();
-  const isSuccess = (s) => ["PAID","SUCCEEDED","SUCCESS","PARTIAL_PAID"].includes(norm(s));
+  const isSuccess = (s) =>
+    ["PAID", "SUCCEEDED", "SUCCESS", "PARTIAL_PAID"].includes(norm(s));
 
-  // ===== 무기한 폴링 제어 =====
+  // =========================
+  // 폴링 관련
+  // =========================
   const alive = useRef(true);
   const elapsedSec = useRef(0);
   const elapsedTick = useRef(null);
   const pollTimer = useRef(null);
   const startedAt = useRef(null);
   const [uiStatus, setUiStatus] = useState(null);
-  const [paymentId, setPaymentId] = useState(null);
+  const [handleId, setHandleId] = useState(null);
+  const [shownPaymentId, setShownPaymentId] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -66,26 +68,29 @@ export default function CheckoutPage() {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
   };
 
-  // ★ 서버 폴링: 반드시 /payments/{paymentId} 사용
-  const pollOnce = async (pid) => {
+  const pollOnce = async (handle) => {
     try {
-      const r = await paymentsApi.lookup(pid);
+      const r = await paymentsApi.lookup(handle);
       const s = norm(r?.data?.status || r?.data?.result);
       const done = Boolean(r?.data?.done);
       setUiStatus(s || "UNKNOWN");
+      const pid = r?.data?.paymentId;
+      if (pid) setShownPaymentId(pid);
 
       if (done) {
         stopElapsed();
+        const invId = r?.data?.invoiceId ?? "";
         if (isSuccess(s)) {
           setMsg("결제 완료되었습니다.");
-          navigate(`/plan/checkout/result?invoiceId=${r?.data?.invoiceId ?? ""}&paymentId=${pid}&status=${s}`);
         } else {
           setMsg("결제가 완료되지 않았습니다.");
-          navigate(`/plan/checkout/result?invoiceId=${r?.data?.invoiceId ?? ""}&paymentId=${pid}&status=${s}`);
         }
+        navigate(
+          `/plan/checkout/result?invoiceId=${invId}&paymentId=${pid || handle}&status=${s}`
+        );
         return true;
       }
-      setDebug((d) => d + `\n[POLL] paymentId=${pid} status=${s}`);
+      setDebug((d) => d + `\n[POLL] handle=${handle} status=${s}`);
       return false;
     } catch (e) {
       setDebug((d) => d + `\n[POLL ERROR] ${e?.message || e}`);
@@ -93,14 +98,14 @@ export default function CheckoutPage() {
     }
   };
 
-  const pollForeverUntilPaid = async (pid) => {
+  const pollForeverUntilPaid = async (handle) => {
     startElapsed();
     setMsg("결제 진행중… (경과 0초)");
     setUiStatus("PENDING");
 
     const loop = async () => {
       if (!alive.current) return;
-      const done = await pollOnce(pid);
+      const done = await pollOnce(handle);
       if (done) return;
       pollTimer.current = setTimeout(loop, backoffMs());
     };
@@ -170,7 +175,9 @@ export default function CheckoutPage() {
       } catch {}
 
       const hasIssueFn = typeof PortOne?.requestIssueBillingKey === "function";
-      const callDesc = hasIssueFn ? "requestIssueBillingKey" : "requestPayment(BILLING)";
+      const callDesc = hasIssueFn
+        ? "requestIssueBillingKey"
+        : "requestPayment(BILLING)";
       setDebug((d) => d + `\n[SDK] Using ${callDesc}`);
 
       let resp;
@@ -179,7 +186,7 @@ export default function CheckoutPage() {
           storeId,
           channelKey,
           redirectUrl,
-          billingKeyMethod, // "CARD"
+          billingKeyMethod,
         });
       } else {
         resp = await PortOne.requestPayment({
@@ -199,7 +206,6 @@ export default function CheckoutPage() {
 
       const statusLike = String(resp?.status || resp?.billingKey || "").toUpperCase();
 
-      // 1) 오버레이 즉시 발급
       if (
         resp?.billingKey &&
         statusLike !== "NEEDS_CONFIRMATION" &&
@@ -214,7 +220,6 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2) 본인인증 추가 단계
       if (statusLike === "NEEDS_CONFIRMATION" && resp?.billingIssueToken) {
         const url = new URL(redirectUrl);
         url.searchParams.set("transactionType", "ISSUE_BILLING_KEY");
@@ -226,10 +231,10 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 3) 나머지
       setMsg("카드 등록이 취소되었거나 실패했습니다.");
       setDebug(
-        (d) => d + `\n[FAIL PATH] statusLike=${statusLike} billingKey=${resp?.billingKey}`
+        (d) =>
+          d + `\n[FAIL PATH] statusLike=${statusLike} billingKey=${resp?.billingKey}`
       );
     } catch (e) {
       setMsg("카드 등록 실패 (네트워크/서버).");
@@ -240,7 +245,32 @@ export default function CheckoutPage() {
   }
 
   // =========================
-  // 인보이스 생성 + 결제 시작(폴링)
+  // ✅ 카드 삭제 (비활성화) — payId 우선, 없으면 billingKey
+  // =========================
+  async function handleDeleteCard(card) {
+    if (!card || busy) return;
+    if (!window.confirm("해당 카드를 삭제(비활성화)하시겠습니까?")) return;
+    setBusy(true);
+    try {
+      if (card.payId) {
+        await billingKeysApi.deleteById(card.payId);
+      } else if (card.billingKey) {
+        await billingKeysApi.deleteByKey(card.billingKey);
+      } else {
+        throw new Error("삭제 식별자가 없습니다.");
+      }
+      setMsg("카드가 삭제되었습니다.");
+      await loadCards();
+    } catch (e) {
+      setMsg("카드 삭제 실패");
+      setDebug((d) => d + `\n[DELETE ERROR] ${e?.message || e}`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // =========================
+  // 결제 시작
   // =========================
   async function handleStart() {
     if (busy || !selectedCard) return;
@@ -248,13 +278,11 @@ export default function CheckoutPage() {
     setDebug("");
     setMsg("인보이스 생성 중…");
     try {
-      // 1) 인보이스 생성 (선택 카드 식별자 전달)
       const payload = { planCode, months };
       if (selectedPayId) payload.payId = selectedPayId;
       else if (selectedCard?.billingKey) payload.billingKey = selectedCard.billingKey;
 
       const invRes = await subscriptionApi.start(payload);
-
       const invoiceId =
         invRes?.data?.invoiceId ??
         invRes?.data?.id ??
@@ -267,21 +295,22 @@ export default function CheckoutPage() {
         return;
       }
 
-      // 2) 결제 트리거
       setMsg(`인보이스 생성 완료 (ID: ${invoiceId}). 결제를 시작합니다…`);
       const payRes = await paymentsApi.confirm({ invoiceId });
 
       const pid =
         payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
-      if (!pid) {
-        setMsg("결제 시작 실패: paymentId 없음");
+      const oid = payRes?.data?.orderId;
+      if (!pid && !oid) {
+        setMsg("결제 시작 실패: 식별자(handle) 없음");
         setDebug((d) => d + `\n[CONFIRM RESP] ${safeJ(payRes?.data)}`);
         return;
       }
-      setPaymentId(pid);
 
-      // 3) 폴링 시작 (서버: /payments/{paymentId})
-      await pollForeverUntilPaid(pid);
+      const handle = pid ?? oid;
+      setHandleId(handle);
+      if (pid) setShownPaymentId(pid);
+      await pollForeverUntilPaid(handle);
     } catch (e) {
       setMsg("결제에 실패했습니다. 다시 시도해 주세요.");
       setDebug((d) => d + `\n[CHECKOUT ERROR] ${e?.message || e}`);
@@ -290,6 +319,9 @@ export default function CheckoutPage() {
     }
   }
 
+  // =========================
+  // 렌더링
+  // =========================
   return (
     <div style={{ maxWidth: 720, margin: "24px auto", padding: 16 }}>
       <h2>구독 결제</h2>
@@ -311,17 +343,17 @@ export default function CheckoutPage() {
                 onClick={() => setSelectedIdx(idx)}
                 style={{
                   display: "flex",
-                  gap: 12,
+                  flexDirection: "column",
+                  gap: 6,
                   padding: "10px 12px",
-                  border: "1px solid " + (idx === selectedIdx ? "#4096ff" : "#ddd"),
+                  border:
+                    "1px solid " + (idx === selectedIdx ? "#4096ff" : "#ddd"),
                   borderRadius: 8,
                   cursor: "pointer",
                   marginBottom: 8,
-                  flexDirection: "column",
-                  alignItems: "flex-start",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 12, width: "100%" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div
                     style={{
                       width: 10,
@@ -341,16 +373,25 @@ export default function CheckoutPage() {
                         ? `****-****-****-${c.last4}`
                         : ""}
                       {c.pg ? ` · ${c.pg}` : ""}
-                      {c.payId ? ` · payId:${c.payId}` : ""}
                     </div>
                   </div>
+                  {/* 🔽 카드 삭제 버튼 */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCard(c);
+                    }}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "#d00",
+                      fontSize: 12,
+                      cursor: "pointer",
+                    }}
+                  >
+                    삭제
+                  </button>
                 </div>
-
-                {(!c.brand || !c.last4) && (
-                  <div style={{ fontSize: 12, color: "#999", marginTop: 4 }}>
-                    ※ 카드 상세정보는 첫 결제 완료 후 확인 가능합니다.
-                  </div>
-                )}
               </li>
             ))}
           </ul>
@@ -365,13 +406,6 @@ export default function CheckoutPage() {
           onClick={handleStart}
           disabled={busy || !selectedCard}
           style={btnPrimaryStyle}
-          title={
-            selectedPayId
-              ? `선택된 카드(payId=${selectedPayId})로 결제`
-              : selectedCard?.billingKey
-              ? "선택된 카드(빌링키)로 결제"
-              : "카드를 선택하세요"
-          }
         >
           {busy ? "처리 중…" : "구독 시작"}
         </button>
@@ -380,9 +414,10 @@ export default function CheckoutPage() {
       {msg && (
         <div style={{ marginTop: 12, color: "#333" }}>
           {msg}
-          {paymentId && (
+          {(handleId || shownPaymentId) && (
             <div style={{ marginTop: 6, color: "#777", fontSize: 13 }}>
-              상태: {uiStatus || "PENDING"} · paymentId: {paymentId}
+              상태: {uiStatus || "PENDING"} · handle: {handleId || "-"}
+              {shownPaymentId ? ` · paymentId: ${shownPaymentId}` : ""}
             </div>
           )}
         </div>
@@ -401,7 +436,7 @@ export default function CheckoutPage() {
             wordBreak: "break-all",
           }}
         >
-{debug}
+          {debug}
         </pre>
       )}
     </div>
@@ -415,6 +450,7 @@ const btnStyle = {
   background: "#fff",
   cursor: "pointer",
 };
+
 const btnPrimaryStyle = {
   ...btnStyle,
   border: "1px solid #4096ff",

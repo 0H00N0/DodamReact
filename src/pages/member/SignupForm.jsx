@@ -282,7 +282,7 @@ export default function SignupForm() {
 
         <button
           type="button"
-          onClick={() => navigate("/loginForm")}
+          onClick={() => navigate("/login")}
           disabled={loading}
           style={styles.linkBtn}
         >
