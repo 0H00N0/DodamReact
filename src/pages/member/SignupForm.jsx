@@ -92,7 +92,7 @@ export default function SignupForm() {
         children: form.children,
       };
       await api.post("/member/signup", payload);
-      navigate("/loginForm", { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       const message =
         err?.response?.data?.error ??
