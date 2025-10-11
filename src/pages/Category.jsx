@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProductsByCategory, getCategoryById, sortProducts, filterProductsByPrice, priceRanges, sortOptions } from '../utils/dummyData';
+import { priceRanges, sortOptions, sortProducts, filterProductsByPrice } from '../utils/dummyData';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
 import ProductCard from '../components/Product/ProductCard';
 import styles from './Category.module.css';
 
 /**
- * 카테고리별 상품 목록 페이지
+ * 카테고리별 상품 목록 페이지 (API 연동)
  */
 const Category = () => {
-  const { categoryId } = useParams();
+  const { categoryName } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -22,17 +22,20 @@ const Category = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 카테고리 데이터 로드
+  // 카테고리 정보 및 상품 목록 API로 불러오기
   useEffect(() => {
-    const categoryData = getCategoryById(categoryId);
-    const categoryProducts = getProductsByCategory(categoryId);
-    
-    if (categoryData) {
+    setIsLoading(true);
+    Promise.all([
+      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
+        .then(res => res.ok ? res.json() : null),
+      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
+        .then(res => res.ok ? res.json() : [])
+    ]).then(([categoryData, categoryProducts]) => {
       setCategory(categoryData);
       setProducts(categoryProducts);
-    }
-    setIsLoading(false);
-  }, [categoryId]);
+      setIsLoading(false);
+    });
+  }, [categoryName]);
 
   // 필터링 및 정렬 적용
   useEffect(() => {
@@ -108,7 +111,7 @@ const Category = () => {
       <div className={styles.categoryHeader}>
         <div className={styles.categoryInfo}>
           <span className={styles.categoryIcon}>{category.icon}</span>
-          <h1 className={styles.categoryName}>{category.name}</h1>
+          <h1 className={styles.categoryName}>{category.catename || category.name}</h1>
         </div>
         <p className={styles.productCount}>
           총 {filteredProducts.length}개의 상품
@@ -167,9 +170,9 @@ const Category = () => {
       {filteredProducts.length > 0 ? (
         <div className={styles.productGrid}>
           {filteredProducts.map(product => (
-            <div key={product.id} onClick={() => handleProductClick(product.id)}>
+            <div key={product.pronum} onClick={() => handleProductClick(product.pronum)}>
               <ProductCard
-                id={product.id}
+                id={product.pronum}
                 name={product.name}
                 price={product.price}
                 discountPrice={product.discountPrice}

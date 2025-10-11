@@ -3,6 +3,27 @@ import { api } from '../../utils/api';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
+// ---- 날짜/빈값 유틸 (콤마/슬래시 등 포함해도 YYYY-MM-DD로 정규화) ----
+const toYYYYMMDD = (v) => {
+  if (!v) return '';
+  const s = String(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;                  // 이미 yyyy-MM-dd
+  const m = s.match(/(\d{4})\D?(\d{1,2})\D?(\d{1,2})/);          // 2025,10,16 / 2025.10.16 / 2025/10/16 ...
+  if (m) return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10); // 마지막 방어선
+};
+const nullIfBlank = (v) => (v === '' || v == null ? null : v);
+const numOrNull   = (v) => (v === '' || v == null ? null : Number(v));
+
+// ---- 자녀 유효성 유틸 ----
+const isFilledChild = (c) => (c.chname || '').trim() !== '' && toYYYYMMDD(c.chbirth) !== '';
+const isPartialChild = (c) => {
+  const name = (c.chname || '').trim();
+  const birth = toYYYYMMDD(c.chbirth);
+  return (name !== '' || birth !== '') && !(name !== '' && birth !== '');
+};
+
 const UpdateProfile = () => {
   const [form, setForm] = useState({
     mname: '',
@@ -47,30 +68,37 @@ const UpdateProfile = () => {
     }).open();
   };
 
-  // 회원 정보 불러오기
+  // ✅ 회원 정보 불러오기 (/member/me: { login, member })
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { data } = await api.get('/member/me');
         if (cancelled) return;
+
+        if (!data?.login) {
+          alert('로그인이 필요합니다.');
+          navigate('/member/login', { replace: true });
+          return;
+        }
+
+        const m = data.member || {};
         setForm({
-          mname:  data?.mname  ?? '',
-          mbirth: data?.mbirth ?? '',
-          memail: data?.memail ?? '',
-          mtel:   data?.mtel   ?? '',
-          maddr:  data?.maddr  ?? '',
-          mpost:  data?.mpost  ?? '',
-          mnic:   data?.mnic   ?? '',
-          children: data?.children ?? []
+          mname:  m.mname  ?? '',
+          mbirth: toYYYYMMDD(m.mbirth),             // ★ 날짜 정규화
+          memail: m.memail ?? '',
+          mtel:   m.mtel   ?? '',
+          maddr:  m.maddr  ?? '',
+          mpost:  (m.mpost ?? '').toString(),       // ★ 입력창은 문자열
+          mnic:   m.mnic   ?? '',
+          children: (m.children ?? []).map(c => ({
+            chname:  c?.chname ?? '',
+            chbirth: toYYYYMMDD(c?.chbirth)         // ★ 날짜 정규화
+          }))
         });
       } catch (err) {
         console.error('회원 정보 로딩 실패:', err);
-        if (err?.response?.status === 401) {
-          alert('로그인이 필요합니다.');
-          navigate('/login', { replace: true });
-          return;
-        }
+        alert('회원 정보를 불러오지 못했습니다.');
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -110,13 +138,36 @@ const UpdateProfile = () => {
     }));
   };
 
-  // 수정 요청
+  // ✅ 수정 요청 (회원 생일은 비워도 OK, 자녀는 둘 다 채운 행만 전송)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setMessage('');
     try {
-      await api.put('/member/updateProfile', form);
+      // 부분 입력된 자녀행이 있으면 저장 차단 (원치 않으면 이 블록 제거 가능)
+      const partial = (form.children || []).find(isPartialChild);
+      if (partial) {
+        setSaving(false);
+        setMessage('자녀 행을 추가했다면 이름과 생년월일을 모두 입력해주세요.');
+        return;
+      }
+
+      // 둘 다 채운 자녀행만 서버로 전송
+      const cleanedChildren = (form.children || [])
+        .filter(isFilledChild)
+        .map(c => ({
+          chname: (c.chname || '').trim(),
+          chbirth: toYYYYMMDD(c.chbirth)           // yyyy-MM-dd 보장
+        }));
+
+      const payload = {
+        ...form,
+        mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)), // 회원 생일: 비워두면 null
+        mpost:  numOrNull(form.mpost),                // 숫자 변환 (빈값 null)
+        children: cleanedChildren
+      };
+
+      await api.put('/member/updateProfile', payload);
       alert('회원정보 수정이 완료되었습니다.');
       navigate('/member/profile', { replace: true });
     } catch (err) {
@@ -137,6 +188,7 @@ const UpdateProfile = () => {
         <label>생년월일: <input type="date" name="mbirth" value={form.mbirth || ""} onChange={handleChange} /></label><br />
         <label>이메일: <input type="email" name="memail" value={form.memail} onChange={handleChange} /></label><br />
         <label>전화번호: <input type="text"  name="mtel"   value={form.mtel}   onChange={handleChange} /></label><br />
+
         <label>주소:</label>
         <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
           <input
@@ -148,12 +200,17 @@ const UpdateProfile = () => {
             style={{ width: "250px" }} 
             autoComplete="address-line1"
           />
-          <button type="button" onClick={handleAddressSearch} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
-          주소검색
+          <button
+            type="button"
+            onClick={handleAddressSearch}
+            style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}
+          >
+            주소검색
           </button>
         </div>
-        <label>우편번호: <input type="text"  name="mpost"  value={form.mpost}  onChange={handleChange} /></label><br />
-        <label>닉네임: <input type="text"  name="mnic"   value={form.mnic}   onChange={handleChange} /></label><br />
+
+        <label>우편번호: <input type="text" name="mpost" value={form.mpost} onChange={handleChange} /></label><br />
+        <label>닉네임: <input type="text" name="mnic" value={form.mnic} onChange={handleChange} /></label><br />
 
         <fieldset style={{ border: "1px solid #eee", padding: 12, borderRadius: 8, marginTop: 16 }}>
           <legend>자녀 정보 (선택)</legend>
@@ -164,16 +221,20 @@ const UpdateProfile = () => {
                 value={c.chname}
                 onChange={e => handleChildChange(idx, e)}
                 placeholder="자녀 이름"
-                 style={{ width: "250px" }} 
+                style={{ width: "250px" }} 
               />
               <input
                 name="chbirth"
                 type="date"
-                value={c.chbirth}
+                value={c.chbirth || ''}
                 onChange={e => handleChildChange(idx, e)}
-                 style={{ width: "250px" }} 
+                style={{ width: "250px" }} 
               />
-              <button type="button" onClick={() => removeChild(idx)} style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}>
+              <button
+                type="button"
+                onClick={() => removeChild(idx)}
+                style={{ background: "#eee", border: "none", borderRadius: 4, cursor: "pointer", padding: "0 12px" }}
+              >
                 삭제
               </button>
             </div>
@@ -205,7 +266,7 @@ const UpdateProfile = () => {
           {saving ? '저장 중…' : '수정하기'}
         </button>
       </form>
-      {message && <p>{message}</p>}
+      {message && <p style={{ color: 'crimson', marginTop: 12 }}>{message}</p>}
     </div>
   );
 };

@@ -1,44 +1,47 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
 
-// 예시: 로그인 회원 정보가 있다면 아래처럼 받아올 수 있음
-
-export default function ProductDetailPage({ mid }) {
+export default function ProductDetailPage() {
+  const { user } = useAuth(); // user = 로그인 정보
   const { pronum } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();   // ✅ CartContext
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-const styles = {
-  linkBtn: {
-    padding: "12px 24px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#2563eb",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "16px",
-    cursor: "pointer",
-    marginTop: "16px",
-    marginRight: "8px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-    transition: "background 0.2s",
-  },
-  buyBtn: {
-    padding: "12px 24px",
-    borderRadius: "8px",
-    border: "none",
-    background: "#059669",
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: "16px",
-    cursor: "pointer",
-    marginTop: "16px",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-    transition: "background 0.2s",
-  }
-};
+  const styles = {
+    linkBtn: {
+      padding: "12px 24px",
+      borderRadius: "8px",
+      border: "none",
+      background: "#2563eb",
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "16px",
+      cursor: "pointer",
+      marginTop: "16px",
+      marginRight: "8px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+      transition: "background 0.2s",
+    },
+    buyBtn: {
+      padding: "12px 24px",
+      borderRadius: "8px",
+      border: "none",
+      background: "#059669",
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: "16px",
+      cursor: "pointer",
+      marginTop: "16px",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+      transition: "background 0.2s",
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -76,29 +79,64 @@ const styles = {
     stock,
     createdAt,
     updatedAt,
-    catenum,
-    resernum,
+    catenum
   } = product;
 
-  // 로그인 회원번호 예시
-  const mnum = mid?.mnum || 1; // 실제 로그인 정보로 대체
+  // 로그인 회원 번호
+  const mnum = user?.mnum;
 
   // 장바구니 버튼 함수
   const addCart = async () => {
+    if (!user) {
+      alert("로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
     const ok = window.confirm("장바구니에 담으시겠습니까?");
     if (!ok) return;
-    await fetch("/cart", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mnum, pronum, catenum, resernum })
-    });
-    window.confirm("장바구니에 담겼습니다!");
+    // ✅ 1) 화면 먼저 갱신 (헤더 미니카트/장바구니 페이지 즉시 반영)
+    addToCart(Number(pronum), 1, {}); // 선택 옵션이 있으면 {} 대신 { colors: '레드', ... }
+
+    // ✅ 2) (선택) 서버에도 저장 — 실패해도 UI는 유지
+    try {
+      await fetch("http://localhost:8080/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mnum, pronum: Number(pronum), catenum })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    window.alert("상품이 장바구니에 담겼습니다.");
   };
 
-  // 구매하기 버튼 함수
-  const goToBuyPage = () => {
-    navigate(`/buy/${pronum}`); // 구매 페이지로 이동
-  };
+  // 구매하기 버튼
+  const goToBuyPage = async () => {
+  if (!user) {
+    alert("로그인 후 이용 가능합니다.");
+    navigate("/login");
+    return;
+  }
+  const ok = window.confirm("구매하시겠습니까?");
+  if (!ok) return;
+
+  try {
+    const res = await fetch("http://localhost:8080/rent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ mnum, pronum: Number(pronum) })
+    });
+    if (!res.ok) throw new Error("대여 등록 실패");
+    window.alert("대여신청이 정상적으로 등록되었습니다.");
+    // 구매(대여) 페이지로 이동
+    // navigate("/rent/pronum");
+  } catch (e) {
+    window.alert("대여 처리 중 오류가 발생했습니다.");
+    console.error(e);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -129,8 +167,10 @@ const styles = {
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold">{proname}</h1>
           <div className="text-lg font-semibold">
-            {proprice ? Number(proprice).toLocaleString() + "원" : ""}
-          </div>
+            {proprice !== undefined && proprice !== null && proprice !== ""
+              ? Number(proprice).toLocaleString() + "원"
+              : "가격정보 없음"}
+</div>
           <div>
             <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>
           </div>

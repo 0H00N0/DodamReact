@@ -1,67 +1,51 @@
-//결제수단 조회 페이지
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
-import '../../styles/member/Cash.css';
+import React, { useEffect, useState } from "react";
+import { api } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
 
-const Cash = () => {
-  const navigate = useNavigate();
-  const [paymentMethods, setPaymentMethods] = useState([]);
+export default function Cash() {
+  const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-    const userId = sessionStorage.getItem('userId');
-    const token = sessionStorage.getItem('token');
-    const headers = {
-        'Authorization': `Bearer ${token}`
-    };      
-    useEffect(() => {
-        if (!userId || !token) {
-            alert('로그인이 필요합니다.');
-            navigate('/login');
-            return;
-        }       
+  const [err, setErr] = useState("");
+  const navigate = useNavigate();
 
-        const fetchPaymentMethods = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8080/api/payments/${userId}`, { headers });
-                setPaymentMethods(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError('결제수단을 불러오는 중 오류가 발생했습니다.');
-                setLoading(false);
-            };
-        };
+  useEffect(() => {
+    (async () => {
+      try {
+        // 백엔드에 이미 있는 엔드포인트 (zip에서 확인)
+        const { data } = await api.get("/billing-keys/list");
+        setMethods(Array.isArray(data) ? data : []);
+      } catch (e) {
+        const status = e?.response?.status;
+        if (status === 401) {
+          navigate("/member/login");
+          return;
+        }
+        setErr("결제수단을 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [navigate]);
 
-        fetchPaymentMethods();
-    }, [userId, token, navigate]);
+  if (loading) return <div style={{ padding: 24 }}>불러오는 중...</div>;
+  if (err) return <div style={{ padding: 24, color: "tomato" }}>{err}</div>;
 
-    const handleAddPaymentMethod = () => {
-        navigate('/member/add-payment');
-    }; 
-    const handleBack = () => {
-        navigate(-1);
-    };
+  return (
+    <div style={{ padding: 24 }}>
+      <h2 style={{ marginBottom: 16 }}>내 결제수단</h2>
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }           
-    if (error) {
-        return <div>{error}</div>;
-    }
-    return ( <div className="cash-container">
-        <Header />
-        <h2>결제수단 조회</h2>
-        <button onClick={handleAddPaymentMethod}>결제수단 추가</button>
-        <button onClick={handleBack}>뒤로가기</button>
-        <ul>
-            {paymentMethods.map(method => (
-                <li key={method.id}>{method.name}</li>
-            ))}
+      {methods.length === 0 ? (
+        <div>등록된 결제수단이 없습니다.</div>
+      ) : (
+        <ul style={{ paddingLeft: 16 }}>
+          {methods.map((m) => (
+            <li key={m.id} style={{ marginBottom: 8 }}>
+              {m.brand || m.pg || "카드"} •••• {m.last4 || "----"}
+              {m.createdAt ? ` / 등록: ${m.createdAt}` : ""}
+            </li>
+          ))}
         </ul>
-        <Footer />
-    </div>);
-};
-
-export default Cash;
+      )}
+    </div>
+  );
+}

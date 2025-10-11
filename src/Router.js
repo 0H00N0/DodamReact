@@ -24,9 +24,15 @@ import FindPwByMemail from "./pages/member/FindPwByMemail";
 import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
+import Membership from "./pages/member/Membership";
+import Cash from "./pages/member/Cash";
+import Cart from "./pages/Cart";
+
 // Product
 import ProductsPage from "./Product/pages/ProductsPage";
 import ProductDetailPage from "./Product/pages/ProductDetailPage";
+import Category from './pages/Category';
+
 
 // Plan (현재 프로젝트에 존재하는 페이지만)
 import PlanSelectPage from "./Plan/PlanSelectPage";
@@ -94,12 +100,19 @@ export const router = createRouter([
       { path: "member/findPwByMtel", element: <FindPwByMtel /> },
       { path: "member/changePwDirect", element: <ChangePwDirect /> },
       { path: "oauth/callback/:provider", element: <OAuthCallback /> },
+      { path: "member/membership", element: <Membership /> },
+      { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
 
+      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
+      { path: "cart", element: <Cart /> },           // 헤더 카트
+      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
+      
       // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
+      { path: "category/:categoryName", element: <Category /> },
 
       // 구독 플랜 (목록/상세)
       { path: "plans", element: <PlanSelectPage /> },

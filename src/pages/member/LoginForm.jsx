@@ -52,7 +52,10 @@ export default function LoginForm() {
       await api.post("/member/loginForm", {
         mid: form.mid.trim(),
         mpw: form.mpw,
+      },{
+        withCredentials: true //로그인 유지
       });
+
       sessionStorage.setItem("auth_hint", "1");
       window.dispatchEvent(new Event("auth:changed"));
       navigate("/", { replace: true }); // 로그인 성공 후 메인으로
