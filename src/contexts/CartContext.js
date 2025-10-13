@@ -1,7 +1,7 @@
 // src/contexts/CartContext.js
 import React, { createContext, useContext, useReducer, useEffect, useCallback } from 'react';
-import { api } from '../utils/api';            // axios 인스턴스 (withCredentials: true 필수)
-import { useAuth } from './AuthContext';       // 현재 로그인 사용자 구독
+import { api } from '../utils/api';
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
@@ -20,12 +20,14 @@ const initialState = {
 // 서버 DTO -> 프론트 아이템 변환
 function mapServerItems(list) {
   return (list || []).map(v => ({
+    // ✅ 서버가 내려주는 장바구니 라인키 보존 (삭제에 필수)
+    cartnum: v.cartnum,
     id: v.pronum,
     name: v.proname ?? `상품 #${v.pronum}`,
-    price: Number(v.price ?? 0),
-    originalPrice: Number(v.price ?? 0),
-    image: v.thumbnail || undefined,
-    quantity: Number(v.qty ?? 1),  // 현재 서버 qty = 1 고정
+    price: Number(v.price ?? v.proprice ?? 0),
+    originalPrice: Number(v.price ?? v.proprice ?? 0),
+    image: v.thumbnail || v.image_url || v.imageUrl || undefined,
+    quantity: Number(v.qty ?? 1),
     selectedOptions: {},
     addedAt: new Date().toISOString(),
   }));
@@ -55,14 +57,13 @@ function reducer(state, action) {
 
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { user } = useAuth(); // user가 바뀔 때마다 서버 동기화
+  const { user } = useAuth();
 
   const refreshFromServer = useCallback(async () => {
     try {
       const { data } = await api.get('/cart/my'); // 세션 쿠키 필요
       dispatch({ type: CART_ACTIONS.LOAD_FROM_SERVER, payload: data });
     } catch (e) {
-      // 로그인 안 된 상태면 401 나올 수 있음 → 장바구니 비우고 조용히 종료
       if (e?.response?.status === 401) {
         dispatch({ type: CART_ACTIONS.RESET });
         return;
@@ -71,25 +72,30 @@ export const CartProvider = ({ children }) => {
     }
   }, []);
 
-  // 1) 앱 시작 시 & 2) 로그인 사용자(user)가 바뀔 때마다 서버에서 동기화
   useEffect(() => {
     if (user) {
       refreshFromServer();
     } else {
-      // 로그아웃/미로그인 시에는 상태 초기화
       dispatch({ type: CART_ACTIONS.RESET });
     }
   }, [user, refreshFromServer]);
 
-  // 서버 upsert 후 재적재
   const addToCart = async (productId, quantity = 1, selectedOptions = {}, extra = {}) => {
-    // 현재 서버는 수량/옵션을 사용하지 않음(스키마 확장 시 전달)
     await api.post('/cart/items', { pronum: productId, catenum: extra?.catenum || 0 });
     await refreshFromServer();
   };
 
+  // ✅ cartnum 기준 삭제로 교체
+  const removeFromCart = async (cartnum) => {
+    try {
+      await api.delete(`/cart/items/by-cartnum/${cartnum}`);
+      await refreshFromServer();
+    } catch (e) {
+      dispatch({ type: CART_ACTIONS.SET_ERROR, payload: e?.message || '장바구니 삭제 실패' });
+    }
+  };
+
   // 아직 서버 API 없는 기능은 안내만
-  const removeFromCart = () => alert('삭제 기능은 서버 API 준비 후 연결됩니다.');
   const updateQuantity = () => alert('수량 변경은 서버 API 준비 후 연결됩니다.');
   const clearCart = () => alert('전체 비우기는 서버 API 준비 후 연결됩니다.');
 
