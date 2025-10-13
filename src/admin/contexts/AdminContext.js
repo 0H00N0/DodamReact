@@ -225,18 +225,8 @@ const deleteProduct = async (id) => {
   };
 
   // --- Orders ---
-  const getAllOrders = async () => request(`${API_BASE_URL}/admin/orders`);
-  const getOrderById = async (orderId) => request(`${API_BASE_URL}/admin/orders/${orderId}`);
-  const updateOrderApproval = async (orderId) =>
-    request(`${API_BASE_URL}/admin/orders/${orderId}/approval`, {
-      method: 'PATCH',
-      body: JSON.stringify({ renApproval: 1 }),
-    });
-  const assignOrderRider = async (orderId, riderData) =>
-    request(`${API_BASE_URL}/admin/orders/${orderId}/rider`, {
-      method: 'PATCH',
-      body: JSON.stringify(riderData),
-    });
+  const getAllOrders = async () => request(`${API_BASE_URL}/admin/rental`);
+  const getOrderById = async (orderId) => request(`${API_BASE_URL}/admin/rental/${orderId}`);
 
   // --- Members ---
   const getAllMembers = async () => request(`${API_BASE_URL}/admin/members`);
@@ -482,8 +472,6 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     createDeliveryman,
     updateDeliveryman,
     deleteDeliveryman,
-    updateOrderApproval,
-    assignOrderRider,
     getAllVocs,
     getVocById,
     updateVoc,

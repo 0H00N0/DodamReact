@@ -58,24 +58,20 @@ function AdminSidebar() {
         
       ]
     },
+    // 주문 관리 메뉴만 수정
     {
       key: 'orders',
       title: '주문 관리',
       icon: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          {/* SVG 아이콘 코드 */}
+          <rect x="3" y="7" width="18" height="13" stroke="currentColor" strokeWidth="2"/>
+          <path d="M16 3v4" stroke="currentColor" strokeWidth="2"/>
+          <path d="M8 3v4" stroke="currentColor" strokeWidth="2"/>
         </svg>
       ),
-      path: '/admin/orders', // 기본 경로
-      // ⬇️ 아래 submenu 배열을 추가합니다. ⬇️
+      path: '/admin/orders',
       submenu: [
-        { title: '대여 목록', path: '/admin/orders/list' },
-        { title: '대여 승인', path: '/admin/orders/approval' },
-        { title: '배송 중/완료', path: '/admin/orders/shipping' },
-        { title: '회수', path: '/admin/orders/returns' },
-        { title: '연체', path: '/admin/orders/overdue' },
-        { title: '손실/분실', path: '/admin/orders/lost' },
-        
+        { title: '대여 목록', path: '/admin/orders/list' }
       ]
     },
     {
