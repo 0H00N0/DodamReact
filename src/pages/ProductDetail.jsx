@@ -72,7 +72,7 @@ const ProductDetail = () => {
 
   // 장바구니 담기
   const handleAddToCart = () => {
-    addToCart(product.id, quantity, selectedOptions);
+    addToCart(Number(id), quantity, selectedOptions);  // ✅ 서버의 pronum 사용
     alert(`${product.name}이(가) 장바구니에 담겼습니다!`);
   };
 
@@ -83,7 +83,7 @@ const ProductDetail = () => {
 
   // 즉시 구매 (장바구니로 이동)
   const handleBuyNow = () => {
-    addToCart(product.id, quantity, selectedOptions);
+   addToCart(Number(id), quantity, selectedOptions);  // ✅ 동일하게 수정
     navigate('/cart');
   };
 
@@ -115,7 +115,7 @@ const ProductDetail = () => {
   }
 
   const category = getCategoryById(product.category);
-  const currentQuantityInCart = getItemQuantity(product.id, selectedOptions);
+  const currentQuantityInCart = getItemQuantity(Number(id), selectedOptions);
   const isWished = isInWishlist(product.id);
 
   return (
