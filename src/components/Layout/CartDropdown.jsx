@@ -96,7 +96,7 @@ const CartDropdown = ({ isOpen, onClose }) => {
               ))}
               {items.length > 3 && (
                 <div className={styles.moreItems}>
-                  +{items.length - 3}개 더 보기
+                  +{items.length - 3}개의 상품이 더 있습니다
                 </div>
               )}
             </div>
