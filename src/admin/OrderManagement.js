@@ -79,12 +79,7 @@ const OrderManagement = () => {
 
   return (
     <div className="order-management-container">
-      <Routes>
-        <Route path="/" element={<Navigate to="list" replace />} />
-        <Route path="list" element={<OrderTable title="전체 대여 목록" orders={orders} />} />
-        {/* 상세는 숫자만 허용 */}
-        <Route path=":orderId([0-9]+)" element={<OrderDetail />} />
-    </Routes>
+      <OrderTable title="전체 대여 목록" orders={orders} />
     </div>
   );
 };

@@ -54,7 +54,7 @@ const OrderDetail = () => {
         <>
           <div className="order-detail-header">
             <h1>주문 상세 정보</h1>
-            <Link to="/admin/orders/list" className="back-to-list-btn">목록으로</Link>
+            <Link to="/admin/orders" className="back-to-list-btn">목록으로</Link>
           </div>
 
           <div className="order-detail-grid">

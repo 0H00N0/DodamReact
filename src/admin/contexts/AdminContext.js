@@ -1,6 +1,6 @@
 // src/admin/contexts/AdminContext.js
 import React, { createContext, useContext, useReducer } from 'react';
-import { API_BASE_URL } from '../../api-config';
+import { API_BASE_URL, api } from '../../utils/api';
 
 const mockPlanNames = [
   { planNameId: 1, planName: '베이직 플랜' },
@@ -83,55 +83,17 @@ const request = async (url, options = {}) => {
     console.log('Headers:', options.headers);
     console.log('Body:', options.body);
 
-    // ✅ 기본 헤더 설정 (FormData 아닐 때만)
-    let headers = options.headers || {};
-    if (!(options.body instanceof FormData)) {
-      headers = { 'Content-Type': 'application/json', ...headers };
-    }
-
-    // ✅ 세션 쿠키(JSESSIONID) 포함시키기
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      credentials: "include"   // <<<<<<<<<<<<<<<< 요거 추가
+    const { data } = await api({
+      url,
+      method: options.method || 'GET',
+      headers: options.headers,
+      data: options.body instanceof FormData ? options.body : JSON.parse(options.body || '{}')
     });
 
-    console.log('=== 응답 정보 ===');
-    console.log('Status:', response.status);
-    console.log('Status Text:', response.statusText);
-    console.log('Response Headers:', {
-      'content-type': response.headers.get('content-type'),
-      'content-length': response.headers.get('content-length')
-    });
-
-    const responseText = await response.text();
-    console.log('Raw Response:', responseText);
-    console.log('Response Length:', responseText.length);
-
-    if (!response.ok) {
-      console.error('Server Error Details:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: responseText
-      });
-      throw new Error(`HTTP ${response.status}: ${responseText}`);
-    }
-
-    if (responseText.trim() === '') {
-      console.log('빈 응답 받음');
-      return null;
-    }
-
-    try {
-      const jsonData = JSON.parse(responseText);
-      console.log('Parsed JSON:', jsonData);
-      return jsonData;
-    } catch (parseError) {
-      console.error('JSON 파싱 실패:', parseError.message);
-      console.error('파싱 시도한 텍스트:', responseText);
-      throw new Error(`Invalid JSON response: ${responseText}`);
-    }
-
+    console.log('=== 응답 데이터 ===');
+    console.log('Response data:', data);
+    
+    return data;
   } catch (error) {
     console.error('Request 전체 오류:', error);
     throw error;
@@ -225,9 +187,22 @@ const deleteProduct = async (id) => {
   };
 
   // --- Orders ---
-  const getAllOrders = async () => request(`${API_BASE_URL}/admin/rental`);
-  const getOrderById = async (orderId) => request(`${API_BASE_URL}/admin/rental/${orderId}`);
-
+  const getAllOrders = async () => {
+    console.log('Fetching orders from:', `${API_BASE_URL}/admin/orders`);
+    try {
+      const data = await api.get(`/admin/orders`);
+      console.log('Orders response:', data);
+      return data.data;
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      throw err;
+    }
+  };
+// ✅ 수정된 코드
+const getOrderById = async (orderId) => {
+  const { data } = await api.get(`/admin/orders/${orderId}`);
+  return data;
+};
   // --- Members ---
   const getAllMembers = async () => request(`${API_BASE_URL}/admin/members`);
   const getMemberById = async (id) => request(`${API_BASE_URL}/admin/members/${id}`);

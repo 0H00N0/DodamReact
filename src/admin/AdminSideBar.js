@@ -71,7 +71,7 @@ function AdminSidebar() {
       ),
       path: '/admin/orders',
       submenu: [
-        { title: '대여 목록', path: '/admin/orders/list' }
+        { title: '대여 목록', path: '/admin/orders' }
       ]
     },
     {
