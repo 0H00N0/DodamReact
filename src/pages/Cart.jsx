@@ -1,4 +1,4 @@
-// Cart.jsx
+// src/pages/Cart.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -19,14 +19,14 @@ const Cart = () => {
     if (newQuantity <= 0) {
       handleRemoveItem(item);
     } else {
-      // 아직 서버 미구현 → 안내만
-      updateQuantity(item.id, item.selectedOptions, newQuantity);
+      // ✅ pronum(id), 최종 수량만 전달
+      updateQuantity(item.id, newQuantity);
     }
   };
 
-  // ✅ cartnum으로 삭제
+  // ✅ pronum(id) 기준 삭제
   const handleRemoveItem = (item) => {
-    removeFromCart(item.cartnum);
+    removeFromCart(item.id);
   };
 
   const handleClearCart = () => {

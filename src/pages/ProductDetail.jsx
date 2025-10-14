@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+// src/pages/ProductDetail.jsx
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductById, getCategoryById } from '../utils/dummyData';
 import { useCart } from '../contexts/CartContext';
@@ -19,6 +20,9 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+
+  // ✅ 중복 클릭 방지 락
+  const addingRef = useRef(false);
 
   // 상품 데이터 로드
   useEffect(() => {
@@ -70,10 +74,23 @@ const ProductDetail = () => {
     }
   };
 
-  // 장바구니 담기
-  const handleAddToCart = () => {
-    addToCart(Number(id), quantity, selectedOptions);  // ✅ 서버의 pronum 사용
-    alert(`${product.name}이(가) 장바구니에 담겼습니다!`);
+  // ✅ 장바구니 담기 (버블링/더블클릭 방지)
+  const handleAddToCart = async (e) => {
+    e?.stopPropagation?.();
+    if (addingRef.current) return;
+    addingRef.current = true;
+    try {
+      const qty = Number(quantity) > 0 ? Number(quantity) : 1;
+      await addToCart(
+        Number(id),                  // pronum
+        qty,                         // qty (반드시 1 이상 숫자)
+        selectedOptions,             // 옵션 그대로
+        { catenum: product?.catenum ?? 0 } // 백엔드가 쓰는 카테고리 번호
+      );
+      alert(`${product.name}이(가) 장바구니에 담겼습니다!`);
+    } finally {
+      addingRef.current = false;
+    }
   };
 
   // 찜하기 토글
@@ -82,8 +99,14 @@ const ProductDetail = () => {
   };
 
   // 즉시 구매 (장바구니로 이동)
-  const handleBuyNow = () => {
-   addToCart(Number(id), quantity, selectedOptions);  // ✅ 동일하게 수정
+  const handleBuyNow = async () => {
+    const qty = Number(quantity) > 0 ? Number(quantity) : 1;
+    await addToCart(
+      Number(id),
+      qty,
+      selectedOptions,
+      { catenum: product?.catenum ?? 0 }
+    );
     navigate('/cart');
   };
 
@@ -115,7 +138,7 @@ const ProductDetail = () => {
   }
 
   const category = getCategoryById(product.category);
-  const currentQuantityInCart = getItemQuantity(Number(id), selectedOptions);
+  const currentQuantityInCart = getItemQuantity(Number(id));
   const isWished = isInWishlist(product.id);
 
   return (
@@ -300,6 +323,7 @@ const ProductDetail = () => {
             onClick={handleAddToCart}
             className={styles.addToCartBtn}
             disabled={product.stock === 0}
+            type="button"
           >
             장바구니 담기
           </button>
@@ -308,6 +332,7 @@ const ProductDetail = () => {
             onClick={handleBuyNow}
             className={styles.buyNowBtn}
             disabled={product.stock === 0}
+            type="button"
           >
             바로 구매
           </button>

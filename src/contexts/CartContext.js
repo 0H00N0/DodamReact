@@ -22,12 +22,12 @@ function mapServerItems(list) {
   return (list || []).map(v => ({
     // ✅ 서버가 내려주는 장바구니 라인키 보존 (삭제에 필수)
     cartnum: v.cartnum,
-    id: v.pronum,
+    id: Number(v.pronum),                // pronum을 id로 사용
     name: v.proname ?? `상품 #${v.pronum}`,
     price: Number(v.price ?? v.proprice ?? 0),
     originalPrice: Number(v.price ?? v.proprice ?? 0),
     image: v.thumbnail || v.image_url || v.imageUrl || undefined,
-    quantity: Number(v.qty ?? 1),
+    quantity: Number(v.qty ?? 1),        // 서버 qty 반영
     selectedOptions: {},
     addedAt: new Date().toISOString(),
   }));
@@ -81,26 +81,40 @@ export const CartProvider = ({ children }) => {
   }, [user, refreshFromServer]);
 
   const addToCart = async (productId, quantity = 1, selectedOptions = {}, extra = {}) => {
-    await api.post('/cart/items', { pronum: productId, catenum: extra?.catenum || 0 });
+    await api.post('/cart/items', {
+      pronum: productId,
+      catenum: extra?.catenum ?? 0,
+      qty: Number(quantity) > 0 ? Number(quantity) : 1,
+    });
     await refreshFromServer();
   };
 
-  // ✅ cartnum 기준 삭제로 교체
-  const removeFromCart = async (cartnum) => {
+  // ✅ pronum 기준 삭제
+  const removeFromCart = async (pronum) => {
     try {
-      await api.delete(`/cart/items/by-cartnum/${cartnum}`);
+      await api.delete(`/cart/items/${pronum}`);
       await refreshFromServer();
     } catch (e) {
       dispatch({ type: CART_ACTIONS.SET_ERROR, payload: e?.message || '장바구니 삭제 실패' });
     }
   };
 
-  // 아직 서버 API 없는 기능은 안내만
-  const updateQuantity = () => alert('수량 변경은 서버 API 준비 후 연결됩니다.');
+  // ✅ 수량 변경 API 연결 (최종 수량 기반)
+  const updateQuantity = async (pronum, qty) => {
+    try {
+      await api.patch(`/cart/items/${pronum}`, { qty });
+      await refreshFromServer();
+    } catch (e) {
+      dispatch({ type: CART_ACTIONS.SET_ERROR, payload: e?.message || '수량 변경 실패' });
+    }
+  };
+
+  // (선택) 전체 비우기는 서버 API 준비 후 연결
   const clearCart = () => alert('전체 비우기는 서버 API 준비 후 연결됩니다.');
 
-  const isInCart = (productId) => state.items.some(it => it.id === productId);
-  const getItemQuantity = (productId) => state.items.find(it => it.id === productId)?.quantity ?? 0;
+  // ✅ 비교 키를 id(pronum)로 통일
+  const isInCart = (productId) => state.items.some(it => it.id === Number(productId));
+  const getItemQuantity = (productId) => state.items.find(it => it.id === Number(productId))?.quantity ?? 0;
 
   const value = {
     ...state,
