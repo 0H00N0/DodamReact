@@ -81,35 +81,55 @@ export default function Membership() {
     return "-";
   };
 
-  // 백엔드 키 다양성 대응 (동일 의미의 여러 키를 안전하게 병합)
+  // ===== 백엔드 키 다양성 대응 (동일 의미의 여러 키를 안전하게 병합) =====
   const getTermStart = (s) =>
-    s.termStart ??
-    s.pmTermStart ??
-    s.startAt ??
-    s.startDate ??
-    s.piStart ??
-    s.term_start ??
-    s.pm_start ??
-    null;
+    s.termStart ?? s.pmTermStart ?? s.startAt ?? s.startDate ?? s.piStart ?? s.term_start ?? s.pm_start ?? null;
 
   const getTermEnd = (s) =>
-    s.termEnd ??
-    s.pmTermEnd ??
-    s.endAt ??
-    s.endDate ??
-    s.piEnd ??
-    s.term_end ??
-    s.pm_end ??
-    null;
+    s.termEnd ?? s.pmTermEnd ?? s.endAt ?? s.endDate ?? s.piEnd ?? s.term_end ?? s.pm_end ?? null;
 
   const getNextBillingAt = (s) =>
-    s.nextBillingAt ??
-    s.pmNextBil ??
-    s.pmNextBill ??
-    s.nextBillAt ??
-    s.nextBillingDate ??
-    s.next_billing_at ??
-    null;
+    s.nextBillingAt ?? s.pmNextBil ?? s.pmNextBill ?? s.nextBillAt ?? s.nextBillingDate ?? s.next_billing_at ?? null;
+
+  // ---- [NEW] 다음 갱신 예정 계산용 헬퍼들 ----
+  const getPlanName = (s, next=false) =>
+    next ? (s.nextPlanName ?? s.nextPlan?.planName ?? s.nextPlan?.name ?? s.nextPlanCode ?? null)
+         : (s.planName ?? s.plan?.planName ?? s.plan?.name ?? s.planCode ?? null);
+
+  const getPlanCode = (s, next=false) =>
+    next ? (s.nextPlanCode ?? s.nextPlan?.planCode ?? null)
+         : (s.planCode ?? s.plan?.planCode ?? null);
+
+  const getMonths = (s, next=false) => {
+    if (next) {
+      return s.nextTermMonth ?? s.nextTerms?.ptermMonth ?? s.nextTerms?.months ??
+             s.nextPterm?.months ?? s.nextPtermMonth ?? null;
+    }
+    return s.termMonth ?? s.terms?.ptermMonth ?? s.terms?.months ?? s.pmCycle ?? null;
+  };
+
+  const getAmount = (s, next=false) =>
+    next ? (s.nextAmount ?? s.nextPrice?.ppriceAmount ?? s.nextPriceAmount ?? null)
+         : (s.amount ?? s.price?.ppriceAmount ?? s.ppriceAmount ?? null);
+
+  const getCurr = (s, next=false) =>
+    next ? (s.nextCurrency ?? s.nextPrice?.ppriceCurr ?? s.nextPriceCurr ?? "KRW")
+         : (s.currency ?? s.price?.ppriceCurr ?? s.ppriceCurr ?? "KRW");
+
+  const hasScheduledChange = (s) =>
+  !!(s.hasScheduledChange) ||   // ✅ 서버 플래그 우선
+  !!(s.nextPlanId || s.nextPpriceId || s.nextPtermId ||
+     s.nextPlan || s.nextPrice || s.nextTerms ||
+     s.nextPlanCode || s.nextPlanName || s.nextTermMonth || s.nextPriceAmount);
+
+  const addMonths = (dateLike, m=1) => {
+    if (!dateLike) return null;
+    const d = new Date(dateLike);
+    if (Number.isNaN(d.getTime())) return null;
+    const nd = new Date(d);
+    nd.setMonth(nd.getMonth() + Number(m || 0));
+    return nd.toISOString();
+  };
 
   // data load
   const load = async () => {
@@ -344,6 +364,23 @@ export default function Membership() {
                       </div>
                     </div>
 
+                    {/* 변경 예약 안내 배지 (선택) */}
+                    {hasScheduledChange(s) && !isCancelScheduled && (
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#b94b78",
+                          background: "#ffe7f0",
+                          border: "1px solid #ffd6e7",
+                          borderRadius: 999,
+                          padding: "4px 8px",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        다음 주기에 변경 예약 적용됨
+                      </div>
+                    )}
+
                     {/* CTA (desktop) */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {isActive && (
@@ -438,6 +475,73 @@ export default function Membership() {
                       결제는 진행되지 않습니다.
                     </div>
                   )}
+
+                  {/* --- [NEW] 다음 갱신 예정 박스 --- */}
+                  {!isCancelScheduled && (() => {
+                    const scheduled = hasScheduledChange(s);           // 변경 예약 여부
+                    const nPlanName = getPlanName(s, scheduled);
+                    const nPlanCode = getPlanCode(s, scheduled);
+                    const nMonths   = getMonths(s, scheduled) ?? 1;
+                    const nAmount   = getAmount(s, scheduled);
+                    const nCurr     = getCurr(s, scheduled);
+                    const nStart    = nextBillingAt;                    // 다음 주기 시작 = pmNextBil
+                    const nEnd      = addMonths(nStart, nMonths);
+
+                    if (!nStart) return null; // pmNextBil 없으면 표시 생략
+
+                    return (
+                      <div
+                        style={{
+                          marginTop: 14,
+                          padding: 14,
+                          borderRadius: 12,
+                          border: `1px dashed ${color.border}`,
+                          background: "#fffafd",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                          <strong>다음 갱신 예정</strong>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              padding: "2px 8px",
+                              borderRadius: 999,
+                              border: `1px solid ${scheduled ? "#ffd6e7" : "#e6e6e6"}`,
+                              background: scheduled ? "#ffe7f0" : "#f6f6f6",
+                              color: scheduled ? "#b94b78" : "#666",
+                            }}
+                          >
+                            {scheduled ? "변경 예약 적용" : "현재와 동일"}
+                          </span>
+                        </div>
+
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                            gap: 12,
+                          }}
+                        >
+                          <Field
+                            label="플랜"
+                            value={
+                              `${nPlanName ?? nPlanCode ?? "-"}`
+                              + (nMonths ? ` (${nMonths}개월)` : "")
+                            }
+                          />
+                          <Field label="다음 이용 기간" value={`${fmtDate(nStart)} ~ ${fmtDate(nEnd)}`} />
+                          <Field
+                            label="결제 예정 금액"
+                            value={
+                              nAmount != null
+                                ? `${new Intl.NumberFormat("ko-KR").format(nAmount)} ${nCurr || "KRW"}`
+                                : "-"
+                            }
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </article>
               );
             })}
