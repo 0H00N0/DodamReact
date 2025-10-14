@@ -129,7 +129,7 @@ export default function ProductDetailPage() {
       body: JSON.stringify({ mnum, pronum: Number(pronum) })
     });
     if (!res.ok) throw new Error("대여 등록 실패");
-    window.alert("대여신청이 정상적으로 등록되었습니다.");
+    window.alert("대여신청이 정상적으로 처리되었습니다.");
     // 구매(대여) 페이지로 이동
     // navigate("/rent/pronum");
   } catch (e) {
