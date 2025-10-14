@@ -1,3 +1,4 @@
+// src/components/Layout/UserDropdown.jsx
 import React, { useRef, useEffect } from "react";
 import ReactDOM from "react-dom"; // 포털: 헤더 깨짐 방지용
 import { useNavigate } from "react-router-dom";
@@ -51,9 +52,9 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
             </div>
 
             <div className={styles.menuList}>
-              
               <button onClick={go('/member/profile')} className={styles.menuItem}>마이페이지</button>
-              <button onClick={go('/member/ordersList')} className={styles.menuItem}>주문내역</button>
+              {/* ✅ 주문내역: 새 라우트(/orders)로 변경 */}
+              <button onClick={go('/orders')} className={styles.menuItem}>주문내역</button>
               <button onClick={go('/member/cart')} className={styles.menuItem}>장바구니</button>
               <button onClick={go('/member/membership')} className={styles.menuItem}>구독확인</button>
               <button onClick={go('/member/cash')} className={styles.menuItem}>결제수단조회</button>
@@ -62,7 +63,6 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               <button onClick={go('/member/returnList')} className={styles.menuItem}>반품조회</button>
               <button onClick={go('/member/tradeList')} className={styles.menuItem}>교환조회</button>
               <button onClick={go('/member/delete')} className={styles.menuItem} style={{ color: '#d32f2f' }}>회원 탈퇴</button>
-            
             </div>
 
             <div className={styles.logoutSection}>

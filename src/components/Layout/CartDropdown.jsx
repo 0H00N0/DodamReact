@@ -1,11 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { createRent } from '../../Product/api/rentApi'; // ✅ 추가
 import styles from './CartDropdown.module.css';
 
 const CartDropdown = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const { items, totalItems, totalAmount, removeFromCart } = useCart();
+  const { items, totalItems, totalAmount, removeFromCart, clearCart } = useCart(); // ✅ clearCart 추가
   const dropdownRef = useRef(null);
 
   // 장바구니 페이지로 이동
@@ -16,7 +17,8 @@ const CartDropdown = ({ isOpen, onClose }) => {
 
   // 상품 삭제
   const handleRemoveItem = (item) => {
-    removeFromCart(item.id, item.selectedOptions);
+    // removeFromCart는 pronum만 필요
+    removeFromCart(item.id);
   };
 
   useEffect(() => {
@@ -35,9 +37,26 @@ const CartDropdown = ({ isOpen, onClose }) => {
     };
   }, [isOpen, onClose]);
 
-  const handleCheckout = () => {
-    alert('주문 기능은 준비 중입니다!');
-    onClose();
+  // ✅ 주문하기: 실제 주문 API 호출 + 장바구니 비우기 + /orders 이동
+  const handleCheckout = async () => {
+    if (!items.length) return;
+    if (!window.confirm('장바구니의 상품을 주문하시겠습니까?')) return;
+
+    try {
+      // 드롭다운에는 수량 표시가 있으므로 수량만큼 생성
+      const tasks = [];
+      for (const it of items) {
+        const qty = Number(it.quantity) || 1;
+        for (let i = 0; i < qty; i++) tasks.push(createRent(it.id)); // id = pronum
+      }
+      await Promise.all(tasks);
+
+      await clearCart();   // CartContext의 clearCart(아래 수정) 사용
+      onClose();
+      navigate('/orders');
+    } catch (e) {
+      alert(e?.response?.data?.message || e?.message || '주문에 실패했습니다.');
+    }
   };
 
   if (!isOpen) return null;

@@ -109,8 +109,17 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // (선택) 전체 비우기는 서버 API 준비 후 연결
-  const clearCart = () => alert('전체 비우기는 서버 API 준비 후 연결됩니다.');
+  // ✅ 실제 비우기 동작으로 교체: 서버 동기화 + 로컬 RESET
+  const clearCart = async () => {
+    try {
+      // 서버에 일괄 삭제 엔드포인트가 없다고 가정 → 아이템별 삭제
+      await Promise.all(state.items.map(it => api.delete(`/cart/items/${it.id}`)));
+    } catch (e) {
+      console.warn('[Cart] clearCart server sync failed, fallback to reset:', e?.message);
+    } finally {
+      dispatch({ type: CART_ACTIONS.RESET });
+    }
+  };
 
   // ✅ 비교 키를 id(pronum)로 통일
   const isInCart = (productId) => state.items.some(it => it.id === Number(productId));

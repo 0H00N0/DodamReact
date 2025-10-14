@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { createRent } from '../Product/api/rentApi';
 import styles from './Cart.module.css';
 
 const Cart = () => {
@@ -37,7 +38,29 @@ const Cart = () => {
 
   const handleContinueShopping = () => navigate('/');
   const handleProductClick = (productId) => navigate(`/product/${productId}`);
-  const handleCheckout = () => alert('주문 기능은 준비 중입니다!');
+
+  // ✅ 변경: 실제 주문 호출
+  const handleCheckout = async () => {
+    if (totalItems === 0) return;
+    if (!window.confirm('장바구니의 상품을 주문하시겠습니까?')) return;
+
+    // 장바구니의 각 아이템(id=pronum)을 수량만큼 주문 생성
+    const tasks = [];
+    for (const it of items) {
+      const pronum = it.id;                 // CartContext에서 id=pronum
+      const qty = Number(it.quantity) || 1; // 수량이 2면 2번 생성
+      for (let i = 0; i < qty; i++) tasks.push(createRent(pronum));
+    }
+
+    try {
+      await Promise.all(tasks);
+      clearCart();
+      navigate('/orders'); // 주문내역 페이지로 이동
+    } catch (e) {
+      const msg = e?.response?.data?.message || e?.message || '주문에 실패했습니다.';
+      alert(msg);
+    }
+  };
 
   const getOptionsText = (selectedOptions) => {
     if (!selectedOptions || Object.keys(selectedOptions).length === 0) return '';
