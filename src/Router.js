@@ -3,7 +3,6 @@ import { createBrowserRouter as createRouter } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import App from "./App";
 
-// 파일명이 PlanCheckout.jsx 라면 아래처럼!
 import CheckoutPage from "./Plan/PlanCheckout";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
 import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
