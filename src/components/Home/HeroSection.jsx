@@ -173,7 +173,7 @@ export default function HeroSection() {
         (repImage ? [repImage] : [PLACEHOLDER_IMG]),
       productId: id,
       primaryText: "상품 상세 정보",
-      onPrimary: () => navigate(id ? `/product/${id}` : "/products"),
+      onPrimary: () => navigate(id ? `/products/${id}` : "/products"),
       imageFit: opts.imageFit ?? "contain",
       aspectRatio: opts.aspectRatio,
       imagePosition: opts.imagePosition,

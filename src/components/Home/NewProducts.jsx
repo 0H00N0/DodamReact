@@ -58,8 +58,7 @@ const NewProducts = () => {
     };
   }, []);
 
-  const goDetail = useCallback((id) => navigate(`/product/${id}`), [navigate]);
-
+const goDetail = useCallback((id) => navigate(`/products/${id}`), [navigate]);
   return (
     <section className={styles.featuredSection}>
       <div className={styles.container}>

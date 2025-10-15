@@ -58,8 +58,8 @@ const FeaturedProducts = () => {
     };
   }, []);
 
-  const handleProductClick = useCallback(
-    (productId) => navigate(`/product/${productId}`),
+   const handleProductClick = useCallback(
+    (productId) => navigate(`/products/${productId}`),
     [navigate]
   );
 
