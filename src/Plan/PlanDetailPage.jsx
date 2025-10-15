@@ -35,9 +35,11 @@ export default function PlanDetailPage() {
   const [selectedMonths, setSelectedMonths] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
+  const [hasActiveSub, setHasActiveSub] = useState(false); // ✅ 활성 구독 여부 상태
 
   const nf = useMemo(() => new Intl.NumberFormat("ko-KR", { maximumFractionDigits: 0 }), []);
 
+  // ✅ 플랜 상세 불러오기
   useEffect(() => {
     let ignore = false;
     setLoading(true); setErr(""); setPlan(null); setSelectedMonths(null);
@@ -59,6 +61,21 @@ export default function PlanDetailPage() {
     })();
     return () => { ignore = true; };
   }, [planCode]);
+
+  // ✅ 회원의 활성 구독 여부 확인 (페이지 진입 시 조회만)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/member/subscriptions/my");
+        const active = Array.isArray(data)
+          ? data.some((s) => s.pmStat === "ACTIVE" || s.status === "ACTIVE")
+          : false;
+        setHasActiveSub(active);
+      } catch {
+        setHasActiveSub(false);
+      }
+    })();
+  }, []);
 
   // note → 설명/혜택
   const noteText = plan?.note || "";
@@ -110,9 +127,16 @@ export default function PlanDetailPage() {
     return row?.ppriceId ?? row?.priceId ?? row?.id ?? null;
   };
 
-  // ✅ 메인 버튼 동작: 모드에 따라 결제 or 변경예약
+  // ✅ 메인 버튼 동작 (결제 버튼 클릭 시)
   const handlePrimary = async () => {
     if (!selectedPrice) return;
+
+    // ✅ 활성 구독이 있을 경우 안내 및 이동
+    if (hasActiveSub && mode === "new") {
+      alert("이미 활성화된 구독이 있습니다.\n구독 변경을 원하시면 구독 확인 페이지에서 변경해주세요.\n구독 확인 페이지로 이동합니다.");
+      navigate("/member/membership");
+      return;
+    }
 
     if (mode === "change") {
       if (!current?.pmId) {
@@ -120,9 +144,10 @@ export default function PlanDetailPage() {
         navigate("/member/membership");
         return;
       }
-      if (!window.confirm(`'${plan.displayName || plan.planName || plan.planCode}'을(를) ${selectedPrice.months}개월로 변경 예약하시겠어요?\n다음 결제일부터 적용됩니다.`)) {
-        return;
-      }
+      if (!window.confirm(
+        `'${plan.displayName || plan.planName || plan.planCode}'을(를) ${selectedPrice.months}개월로 변경 예약하시겠어요?\n다음 결제일부터 적용됩니다.`
+      )) return;
+
       try {
         await api.post("/subscriptions/change", {
           pmId: current.pmId,
@@ -133,11 +158,14 @@ export default function PlanDetailPage() {
         alert("변경이 예약되었습니다. 다음 결제일부터 적용됩니다.");
         navigate("/member/membership");
       } catch (e) {
-        const msg = e?.response?.data?.error || e?.response?.data?.message || "구독 변경 예약에 실패했습니다.";
+        const msg =
+          e?.response?.data?.error ||
+          e?.response?.data?.message ||
+          "구독 변경 예약에 실패했습니다.";
         alert(msg);
       }
     } else {
-      // 신규 결제 플로우 그대로
+      // 신규 결제 플로우
       navigate(`/plan/checkout?code=${plan.planCode}&months=${selectedPrice.months}`);
     }
   };
