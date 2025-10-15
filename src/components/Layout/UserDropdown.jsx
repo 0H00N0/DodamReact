@@ -60,8 +60,8 @@ const UserDropdown = ({ isOpen, onClose, isLoggedIn = false, userInfo, onLogout 
               <button onClick={go('/member/cash')} className={styles.menuItem}>결제수단조회</button>
               <button onClick={go('/member/inquiryList')} className={styles.menuItem}>문의내역</button>
               <button onClick={go('/member/reviewList')} className={styles.menuItem}>리뷰내역</button>
-              <button onClick={go('/member/returnList')} className={styles.menuItem}>반품조회</button>
-              <button onClick={go('/member/tradeList')} className={styles.menuItem}>교환조회</button>
+              <button onClick={go('/orders/returns')} className={styles.menuItem}>반품가능 상품조회</button>
+              <button onClick={go('/orders/exchanges')} className={styles.menuItem}>교환 및 취소가능 상품조회</button>
               <button onClick={go('/member/delete')} className={styles.menuItem} style={{ color: '#d32f2f' }}>회원 탈퇴</button>
             </div>
 

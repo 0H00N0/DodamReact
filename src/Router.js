@@ -25,6 +25,8 @@ import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
 import OrderHistory from "./pages/orders/OrderHistory";
+import OrderReturns from "./pages/orders/OrderReturns";
+import OrderExchanges from "./pages/orders/OrderExchanges";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
 
@@ -87,6 +89,11 @@ export const router = createRouter([
       { path: "cart", element: <Cart /> },           // 헤더 카트
       { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
       { path: "orders", element: <OrderHistory /> },
+
+      //상품 교환 및 반품
+      { path: "orders/returns", element: <OrderReturns /> },
+      { path: "orders/exchanges", element: <OrderExchanges /> },
+
       // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
