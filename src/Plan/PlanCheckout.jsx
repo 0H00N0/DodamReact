@@ -14,8 +14,24 @@ export default function CheckoutPage() {
   const [cards, setCards] = useState([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-  const [debug, setDebug] = useState("");
+
+  // === 반응형: 모바일 감지 (<= 640px)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia("(max-width: 640px)").matches;
+  });
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mql = window.matchMedia("(max-width: 640px)");
+    const handler = (e) => setIsMobile(e.matches);
+    mql.addEventListener?.("change", handler);
+    // Safari 등 구형 브라우저 대응
+    mql.addListener?.(handler);
+    return () => {
+      mql.removeEventListener?.("change", handler);
+      mql.removeListener?.(handler);
+    };
+  }, []);
 
   const selectedCard = useMemo(
     () => (cards && cards.length > 0 ? cards[selectedIdx] : null),
@@ -23,13 +39,7 @@ export default function CheckoutPage() {
   );
   const selectedPayId = selectedCard?.payId ?? selectedCard?.id ?? null;
 
-  const norm = (v) => String(v || "").trim().toUpperCase();
-  const isSuccess = (s) =>
-    ["PAID", "SUCCEEDED", "SUCCESS", "PARTIAL_PAID"].includes(norm(s));
-
-  // =========================
-  // 폴링 관련
-  // =========================
+  // ===== 폴링 관련(표시 UI 없음)
   const alive = useRef(true);
   const elapsedSec = useRef(0);
   const elapsedTick = useRef(null);
@@ -47,23 +57,21 @@ export default function CheckoutPage() {
     };
   }, []);
 
+  const norm = (v) => String(v || "").trim().toUpperCase();
   const backoffMs = () => {
     const s = elapsedSec.current;
     if (s < 60) return 2000;
     if (s < 300) return 5000;
     return 15000;
   };
-
   const startElapsed = () => {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
     elapsedSec.current = 0;
     startedAt.current = Date.now();
     elapsedTick.current = setInterval(() => {
       elapsedSec.current = Math.floor((Date.now() - startedAt.current) / 1000);
-      setMsg(`결제 진행중… (경과 ${elapsedSec.current}초)`);
     }, 1000);
   };
-
   const stopElapsed = () => {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
   };
@@ -76,33 +84,23 @@ export default function CheckoutPage() {
       setUiStatus(s || "UNKNOWN");
       const pid = r?.data?.paymentId;
       if (pid) setShownPaymentId(pid);
-
       if (done) {
         stopElapsed();
         const invId = r?.data?.invoiceId ?? "";
-        if (isSuccess(s)) {
-          setMsg("결제 완료되었습니다.");
-        } else {
-          setMsg("결제가 완료되지 않았습니다.");
-        }
         navigate(
           `/plan/checkout/result?invoiceId=${invId}&paymentId=${pid || handle}&status=${s}`
         );
         return true;
       }
-      setDebug((d) => d + `\n[POLL] handle=${handle} status=${s}`);
       return false;
-    } catch (e) {
-      setDebug((d) => d + `\n[POLL ERROR] ${e?.message || e}`);
+    } catch {
       return false;
     }
   };
 
   const pollForeverUntilPaid = async (handle) => {
     startElapsed();
-    setMsg("결제 진행중… (경과 0초)");
     setUiStatus("PENDING");
-
     const loop = async () => {
       if (!alive.current) return;
       const done = await pollOnce(handle);
@@ -112,14 +110,11 @@ export default function CheckoutPage() {
     loop();
   };
 
-  // =========================
-  // 카드(빌링키) 목록 로드
-  // =========================
+  // ===== 카드(빌링키) 목록
   async function loadCards() {
     try {
       const res = await billingKeysApi.list();
       const arr = Array.isArray(res?.data) ? res.data : [];
-
       const normalized = arr.map((c, i) => ({
         payId: c.payId ?? c.id ?? null,
         billingKey: c.billingKey ?? c.key ?? null,
@@ -130,17 +125,8 @@ export default function CheckoutPage() {
         _raw: c,
         _i: i,
       }));
-
       setCards(normalized);
-      setMsg(
-        normalized.length === 0
-          ? "등록된 카드가 없습니다. 먼저 카드 등록을 진행하세요."
-          : ""
-      );
-    } catch (e) {
-      setMsg("카드 목록을 불러오지 못했습니다.");
-      setDebug((d) => d + `\n[CARD LIST FAIL] ${e?.message || e}`);
-    }
+    } catch {}
   }
 
   useEffect(() => {
@@ -151,37 +137,24 @@ export default function CheckoutPage() {
     } catch {}
   }, []);
 
-  // =========================
-  // 카드(빌링키) 등록
-  // =========================
+  // ===== 카드 등록
   async function handleRegisterCard() {
     if (busy) return;
     setBusy(true);
-    setMsg("카드 등록을 시작합니다…");
-    setDebug("");
     try {
       const storeId = process.env.REACT_APP_PORTONE_STORE_ID;
       const channelKey = process.env.REACT_APP_PORTONE_CHANNEL_KEY;
       const billingKeyMethod = process.env.REACT_APP_BILLING_METHOD || "CARD";
-      if (!storeId) {
-        setMsg("환경변수(REACT_APP_PORTONE_STORE_ID)가 설정되지 않았습니다.");
-        return;
-      }
-      const redirectUrl = `${window.location.origin}/#/billing-keys/redirect`;
+      if (!storeId) return;
 
+      const redirectUrl = `${window.location.origin}/#/billing-keys/redirect`;
       try {
         sessionStorage.setItem("lastCheckoutUrl", window.location.href);
         sessionStorage.setItem("lastCheckoutQuery", window.location.search || "");
       } catch {}
 
-      const hasIssueFn = typeof PortOne?.requestIssueBillingKey === "function";
-      const callDesc = hasIssueFn
-        ? "requestIssueBillingKey"
-        : "requestPayment(BILLING)";
-      setDebug((d) => d + `\n[SDK] Using ${callDesc}`);
-
       let resp;
-      if (hasIssueFn) {
+      if (typeof PortOne?.requestIssueBillingKey === "function") {
         resp = await PortOne.requestIssueBillingKey({
           storeId,
           channelKey,
@@ -202,10 +175,7 @@ export default function CheckoutPage() {
         });
       }
 
-      setDebug((d) => d + `\n[SDK RESP] ${safeJ(resp)}`);
-
       const statusLike = String(resp?.status || resp?.billingKey || "").toUpperCase();
-
       if (
         resp?.billingKey &&
         statusLike !== "NEEDS_CONFIRMATION" &&
@@ -215,68 +185,40 @@ export default function CheckoutPage() {
           billingKey: resp.billingKey,
           rawJson: JSON.stringify(resp),
         });
-        setMsg("카드 등록 완료.");
         await loadCards();
         return;
       }
-
       if (statusLike === "NEEDS_CONFIRMATION" && resp?.billingIssueToken) {
         const url = new URL(redirectUrl);
         url.searchParams.set("transactionType", "ISSUE_BILLING_KEY");
         url.searchParams.set("status", "NEEDS_CONFIRMATION");
         url.searchParams.set("billingIssueToken", resp.billingIssueToken);
-        setMsg("본인인증 단계로 이동합니다…");
-        setDebug((d) => d + `\n[REDIRECT] ${url.toString()}`);
         window.location.assign(url.toString());
         return;
       }
-
-      setMsg("카드 등록이 취소되었거나 실패했습니다.");
-      setDebug(
-        (d) =>
-          d + `\n[FAIL PATH] statusLike=${statusLike} billingKey=${resp?.billingKey}`
-      );
-    } catch (e) {
-      setMsg("카드 등록 실패 (네트워크/서버).");
-      setDebug((d) => d + `\n[ERROR] ${e?.message || e}`);
-    } finally {
+    } catch {} finally {
       setBusy(false);
     }
   }
 
-  // =========================
-  // ✅ 카드 삭제 (비활성화) — payId 우선, 없으면 billingKey
-  // =========================
+  // ===== 카드 삭제
   async function handleDeleteCard(card) {
     if (!card || busy) return;
-    if (!window.confirm("해당 카드를 삭제(비활성화)하시겠습니까?")) return;
+    if (!window.confirm("해당 카드를 삭제하시겠습니까?")) return;
     setBusy(true);
     try {
-      if (card.payId) {
-        await billingKeysApi.deleteById(card.payId);
-      } else if (card.billingKey) {
-        await billingKeysApi.deleteByKey(card.billingKey);
-      } else {
-        throw new Error("삭제 식별자가 없습니다.");
-      }
-      setMsg("카드가 삭제되었습니다.");
+      if (card.payId) await billingKeysApi.deleteById(card.payId);
+      else if (card.billingKey) await billingKeysApi.deleteByKey(card.billingKey);
       await loadCards();
-    } catch (e) {
-      setMsg("카드 삭제 실패");
-      setDebug((d) => d + `\n[DELETE ERROR] ${e?.message || e}`);
-    } finally {
+    } catch {} finally {
       setBusy(false);
     }
   }
 
-  // =========================
-  // 결제 시작
-  // =========================
+  // ===== 결제 시작
   async function handleStart() {
     if (busy || !selectedCard) return;
     setBusy(true);
-    setDebug("");
-    setMsg("인보이스 생성 중…");
     try {
       const payload = { planCode, months };
       if (selectedPayId) payload.payId = selectedPayId;
@@ -288,180 +230,303 @@ export default function CheckoutPage() {
         invRes?.data?.id ??
         invRes?.data?.piId ??
         invRes?.data?.pi_id;
+      if (!invoiceId) return;
 
-      if (!invoiceId) {
-        setMsg("인보이스 생성 실패: ID 없음");
-        setDebug((d) => d + `\n[INV RESP] ${safeJ(invRes?.data)}`);
-        return;
-      }
-
-      setMsg(`인보이스 생성 완료 (ID: ${invoiceId}). 결제를 시작합니다…`);
       const payRes = await paymentsApi.confirm({ invoiceId });
-
       const pid =
         payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
       const oid = payRes?.data?.orderId;
-      if (!pid && !oid) {
-        setMsg("결제 시작 실패: 식별자(handle) 없음");
-        setDebug((d) => d + `\n[CONFIRM RESP] ${safeJ(payRes?.data)}`);
-        return;
-      }
+      if (!pid && !oid) return;
 
       const handle = pid ?? oid;
       setHandleId(handle);
       if (pid) setShownPaymentId(pid);
       await pollForeverUntilPaid(handle);
-    } catch (e) {
-      setMsg("결제에 실패했습니다. 다시 시도해 주세요.");
-      setDebug((d) => d + `\n[CHECKOUT ERROR] ${e?.message || e}`);
-    } finally {
+    } catch {} finally {
       setBusy(false);
     }
   }
 
-  // =========================
-  // 렌더링
-  // =========================
+  // ===== 파스텔 연핑크 테마 (연하고 꽉 차는 레이아웃)
+  const theme = {
+    bg: "#FFFAFC",
+    panel: "#FFFFFF",
+    panelAlt: "#FFF4F8",
+    border: "#FFE3EE",
+    borderStrong: "#FFD1E5",
+    divider: "#FFE8F1",
+    text: "#6F5663",
+    textSub: "#9A8190",
+    accent: "#FFC8DB",
+    accentDeep: "#FFB3D0",
+    accentSoft: "#FFF6FA",
+    shadow: "0 10px 24px rgba(255, 175, 205, 0.15)",
+    radius: 18,
+  };
+
+  const styles = {
+    page: {
+      background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`,
+      padding: "24px 16px 40px",
+    },
+    wrap: {
+      maxWidth: 880,
+      margin: "0 auto",
+    },
+    headerCard: {
+      background: theme.panel,
+      border: `1px solid ${theme.border}`,
+      borderRadius: theme.radius,
+      boxShadow: theme.shadow,
+      padding: "22px 24px",
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
+      alignItems: "center",
+      gap: 16,
+      marginBottom: 18,
+    },
+    title: {
+      fontSize: isMobile ? 22 : 26,
+      fontWeight: 900,
+      color: theme.text,
+      letterSpacing: 0.2,
+      lineHeight: 1.25,
+      margin: 0,
+    },
+    summary: {
+      fontSize: 14,
+      color: theme.textSub,
+      marginTop: 6,
+    },
+    summaryBadge: {
+      display: "inline-block",
+      padding: "6px 12px",
+      borderRadius: 999,
+      background: theme.accentSoft,
+      border: `1px solid ${theme.borderStrong}`,
+      color: theme.text,
+      fontWeight: 700,
+      fontSize: 12,
+      marginLeft: 8,
+    },
+    sectionCard: {
+      background: theme.panel,
+      border: `1px solid ${theme.border}`,
+      borderRadius: theme.radius,
+      boxShadow: theme.shadow,
+      padding: isMobile ? 14 : 18,
+      marginBottom: 18,
+    },
+    sectionH: {
+      fontSize: 16,
+      fontWeight: 800,
+      color: theme.text,
+      margin: "2px 2px 12px",
+    },
+    empty: {
+      padding: 16,
+      borderRadius: 14,
+      background: theme.accentSoft,
+      border: `1.5px dashed ${theme.borderStrong}`,
+      color: theme.textSub,
+      textAlign: "center",
+    },
+    // ★ 카드 목록: 모바일 1열, 데스크톱 2열
+    cardList: {
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+      gap: 12,
+    },
+    cardItem: (active) => ({
+      padding: isMobile ? "12px 12px" : "14px 14px",
+      borderRadius: 14,
+      border: `1.5px solid ${active ? theme.accentDeep : theme.border}`,
+      background: active ? theme.panelAlt : theme.panel,
+      boxShadow: active ? "0 6px 16px rgba(255, 180, 205, 0.12)" : "none",
+      transition: "transform .08s ease, box-shadow .2s ease, background .2s ease",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+    }),
+    radio: (active) => ({
+      width: 18,
+      height: 18,
+      borderRadius: 999,
+      border: `2px solid ${active ? theme.accentDeep : theme.borderStrong}`,
+      background: active ? theme.accentDeep : "#fff",
+      boxShadow: active ? "0 0 0 6px rgba(255, 179, 208, 0.15)" : "none",
+      flex: "0 0 auto",
+    }),
+    cardMetaWrap: { flex: 1, minWidth: 0 },
+    cardBrand: { fontWeight: 800, color: theme.text, fontSize: isMobile ? 14 : 15 },
+    cardMeta: { fontSize: 12, color: theme.textSub, marginTop: 2 },
+    delBtn: {
+      background: "#fff",
+      border: `1px solid ${theme.borderStrong}`,
+      color: theme.text,
+      padding: "8px 10px",
+      borderRadius: 999,
+      fontSize: 12,
+      flex: "0 0 auto",
+    },
+    divider: {
+      height: 1,
+      background: theme.divider,
+      margin: "14px 0 0",
+    },
+    metaRow: {
+      display: "flex",
+      gap: 10,
+      flexWrap: "wrap",
+      color: theme.textSub,
+      fontSize: 13,
+      marginTop: 6,
+    },
+    // ★ 액션바: 모바일 세로 스택, 데스크톱 2열
+    actionBar: {
+      marginTop: 18,
+      display: "grid",
+      gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr",
+      gap: 10,
+    },
+    btn: {
+      padding: isMobile ? "14px 16px" : "16px 18px",
+      borderRadius: 999,
+      border: `1px solid ${theme.borderStrong}`,
+      background: "#fff",
+      color: theme.text,
+      fontWeight: 800,
+      letterSpacing: 0.2,
+      fontSize: isMobile ? 15 : 16,
+      boxShadow: "0 3px 0 rgba(0,0,0,0.03)",
+      transition: "transform .06s ease, box-shadow .2s ease",
+      width: "100%",
+    },
+    btnPrimary: {
+      padding: isMobile ? "14px 18px" : "16px 20px",
+      borderRadius: 999,
+      border: "none",
+      background: `linear-gradient(180deg, ${theme.accent}, ${theme.accentDeep})`,
+      color: "#fff",
+      fontWeight: 900,
+      letterSpacing: 0.3,
+      fontSize: isMobile ? 16 : 17,
+      boxShadow: "0 10px 20px rgba(255, 160, 200, 0.25)",
+      transition: "transform .06s ease, box-shadow .2s ease",
+      width: "100%",
+    },
+    btnDisabled: {
+      opacity: 0.6,
+      pointerEvents: "none",
+    },
+  };
+
+  const onHover = (e) => (e.currentTarget.style.transform = "translateY(-1px)");
+  const onLeave = (e) => (e.currentTarget.style.transform = "translateY(0)");
+  const onPress = (e) => (e.currentTarget.style.transform = "translateY(1px)");
+
   return (
-    <div style={{ maxWidth: 720, margin: "24px auto", padding: 16 }}>
-      <h2>구독 결제</h2>
-      <div style={{ marginBottom: 12, color: "#666" }}>
-        선택한 플랜: <b>{planCode || "-"}</b> / 기간: <b>{months}</b>개월
-      </div>
-
-      <section style={{ marginBottom: 24 }}>
-        <h3 style={{ marginBottom: 8 }}>결제수단</h3>
-        {cards.length === 0 ? (
-          <div style={{ padding: 12, border: "1px solid #ddd", borderRadius: 8 }}>
-            등록된 카드가 없습니다. 아래 버튼으로 먼저 등록하세요.
+    <div style={styles.page}>
+      <div style={styles.wrap}>
+        <div style={styles.headerCard}>
+          <div>
+            <h1 style={styles.title}>구독 결제</h1>
+            <div style={styles.summary}>
+              선택한 플랜 <b>{planCode || "-"}</b>
+              <span style={styles.summaryBadge}>{months}개월</span>
+            </div>
           </div>
-        ) : (
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-            {cards.map((c, idx) => (
-              <li
-                key={c.payId ?? c.billingKey ?? idx}
-                onClick={() => setSelectedIdx(idx)}
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 6,
-                  padding: "10px 12px",
-                  border:
-                    "1px solid " + (idx === selectedIdx ? "#4096ff" : "#ddd"),
-                  borderRadius: 8,
-                  cursor: "pointer",
-                  marginBottom: 8,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        </div>
+
+        <div style={styles.sectionCard}>
+          <div style={styles.sectionH}>결제수단</div>
+
+          {cards.length === 0 ? (
+            <div style={styles.empty}>
+              등록된 카드가 없습니다. 아래에서 먼저 등록해 주세요.
+            </div>
+          ) : (
+            <div style={styles.cardList}>
+              {cards.map((c, idx) => {
+                const active = idx === selectedIdx;
+                return (
                   <div
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
-                      background: idx === selectedIdx ? "#4096ff" : "#bbb",
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600 }}>
-                      {c.brand || "등록된 카드"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#888" }}>
-                      {c.bin
-                        ? `${c.bin}-****-****-${c.last4 || "****"}`
-                        : c.last4
-                        ? `****-****-****-${c.last4}`
-                        : ""}
-                      {c.pg ? ` · ${c.pg}` : ""}
-                    </div>
-                  </div>
-                  {/* 🔽 카드 삭제 버튼 */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCard(c);
-                    }}
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#d00",
-                      fontSize: 12,
-                      cursor: "pointer",
-                    }}
+                    key={c.payId ?? c.billingKey ?? idx}
+                    onClick={() => setSelectedIdx(idx)}
+                    style={styles.cardItem(active)}
+                    onMouseEnter={onHover}
+                    onMouseLeave={onLeave}
                   >
-                    삭제
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={handleRegisterCard} disabled={busy} style={btnStyle}>
-          {busy ? "처리 중…" : "카드 등록"}
-        </button>
-        <button
-          onClick={handleStart}
-          disabled={busy || !selectedCard}
-          style={btnPrimaryStyle}
-        >
-          {busy ? "처리 중…" : "구독 시작"}
-        </button>
-      </div>
-
-      {msg && (
-        <div style={{ marginTop: 12, color: "#333" }}>
-          {msg}
-          {(handleId || shownPaymentId) && (
-            <div style={{ marginTop: 6, color: "#777", fontSize: 13 }}>
-              상태: {uiStatus || "PENDING"} · handle: {handleId || "-"}
-              {shownPaymentId ? ` · paymentId: ${shownPaymentId}` : ""}
+                    <div style={styles.radio(active)} />
+                    <div style={styles.cardMetaWrap}>
+                      <div style={styles.cardBrand}>{c.brand || "등록된 카드"}</div>
+                      <div style={styles.cardMeta}>
+                        {c.bin
+                          ? `${c.bin}-****-****-${c.last4 || "****"}`
+                          : c.last4
+                          ? `****-****-****-${c.last4}`
+                          : ""}
+                        {c.pg ? ` · ${c.pg}` : ""}
+                      </div>
+                    </div>
+                    <button
+                      style={styles.delBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteCard(c);
+                      }}
+                    >
+                      삭제
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
-        </div>
-      )}
 
-      {debug && (
-        <pre
-          style={{
-            marginTop: 16,
-            padding: 12,
-            background: "#f7f7f7",
-            border: "1px solid #eee",
-            borderRadius: 8,
-            fontSize: 12,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-all",
-          }}
-        >
-          {debug}
-        </pre>
-      )}
+          <div style={styles.divider} />
+          <div style={styles.metaRow}>
+            <span>선택된 결제수단</span>
+            <b>
+              {selectedCard
+                ? `${selectedCard.brand || "카드"}${
+                    selectedCard.last4 ? ` ···· ${selectedCard.last4}` : ""
+                  }`
+                : "없음"}
+            </b>
+          </div>
+        </div>
+
+        <div style={styles.actionBar}>
+          <button
+            onClick={handleRegisterCard}
+            disabled={busy}
+            style={{ ...styles.btn, ...(busy ? styles.btnDisabled : {}) }}
+            onMouseEnter={onHover}
+            onMouseLeave={onLeave}
+            onMouseDown={onPress}
+            onMouseUp={onHover}
+          >
+            카드 등록
+          </button>
+
+          <button
+            onClick={handleStart}
+            disabled={busy || !selectedCard}
+            style={{
+              ...styles.btnPrimary,
+              ...((busy || !selectedCard) ? styles.btnDisabled : {}),
+            }}
+            onMouseEnter={onHover}
+            onMouseLeave={onLeave}
+            onMouseDown={onPress}
+            onMouseUp={onHover}
+          >
+            구독 시작
+          </button>
+        </div>
+      </div>
     </div>
   );
-}
-
-const btnStyle = {
-  padding: "10px 14px",
-  borderRadius: 8,
-  border: "1px solid #ddd",
-  background: "#fff",
-  cursor: "pointer",
-};
-
-const btnPrimaryStyle = {
-  ...btnStyle,
-  border: "1px solid #4096ff",
-  background: "#4096ff",
-  color: "#fff",
-};
-
-function safeJ(v) {
-  try {
-    return JSON.stringify(v);
-  } catch {
-    return String(v);
-  }
 }

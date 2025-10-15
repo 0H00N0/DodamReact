@@ -1,4 +1,3 @@
-// src/pages/member/Membership.js
 import React, { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
@@ -25,63 +24,49 @@ export default function Membership() {
   };
 
   // =========================
-  // Date helpers (폭넓은 입력 대응)
+  // Date helpers
   // =========================
   const pad2 = (n) => String(n).padStart(2, "0");
 
-  // raw가 ISO, "yyyy-MM-dd HH:mm:ss", 숫자(epoch), yyyymmdd, LocalDateTime 배열 등 모두 대응
   const fmtDate = (raw) => {
     if (!raw && raw !== 0) return "-";
 
-    // 1) 배열 [yyyy, MM, dd, ...]
+    // 배열 [yyyy,MM,dd]
     if (Array.isArray(raw) && raw.length >= 3) {
       const y = raw[0], m = raw[1], d = raw[2];
       if (!isNaN(Number(y)) && !isNaN(Number(m)) && !isNaN(Number(d))) {
         return `${y}-${pad2(m)}-${pad2(d)}`;
       }
     }
-
-    // 2) 객체 {year, month, day} 또는 {y, m, d}
+    // 객체 {year,month,day}
     if (typeof raw === "object" && raw) {
-      const y = raw.year ?? raw.y;
-      const m = raw.month ?? raw.m;
-      const d = raw.day ?? raw.d;
+      const y = raw.year ?? raw.y, m = raw.month ?? raw.m, d = raw.day ?? raw.d;
       if (y && m && d) return `${y}-${pad2(m)}-${pad2(d)}`;
     }
-
-    // 3) 문자열: 숫자만 추출(yyyyMMdd...) → yyyy-MM-dd
+    // 문자열
     if (typeof raw === "string") {
-      // ISO/T 포함되면 Date로 먼저 시도
       if (raw.includes("T") || raw.includes(":")) {
         const d = new Date(raw);
-        if (!isNaN(d)) {
-          return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-        }
+        if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
       }
       const digits = raw.replace(/\D/g, "");
       if (digits.length >= 8) {
-        return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+        return `${digits.slice(0,4)}-${digits.slice(4,6)}-${digits.slice(6,8)}`;
       }
     }
-
-    // 4) 숫자 epoch(ms or s)
+    // 숫자 epoch
     if (typeof raw === "number") {
-      const ms = raw < 2e10 ? raw * 1000 : raw; // 초 단위일 가능성 보정
+      const ms = raw < 2e10 ? raw * 1000 : raw;
       const d = new Date(ms);
-      if (!isNaN(d)) {
-        return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-      }
+      if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
     }
-
-    // 5) 마지막 시도
+    // 마지막 시도
     const d = new Date(raw);
-    if (!isNaN(d)) {
-      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-    }
+    if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
     return "-";
   };
 
-  // ===== 백엔드 키 다양성 대응 (동일 의미의 여러 키를 안전하게 병합) =====
+  // ===== 백엔드 키 다양성 대응 =====
   const getTermStart = (s) =>
     s.termStart ?? s.pmTermStart ?? s.startAt ?? s.startDate ?? s.piStart ?? s.term_start ?? s.pm_start ?? null;
 
@@ -91,7 +76,7 @@ export default function Membership() {
   const getNextBillingAt = (s) =>
     s.nextBillingAt ?? s.pmNextBil ?? s.pmNextBill ?? s.nextBillAt ?? s.nextBillingDate ?? s.next_billing_at ?? null;
 
-  // ---- [NEW] 다음 갱신 예정 계산용 헬퍼들 ----
+  // ---- 다음 갱신 예정 표시용 ----
   const getPlanName = (s, next=false) =>
     next ? (s.nextPlanName ?? s.nextPlan?.planName ?? s.nextPlan?.name ?? s.nextPlanCode ?? null)
          : (s.planName ?? s.plan?.planName ?? s.plan?.name ?? s.planCode ?? null);
@@ -117,19 +102,66 @@ export default function Membership() {
          : (s.currency ?? s.price?.ppriceCurr ?? s.ppriceCurr ?? "KRW");
 
   const hasScheduledChange = (s) =>
-  !!(s.hasScheduledChange) ||   // ✅ 서버 플래그 우선
-  !!(s.nextPlanId || s.nextPpriceId || s.nextPtermId ||
-     s.nextPlan || s.nextPrice || s.nextTerms ||
-     s.nextPlanCode || s.nextPlanName || s.nextTermMonth || s.nextPriceAmount);
+    !!(s.hasScheduledChange) ||
+    !!(s.nextPlanId || s.nextPpriceId || s.nextPtermId ||
+       s.nextPlan || s.nextPrice || s.nextTerms ||
+       s.nextPlanCode || s.nextPlanName || s.nextTermMonth || s.nextPriceAmount);
 
-  const addMonths = (dateLike, m=1) => {
-    if (!dateLike) return null;
-    const d = new Date(dateLike);
-    if (Number.isNaN(d.getTime())) return null;
-    const nd = new Date(d);
-    nd.setMonth(nd.getMonth() + Number(m || 0));
-    return nd.toISOString();
-  };
+  const addMonths = (raw, m = 1) => {
+  if (raw == null) return null;
+
+  let d = null;
+
+  // 1) 배열 [yyyy, MM, dd, hh?, mm?, ss?]
+  if (Array.isArray(raw)) {
+    if (raw.length >= 3) {
+      const [y, M, D, hh = 0, mm = 0, ss = 0] = raw.map((v) => Number(v));
+      if (!Number.isNaN(y) && !Number.isNaN(M) && !Number.isNaN(D)) {
+        d = new Date(y, M - 1, D, hh, mm, ss);
+      }
+    }
+  }
+  // 2) 객체 {year, month, day, hour?, minute?, second?}
+  else if (typeof raw === "object") {
+    const y = Number(raw.year ?? raw.y);
+    const M = Number(raw.month ?? raw.m);
+    const D = Number(raw.day ?? raw.d);
+    const hh = Number(raw.hour ?? raw.h ?? 0);
+    const mm = Number(raw.minute ?? raw.min ?? 0);
+    const ss = Number(raw.second ?? raw.s ?? 0);
+    if (!Number.isNaN(y) && !Number.isNaN(M) && !Number.isNaN(D)) {
+      d = new Date(y, M - 1, D, isNaN(hh) ? 0 : hh, isNaN(mm) ? 0 : mm, isNaN(ss) ? 0 : ss);
+    }
+  }
+  // 3) 숫자 epoch(s/ms)
+  else if (typeof raw === "number") {
+    const ms = raw < 2e10 ? raw * 1000 : raw;
+    d = new Date(ms);
+  }
+  // 4) 문자열
+  else if (typeof raw === "string") {
+    if (raw.includes("T") || raw.includes(":")) {
+      d = new Date(raw);
+    } else {
+      const digits = raw.replace(/\D/g, "");
+      if (digits.length >= 8) {
+        // yyyyMMdd
+        const y = Number(digits.slice(0, 4));
+        const M = Number(digits.slice(4, 6));
+        const D = Number(digits.slice(6, 8));
+        d = new Date(y, M - 1, D);
+      } else {
+        d = new Date(raw);
+      }
+    }
+  }
+
+  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return null;
+
+  const nd = new Date(d);
+  nd.setMonth(nd.getMonth() + Number(m || 0));
+  return nd.toISOString();
+};
 
   // data load
   const load = async () => {
@@ -245,7 +277,7 @@ export default function Membership() {
     cursor: "not-allowed",
   };
 
-  // 상태 컬러 배지 (한글 라벨)
+  // 상태 컬러 배지
   const StatusBadgeKo = ({ status }) => {
     const s = (status || "").toUpperCase();
     const map = {
@@ -256,7 +288,6 @@ export default function Membership() {
       TRIAL: { label: "체험중", bg: "#e8ffef", text: "#308a4c", border: "#b8f5c8" },
       PAUSED: { label: "일시중지", bg: "#fffbe6", text: "#b3a000", border: "#fff2b3" },
     };
-
     const style = {
       display: "inline-block",
       padding: "4px 10px",
@@ -364,7 +395,7 @@ export default function Membership() {
                       </div>
                     </div>
 
-                    {/* 변경 예약 안내 배지 (선택) */}
+                    {/* 변경 예약 안내 배지 */}
                     {hasScheduledChange(s) && !isCancelScheduled && (
                       <div
                         style={{
@@ -381,7 +412,7 @@ export default function Membership() {
                       </div>
                     )}
 
-                    {/* CTA (desktop) */}
+                    {/* CTA */}
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                       {isActive && (
                         <>
@@ -476,18 +507,29 @@ export default function Membership() {
                     </div>
                   )}
 
-                  {/* --- [NEW] 다음 갱신 예정 박스 --- */}
+                  {/* --- 다음 갱신 예정 박스 --- */}
                   {!isCancelScheduled && (() => {
-                    const scheduled = hasScheduledChange(s);           // 변경 예약 여부
+                    const scheduled = hasScheduledChange(s);
                     const nPlanName = getPlanName(s, scheduled);
                     const nPlanCode = getPlanCode(s, scheduled);
-                    const nMonths   = getMonths(s, scheduled) ?? 1;
-                    const nAmount   = getAmount(s, scheduled);
-                    const nCurr     = getCurr(s, scheduled);
-                    const nStart    = nextBillingAt;                    // 다음 주기 시작 = pmNextBil
-                    const nEnd      = addMonths(nStart, nMonths);
 
-                    if (!nStart) return null; // pmNextBil 없으면 표시 생략
+                    // 프론트 계산 규칙:
+                    // 1) 다음 결제일 nStart = nextBillingAt
+                    // 2) 개월수 months = (변경예약이면 nextTermMonth) else (termMonth → pmCycle → 1)
+                    // 3) nEnd = addMonths(nStart, months)
+                    const months =
+                      getMonths(s, scheduled) ??
+                      s.termMonth ??
+                      s.pmCycle ??
+                      1;
+
+                    const nStart = getNextBillingAt(s);
+                    const nEnd = nStart ? addMonths(nStart, months) : null;
+
+                    const nAmount = getAmount(s, scheduled);
+                    const nCurr   = getCurr(s, scheduled);
+
+                    if (!nStart) return null;
 
                     return (
                       <div
@@ -524,12 +566,16 @@ export default function Membership() {
                         >
                           <Field
                             label="플랜"
+                            value={`${nPlanName ?? nPlanCode ?? "-"} (${months}개월)`}
+                          />
+                          <Field
+                            label="다음 이용 기간"
                             value={
-                              `${nPlanName ?? nPlanCode ?? "-"}`
-                              + (nMonths ? ` (${nMonths}개월)` : "")
+                              nEnd
+                                ? `${fmtDate(nStart)} ~ ${fmtDate(nEnd)}`
+                                : `${fmtDate(nStart)} ~ -`
                             }
                           />
-                          <Field label="다음 이용 기간" value={`${fmtDate(nStart)} ~ ${fmtDate(nEnd)}`} />
                           <Field
                             label="결제 예정 금액"
                             value={
