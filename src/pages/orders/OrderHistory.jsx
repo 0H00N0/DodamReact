@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { fetchMyRents, cancelRent, exchangeRent, returnRent } from "../../Product/api/rentApi";
 import { shipStatusLabel } from "../../utils/shipStatusLabel";
+import ProductPickerModal from "../ProductPickerModal";
 
 export default function OrderHistory() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
-  const [modal, setModal] = useState(null); // { renNum, type:'EXCHANGE', newPronum:'', reason:'' }
+  // { renNum, type:'EXCHANGE', newPronum:'', reason:'', origPronum }
+  const [modal, setModal] = useState(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const reload = async () => {
     setLoading(true);
@@ -38,7 +41,8 @@ export default function OrderHistory() {
     }
   };
 
-  const onExchange = (r) => setModal({ renNum: r.rentNum, type:'EXCHANGE', newPronum:'', reason:'' });
+  const onExchange = (r) =>
+    setModal({ renNum: r.rentNum, type:'EXCHANGE', newPronum:'', reason:'', origPronum: r.pronum });
 
   const onReturn = async (r) => {
     const reason = window.prompt("반품 사유를 입력하세요(선택)");
@@ -110,12 +114,25 @@ export default function OrderHistory() {
             <h3>교환 요청</h3>
             <div style={{ marginTop: 12 }}>
               <label>교환 상품 번호(pronum)</label><br />
-              <input
-                value={modal.newPronum}
-                onChange={e => setModal({ ...modal, newPronum: e.target.value })}
-                placeholder="예) 101"
-                style={{ width: '100%', padding: 8 }}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  value={modal.newPronum}
+                  onChange={e => setModal({ ...modal, newPronum: e.target.value })}
+                  placeholder="예) 101"
+                  style={{ width: '100%', padding: '8px 96px 8px 8px', boxSizing: 'border-box' }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setPickerOpen(true)}
+                  style={{
+                    position: 'absolute', right: 4, top: 4, bottom: 4,
+                    padding: '0 12px', border: '1px solid #ddd',
+                    borderRadius: 8, background: '#f9fafb', cursor: 'pointer'
+                  }}
+                >
+                  상품 선택
+                </button>
+              </div>
             </div>
             <div style={{ marginTop: 12 }}>
               <label>사유(선택)</label><br />
@@ -132,6 +149,20 @@ export default function OrderHistory() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 상품 선택 모달 */}
+      {modal && (
+        <ProductPickerModal
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={(p) => {
+            setModal(m => ({ ...m, newPronum: p.pronum }));
+            setPickerOpen(false);
+          }}
+          excludePronum={modal.origPronum}  // ✅ 원래 상품은 목록에서 숨김
+          title="교환할 상품 선택"
+        />
       )}
     </div>
   );
