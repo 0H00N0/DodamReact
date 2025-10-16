@@ -198,6 +198,19 @@ const deleteProduct = async (id) => {
       throw err;
     }
   };
+ // AdminContext.js (이미 axios api 사용 중)
+const updateTrackingNumber = async (renNum, trackingNumber) => {
+  try {
+    const { data } = await api.patch(`/admin/orders/${renNum}/tracking`, { trackingNumber });
+    addNotification('운송장 번호가 저장되었습니다.', 'success');
+    return data;
+  } catch (err) {
+    const res = err?.response?.data;
+    const msg = res?.message || res?.error || err?.message || '운송장 번호 저장 실패';
+    addNotification(msg, 'error');
+    throw err;
+  }
+};
 // ✅ 수정된 코드
 const getOrderById = async (orderId) => {
   const { data } = await api.get(`/admin/orders/${orderId}`);
@@ -474,7 +487,8 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     getFirstEventWinners,
     // Plan related APIs
     getAllSubscriptions,
-    getAllInvoices
+    getAllInvoices,
+    updateTrackingNumber,
   };
 
   return (
