@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchMyRents, returnRent } from "../../Product/api/rentApi";
+import { shipStatusLabel } from "../../utils/shipStatusLabel";
 
 export default function OrderReturns() {
   const [rows, setRows] = useState([]);
@@ -45,7 +46,7 @@ export default function OrderReturns() {
             <tr key={r.rentNum}>
               <td style={{padding:8}}>{r.rentNum}</td>
               <td style={{padding:8}}>{r.productName}</td>
-              <td style={{padding:8}}>{r.status}</td>
+              <td style={{padding:8}}>{shipStatusLabel(r.status)}</td>
               <td style={{padding:8}}>{r.rentDate?.replace("T"," ").slice(0,19)}</td>
               <td style={{padding:8}}>
                 <button onClick={()=>onReturn(r)}>반품</button>

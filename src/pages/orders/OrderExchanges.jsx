@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchMyRents, exchangeRent, cancelRent } from "../../Product/api/rentApi";
+import { shipStatusLabel } from "../../utils/shipStatusLabel";
 
 export default function OrderExchanges() {
   const [rows, setRows] = useState([]);
@@ -54,7 +55,7 @@ export default function OrderExchanges() {
             <tr key={r.rentNum}>
               <td style={{padding:8}}>{r.rentNum}</td>
               <td style={{padding:8}}>{r.productName}</td>
-              <td style={{padding:8}}>{r.status}</td>
+              <td style={{ padding: 8 }}>{shipStatusLabel(r.status)}</td>
               <td style={{padding:8}}>{r.rentDate?.replace("T"," ").slice(0,19)}</td>
               <td style={{padding:8}}>
                 <button onClick={()=>onExchange(r)}>교환</button>
