@@ -4,6 +4,15 @@ import { api } from "../../utils/api";
 
 export default function SignupForm() {
   const navigate = useNavigate();
+
+  const todayStr = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+  };
+
   const [form, setForm] = useState({
     mid: "",
     mpw: "",
@@ -78,19 +87,46 @@ export default function SignupForm() {
     e.preventDefault();
     if (loading) return;
     setMsg("");
+
+    // 🔒 미래 생일 금지 (문자열 yyyy-MM-dd 비교가 타임존 이슈 없이 안전)
+   const today = todayStr();
+   const childMin = "2000-01-01";
+   if (form.mbirth && form.mbirth > today) {
+     setMsg("생년월일은 오늘 이후(미래)로 설정할 수 없습니다.");
+     return;
+   }
+   // 🔒 자녀 생일도 모두 체크
+   if (Array.isArray(form.children)) {
+     for (const [idx, ch] of form.children.entries()) {
+       if (ch?.chbirth && ch.chbirth > today) {
+         setMsg(`자녀 ${idx + 1}의 생년월일이 미래로 설정되어 있습니다.`);
+         return;
+       }
+       if (ch?.chbirth && ch.chbirth < childMin) {
+          setMsg(`자녀 ${idx + 1}의 생년월일은 2000-01-01 이후여야 합니다.`);
+          return;
+        }
+     }
+   }
+
     setLoading(true);
     try {
-      const payload = {
-        ...form,
-        mid: form.mid.trim(),
-        mpw: form.mpw,
-        mname: form.mname.trim(),
-        mtel: form.mtel.trim(),
-        memail: form.memail.trim(),
-        maddr: form.maddr.trim(),
-        mpost: form.mpost,
-        children: form.children,
-      };
+      // 🔒 빈 자녀 행 제거 (chname, chbirth 둘 다 있어야 전송)
+     const cleanChildren = (form.children || []).filter(
+       (c) => c?.chname?.trim() && c?.chbirth
+     );
+ 
+     const payload = {
+       ...form,
+       mid: form.mid.trim(),
+       mpw: form.mpw,
+       mname: form.mname.trim(),
+       mtel: form.mtel.trim(),
+       memail: form.memail.trim(),
+       maddr: form.maddr.trim(),
+       mpost: form.mpost,
+       children: cleanChildren,
+     };
       await api.post("/member/signup", payload);
       navigate("/", { replace: true });
     } catch (err) {
@@ -155,6 +191,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="-없이 숫자만 입력"
           autoComplete="tel"
+          required
         />
         <label htmlFor="mbirth">생년월일</label>
           <input
@@ -165,6 +202,9 @@ export default function SignupForm() {
             onChange={onChange}
             placeholder="생년월일"
             autoComplete="bday"
+            max={todayStr()}
+            min="1900-01-01"
+            required
           />
 
         <label htmlFor="memail">이메일 주소</label>
@@ -184,6 +224,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="우편번호"
           autoComplete="postal-code"
+          required
         />
         <label htmlFor="maddr">주소</label>
         <div style={{ display: "flex", gap: 8 }}>
@@ -244,6 +285,8 @@ export default function SignupForm() {
                   });
                 }}
                 style={{ flex: 1 }}
+                max={todayStr()}
+                min="2000-01-01"
               />
               <button type="button" onClick={() => removeChild(idx)} style={styles.linkBtn}>
                 삭제
@@ -259,7 +302,7 @@ export default function SignupForm() {
           </button>
         </fieldset>
 
-        {msg && <p style={styles.error}>{msg}</p>}
+        {msg && <p style={styles.error} aria-live="polite" aria-atomic="true">{msg}</p>}
 
         <button
           type="submit"
