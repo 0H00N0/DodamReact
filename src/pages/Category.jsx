@@ -25,16 +25,43 @@ const Category = () => {
   // 카테고리 정보 및 상품 목록 API로 불러오기
   useEffect(() => {
     setIsLoading(true);
-    Promise.all([
-      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
-        .then(res => res.ok ? res.json() : null),
-      fetch(`/products/category/${encodeURIComponent(categoryName)}`)
-        .then(res => res.ok ? res.json() : [])
-    ]).then(([categoryData, categoryProducts]) => {
-      setCategory(categoryData);
-      setProducts(categoryProducts);
-      setIsLoading(false);
-    });
+
+    fetch(`http://localhost:8080/products/category/${encodeURIComponent(categoryName)}`)
+      .then(res => {
+        console.log('[Category] fetch status', res.status, res.statusText, res.url);
+        if (!res.ok) return Promise.reject(res);
+        return res.json();
+      })
+      .then(data => {
+        console.log('[Category] products data sample:', Array.isArray(data) ? data[0] : data);
+
+        // images 배열에서 사용할 이미지 추출하여 prourl / image 필드로 정규화
+        const normalized = Array.isArray(data) ? data.map(p => {
+          // images 배열에서 먼저 prourl 있는 항목, 없으면 prodetailimage 사용
+          let imgFilename = '';
+          if (p.images && Array.isArray(p.images) && p.images.length > 0) {
+            const found = p.images.find(i => i.prourl) || p.images.find(i => i.prodetailimage) || p.images[0];
+            imgFilename = found ? (found.prourl || found.prodetailimage || '') : '';
+          } else if (p.prourl) {
+            imgFilename = p.prourl;
+          }
+
+          // 이미지가 파일명(또는 상대경로)으로 내려오면 백엔드 절대 URL로 보정
+          const imageUrl = imgFilename
+            ? (imgFilename.startsWith('http') ? imgFilename : `http://localhost:8080/images/${imgFilename}`)
+            : '/default-image.png';
+
+          return {
+            ...p,
+            prourl: imgFilename,   // 원본 파일명 보존
+            image: imageUrl        // ProductCard에서 image 또는 prourl 사용 가능하도록 추가
+          };
+        }) : [];
+
+        setProducts(normalized);
+        setCategory({ name: categoryName, icon: null });
+      })
+      .finally(() => setIsLoading(false));
   }, [categoryName]);
 
   // 필터링 및 정렬 적용
@@ -170,22 +197,13 @@ const Category = () => {
       {filteredProducts.length > 0 ? (
         <div className={styles.productGrid}>
           {filteredProducts.map(product => (
-            <div key={product.pronum} onClick={() => handleProductClick(product.pronum)}>
-              <ProductCard
-                id={product.pronum}
-                name={product.name}
-                price={product.price}
-                discountPrice={product.discountPrice}
-                discountRate={product.discountRate}
-                image={product.image}
-                rating={product.rating}
-                reviewCount={product.reviewCount}
-                onAddToCart={handleAddToCart}
-                onWishlist={handleWishlist}
-                isWishlisted={isInWishlist(product.id)}
-              />
-            </div>
-          ))}
+  <div key={product.pronum}>
+    <ProductCard
+      item={product}
+      onClick={() => handleProductClick(product.pronum)} 
+    />
+  </div>
+))}
         </div>
       ) : (
         <div className={styles.noProducts}>
