@@ -29,6 +29,9 @@ export default function SignupForm() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 숫자만 남기고 최대 13자리 제한
+  const digitsOnly = (s = "") => s.replace(/\D/g, "").slice(0, 13);
+
   // 카카오 주소검색 스크립트
   useEffect(() => {
     if (!window.daum?.Postcode) {
@@ -58,7 +61,7 @@ export default function SignupForm() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm((f) => ({ ...f, [name]: name === "mtel" ? digitsOnly(value) : value }));
   };
 
   const onChildChange = (e) => {
@@ -90,9 +93,14 @@ export default function SignupForm() {
 
     // 🔒 미래 생일 금지 (문자열 yyyy-MM-dd 비교가 타임존 이슈 없이 안전)
    const today = todayStr();
+   const MEMBER_MIN = "1900-01-01";
    const childMin = "2000-01-01";
    if (form.mbirth && form.mbirth > today) {
      setMsg("생년월일은 오늘 이후(미래)로 설정할 수 없습니다.");
+     return;
+   }
+   if (form.mbirth && form.mbirth < MEMBER_MIN) {
+     setMsg("회원 생년월일은 1900-01-01 이후여야 합니다.");
      return;
    }
    // 🔒 자녀 생일도 모두 체크
@@ -109,6 +117,13 @@ export default function SignupForm() {
      }
    }
 
+    // 🔒 전화번호: 9~13자리 숫자만 허용
+    const mtelDigits = digitsOnly(form.mtel);
+    if (!/^\d{9,13}$/.test(mtelDigits)) {
+      setMsg("전화번호는 숫자 9~13자리로 입력하세요.");
+      return;
+    }
+   
     setLoading(true);
     try {
       // 🔒 빈 자녀 행 제거 (chname, chbirth 둘 다 있어야 전송)
@@ -121,7 +136,7 @@ export default function SignupForm() {
        mid: form.mid.trim(),
        mpw: form.mpw,
        mname: form.mname.trim(),
-       mtel: form.mtel.trim(),
+       mtel: mtelDigits,             // ← 숫자만 전송
        memail: form.memail.trim(),
        maddr: form.maddr.trim(),
        mpost: form.mpost,
@@ -144,7 +159,7 @@ export default function SignupForm() {
 
   return (
     <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form} noValidate>
+      <form onSubmit={onSubmit} style={styles.form}>
         <h2>회원가입</h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
   <span style={{ color: "red" }}>*</span>는 필수 입력사항입니다.
@@ -185,15 +200,19 @@ export default function SignupForm() {
 
         <label htmlFor="mtel">전화번호<span style={{ color: "red" }}>*</span></label>
         <input
-          id="mtel"
-          name="mtel"
-          value={form.mtel}
-          onChange={onChange}
-          placeholder="-없이 숫자만 입력"
-          autoComplete="tel"
-          required
-        />
-        <label htmlFor="mbirth">생년월일</label>
+           id="mtel"
+           name="mtel"
+           type="tel"
+           inputMode="numeric"
+           pattern="[0-9]*"
+           maxLength={13}
+           value={form.mtel}
+           onChange={onChange}
+           placeholder="-없이 숫자만 입력"
+           autoComplete="tel"
+           required
+         />
+        <label htmlFor="mbirth">생년월일<span style={{ color: "red" }}>*</span></label>
           <input
             id="mbirth"
             name="mbirth"
@@ -215,6 +234,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="이메일"
           autoComplete="email"
+          pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
         />
         <label htmlFor="mpost">우편번호<span style={{ color: "red" }}>*</span></label>
         <input
