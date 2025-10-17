@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchMyRents, cancelRent, exchangeRent, returnRent } from "../../Product/api/rentApi";
 import { shipStatusLabel } from "../../utils/shipStatusLabel";
 import ProductPickerModal from "../ProductPickerModal";
+import { useNavigate } from "react-router-dom";
 
 export default function OrderHistory() {
   const [rows, setRows] = useState([]);
@@ -10,6 +11,7 @@ export default function OrderHistory() {
   // { renNum, type:'EXCHANGE', newPronum:'', reason:'', origPronum }
   const [modal, setModal] = useState(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const navigate = useNavigate();
 
   const reload = async () => {
     setLoading(true);
@@ -98,6 +100,14 @@ export default function OrderHistory() {
                 {canCancel(r)   && <button onClick={() => onCancel(r)}>취소</button>}
                 {canExchange(r) && <button onClick={() => onExchange(r)} style={{ marginLeft: 8 }}>교환</button>}
                 {canReturn(r)   && <button onClick={() => onReturn(r)} style={{ marginLeft: 8 }}>반품</button>}
+                {canReturn(r)   && (
+                  <button
+                    onClick={() => navigate('/orders/inquiry', { state: { renNum: r.rentNum, pronum: r.pronum } })}
+                    style={{ marginLeft: 8 }}
+                  >
+                    문의하기
+                  </button>
+                )}
               </td>
             </tr>
           ))}

@@ -52,6 +52,9 @@ import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 
 import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
 import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
 
+import OrderInquiryNew from "./pages/orders/OrderInquiryNew"; // 상품 문의
+import MyInquiries from "./pages/member/MyInquiries"; // 문의 내역
+
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
@@ -93,6 +96,13 @@ export const router = createRouter([
       //상품 교환 및 반품
       { path: "orders/returns", element: <OrderReturns /> },
       { path: "orders/exchanges", element: <OrderExchanges /> },
+
+      // 주문 관련
+      { path: "orders/inquiry", element: <OrderInquiryNew /> },
+      
+      // 마이페이지
+      { path: "member/inquiries", element: <MyInquiries /> },
+
 
       // Product
       { path: "products", element: <ProductsPage /> },
