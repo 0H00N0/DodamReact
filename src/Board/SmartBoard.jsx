@@ -4,7 +4,8 @@
 // - 모의 저장: localStorage (USE_MOCK=true). Spring Boot 연동시 USE_MOCK=false 로 바꾸고 BASE_URL 수정.
 
 import React, { useEffect, useMemo, useState } from "react";
-
+import "./SmartBoard.module.css"; // ← 폴백/전역 유틸 적용 (line-clamp, prose, 모달 애니메이션 등)
+import styles from "./SmartBoard.module.css"; // ← CSS Module 객체 임포트
 /*** ▼▼ 환경 설정 ▼▼ ***/
 const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
 const BASE_URL = "http://localhost:8080/api"; // Spring Boot 기본 예시
@@ -307,10 +308,10 @@ function Header() {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-xs tracking-widest text-gray-500">LUX • SMART • BOARD</div>
-        <h1 className="mt-1 text-2xl font-bold">스마트 게시판</h1>
+        <div className="text-xs tracking-widest text-gray-500">SMART • BOARD</div>
+        <h1 className="mt-1 text-2xl font-bold">소통 게시판</h1>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          검색 · 정렬 · 태그 · 좋아요 · FAQ · 문의 · 이벤트, 한 화면에서 관리
+          한 화면에서 관리
         </p>
       </div>
       <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 px-4 py-2 text-sm text-white shadow-lg">
@@ -372,7 +373,7 @@ function PostList({ board, title, allowWrite }) {
             className="rounded-xl border border-gray-300 bg-white px-2 py-2 text-sm shadow-sm dark:border-gray-700 dark:bg-gray-800"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-          >
+          > 
             <option value="new">최신순</option>
             <option value="view">조회순</option>
             <option value="like">좋아요순</option>
@@ -404,15 +405,15 @@ function PostList({ board, title, allowWrite }) {
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50 text-left dark:bg-gray-800">
-            <tr>
-              <th className="px-4 py-3">제목</th>
-              <th className="px-4 py-3">태그</th>
-              <th className="px-4 py-3">작성자</th>
-              <th className="px-4 py-3">조회</th>
-              <th className="px-4 py-3">좋아요</th>
-              <th className="px-4 py-3">작성일</th>
-            </tr>
+          <thead className={styles.tableReadable}>
+          <tr>
+            <th className="px-4 py-3">제목</th>
+            <th className="px-4 py-3">태그</th>
+            <th className="px-4 py-3">작성자</th>
+            <th className="px-4 py-3">조회</th>
+            <th className="px-4 py-3">좋아요</th>
+            <th className="px-4 py-3">작성일</th>
+          </tr>
           </thead>
           <tbody>
             {loading && (
