@@ -4,7 +4,6 @@
 // - 모의 저장: localStorage (USE_MOCK=true). Spring Boot 연동시 USE_MOCK=false 로 바꾸고 BASE_URL 수정.
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 
 /*** ▼▼ 환경 설정 ▼▼ ***/
 const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
@@ -16,13 +15,13 @@ const uid = () => Math.random().toString(36).slice(2, 10);
 
 /*** ▼▼ 로컬스토리지 모의 DB ***/
 const LS_KEYS = {
-  Notice: "smartboard_Notice",
+  posts: "smartboard_posts",
   faqs: "smartboard_faqs",
   inquiries: "smartboard_inquiries",
 };
 
 function ensureSeed() {
-  if (!localStorage.getItem(LS_KEYS.Notice)) {
+  if (!localStorage.getItem(LS_KEYS.posts)) {
     const now = Date.now();
     const seed = [
       {
@@ -67,7 +66,7 @@ function ensureSeed() {
         updatedAt: now - 1000 * 60 * 60 * 1,
       },
     ];
-    localStorage.setItem(LS_KEYS.Notice, JSON.stringify(seed));
+    localStorage.setItem(LS_KEYS.posts, JSON.stringify(seed));
   }
   if (!localStorage.getItem(LS_KEYS.faqs)) {
     const seed = [
@@ -93,7 +92,7 @@ function ensureSeed() {
 const api = {
   async listPosts({ board, q = "", sort = "new", page = 1, size = 10 }) {
     if (USE_MOCK) {
-      const all = JSON.parse(localStorage.getItem(LS_KEYS.Notice) || "[]");
+      const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       let rows = board ? all.filter((p) => p.board === board) : all;
       if (q) {
         const t = q.toLowerCase();
@@ -125,7 +124,7 @@ const api = {
   },
   async getPost(id) {
     if (USE_MOCK) {
-      const all = JSON.parse(localStorage.getItem(LS_KEYS.Notice) || "[]");
+      const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       const found = all.find((p) => p.id === id);
       if (found) {
         // 조회수 증가
@@ -141,7 +140,7 @@ const api = {
   },
   async createPost(payload) {
     if (USE_MOCK) {
-      const all = JSON.parse(localStorage.getItem(LS_KEYS.Notice) || "[]");
+      const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       const now = Date.now();
       const row = {
         ...payload,
@@ -155,7 +154,7 @@ const api = {
       localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
       return row;
     } else {
-      const res = await fetch(`${BASE_URL}/Notice`, {
+      const res = await fetch(`${BASE_URL}/posts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -166,11 +165,11 @@ const api = {
   },
   async updatePost(id, payload) {
     if (USE_MOCK) {
-      const all = JSON.parse(localStorage.getItem(LS_KEYS.Notice) || "[]");
+      const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       const idx = all.findIndex((p) => p.id === id);
       if (idx >= 0) {
         all[idx] = { ...all[idx], ...payload, updatedAt: Date.now() };
-        localStorage.setItem(LS_KEYS.Notice, JSON.stringify(all));
+        localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
         return all[idx];
       }
       throw new Error("존재하지 않는 글");
@@ -186,7 +185,7 @@ const api = {
   },
   async likePost(id) {
     if (USE_MOCK) {
-      const all = JSON.parse(localStorage.getItem(LS_KEYS.Notice) || "[]");
+      const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       const idx = all.findIndex((p) => p.id === id);
       if (idx >= 0) {
         all[idx].likes = (all[idx].likes || 0) + 1;

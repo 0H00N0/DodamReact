@@ -1,0 +1,150 @@
+/* SmartBoard.module.css
+   - Tailwind 플러그인(line-clamp, typography)이 없어도 잘 보이도록 폴백 제공
+   - 모달 오버레이/카드 등장 애니메이션
+   - details/summary 아코디언 시각 개선
+   - 입력 요소 포커스 링 개선 (라이트/다크)
+*/
+
+/* =============== 공통 색/테마 토큰 (선택적 활용) =============== */
+:global(:root) {
+  --sb-border: rgba(0,0,0,0.08);
+  --sb-border-dark: rgba(255,255,255,0.16);
+  --sb-muted: rgba(0,0,0,0.55);
+  --sb-muted-dark: rgba(255,255,255,0.65);
+  --sb-code-bg: #0b1220;
+  --sb-code-text: #d1e7ff;
+}
+
+/* =============== line-clamp 폴백 (Tailwind plugin 없이 동작) =============== */
+:global(.line-clamp-1),
+:global(.line-clamp-2),
+:global(.line-clamp-3),
+:global(.line-clamp-4),
+:global(.line-clamp-5),
+:global(.line-clamp-6) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+:global(.line-clamp-1) { -webkit-line-clamp: 1; }
+:global(.line-clamp-2) { -webkit-line-clamp: 2; }
+:global(.line-clamp-3) { -webkit-line-clamp: 3; }
+:global(.line-clamp-4) { -webkit-line-clamp: 4; }
+:global(.line-clamp-5) { -webkit-line-clamp: 5; }
+:global(.line-clamp-6) { -webkit-line-clamp: 6; }
+
+/* =============== prose 폴백 (Tailwind Typography 없을 때) =============== */
+:global(.prose) {
+  color: #111827;
+  line-height: 1.7;
+  font-size: 0.95rem;
+  word-break: keep-all;
+}
+:global(.prose p + p) { margin-top: 0.75rem; }
+:global(.prose h1),
+:global(.prose h2),
+:global(.prose h3),
+:global(.prose h4) { font-weight: 700; line-height: 1.3; margin: 1rem 0 0.5rem; }
+:global(.prose h1) { font-size: 1.6rem; }
+:global(.prose h2) { font-size: 1.35rem; }
+:global(.prose h3) { font-size: 1.15rem; }
+:global(.prose a) { color: #2563eb; text-decoration: underline; text-underline-offset: 2px; }
+:global(.prose ul),
+:global(.prose ol) { padding-left: 1.2rem; margin: 0.5rem 0; }
+:global(.prose li + li) { margin-top: 0.25rem; }
+:global(.prose code) {
+  background: rgba(0,0,0,0.05);
+  border-radius: 6px;
+  padding: 0.15rem 0.35rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  font-size: 0.85em;
+}
+:global(.prose pre) {
+  background: var(--sb-code-bg);
+  color: var(--sb-code-text);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  overflow: auto;
+}
+:global(.prose table) { width: 100%; border-collapse: collapse; margin: 0.5rem 0; }
+:global(.prose th),
+:global(.prose td) { border-bottom: 1px solid var(--sb-border); padding: 0.5rem 0.75rem; text-align: left; }
+
+/* 다크 모드 반전 (prose-invert 대체) */
+:global(.dark .prose) { color: #e5e7eb; }
+:global(.dark .prose a) { color: #93c5fd; }
+:global(.dark .prose code) { background: rgba(255,255,255,0.08); }
+:global(.dark .prose th),
+:global(.dark .prose td) { border-bottom: 1px solid var(--sb-border-dark); }
+
+/* =============== details/summary(FAQ) 개선 =============== */
+:global(details) { border-top: 1px solid var(--sb-border); }
+:global(.dark details) { border-top: 1px solid var(--sb-border-dark); }
+:global(details > summary) {
+  list-style: none;
+  cursor: pointer;
+  position: relative;
+  padding-right: 1.25rem; /* 접기/펼치기 아이콘 공간 */
+  transition: background-color .15s ease;
+}
+:global(details > summary::-webkit-details-marker) { display: none; }
+:global(details > summary::after) {
+  content: "▾";
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(0);
+  transition: transform .2s ease;
+  opacity: .7;
+}
+:global(details[open] > summary::after) { transform: translateY(-50%) rotate(180deg); }
+
+/* =============== 모달 애니메이션 (PostDetailModal / PostEditorModal) =============== */
+@keyframes sb-fade-in {
+  from { opacity: 0; } to { opacity: 1; }
+}
+@keyframes sb-pop {
+  from { transform: translateY(8px) scale(.98); opacity: 0; }
+  to   { transform: translateY(0)   scale(1);    opacity: 1; }
+}
+/* 오버레이 페이드 */
+:global(.fixed.inset-0.z-50) {
+  animation: sb-fade-in .18s ease-out both;
+}
+/* 카드 살짝 떠오르는 느낌 */
+:global(.fixed.inset-0.z-50 .rounded-2xl) {
+  animation: sb-pop .18s ease-out both;
+}
+
+/* =============== 입력 요소 포커스 링 품질 개선 =============== */
+:global(input),
+:global(textarea),
+:global(select) {
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+:global(input:focus),
+:global(textarea:focus),
+:global(select:focus) {
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.28);
+}
+:global(.dark input:focus),
+:global(.dark textarea:focus),
+:global(.dark select:focus) {
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.38);
+}
+
+/* =============== 표 호버 부드럽게 =============== */
+:global(table.min-w-full tbody tr) { transition: background-color .15s ease; }
+
+/* =============== 보조 유틸 =============== */
+/* 시각적 숨김 (접근성) */
+.visuallyHidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
