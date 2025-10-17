@@ -167,7 +167,7 @@ export default function SignupForm() {
             autoComplete="bday"
           />
 
-        <label htmlFor="memail">이메일 주소<span style={{ color: "red" }}>*</span></label>
+        <label htmlFor="memail">이메일 주소</label>
         <input
           id="memail"
           name="memail"
