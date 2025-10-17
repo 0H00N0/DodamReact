@@ -435,6 +435,9 @@ export default function CheckoutPage() {
             <div style={styles.summary}>
               선택한 플랜 <b>{planCode || "-"}</b>
               <span style={styles.summaryBadge}>{months}개월</span>
+              <div style={{ fontSize: 14, color: "#9A8190", marginTop: 6 }}>
+                할인 적용 금액으로 결제가 진행됩니다.
+              </div>
             </div>
           </div>
         </div>
