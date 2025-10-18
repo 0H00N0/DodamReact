@@ -83,10 +83,10 @@ export default function MainFeedVertical() {
         </ul>
       </div>
 
-      {/* 커뮤니티 인기글 */}
+      {/* 커뮤니티 최신글 */}
       <div className={styles.block}>
         <div className={styles.blockHead}>
-          <h3>커뮤니티 인기글</h3>
+          <h3>커뮤니티 최신글</h3>
           <button className={styles.more} onClick={() => nav("/board/community")}>더보기</button>
         </div>
         <ul className={styles.list}>
