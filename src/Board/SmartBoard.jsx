@@ -1,18 +1,69 @@
-// SmartBoard.jsx — 단일 파일로 붙여넣어 바로 사용하는 리액트 UI (Tailwind 사용)
-// - 탭: 공지, 커뮤니티, FAQ, 문의, 이벤트
-// - 기능: 검색, 정렬, 페이지네이션, 태그, 좋아요, 상세/작성 모달, FAQ 아코디언, 문의 폼, 이벤트 카드
-// - 모의 저장: localStorage (USE_MOCK=true). Spring Boot 연동시 USE_MOCK=false 로 바꾸고 BASE_URL 수정.
+// SmartBoard.premium.jsx — 프리미엄 + 다크모드 토글 내장 (v3)
+// - Header에 다크모드 토글 버튼 추가 (localStorage 지속, 시스템 테마 감지)
+// - CSS 모듈과 연동된 애니메이션 스위치(햇님/달 아이콘, 슬라이딩 노브)
+// - 기존 v2의 간격/가독성 개선 유지
 
 import React, { useEffect, useMemo, useState } from "react";
-import "./SmartBoard.module.css"; // ← 폴백/전역 유틸 적용 (line-clamp, prose, 모달 애니메이션 등)
-import styles from "./SmartBoard.module.css"; // ← CSS Module 객체 임포트
+import "./SmartBoard.module.css";
+import styles from "./SmartBoard.module.css";
+import { Empty } from "antd";
+
 /*** ▼▼ 환경 설정 ▼▼ ***/
 const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
 const BASE_URL = "http://localhost:8080/api"; // Spring Boot 기본 예시
+const THEME_KEY = "smartboard_theme";
 
 /*** ▼▼ 유틸 ***/
 const fmtDate = (d) => new Date(d).toLocaleString();
 const uid = () => Math.random().toString(36).slice(2, 10);
+
+/*** ▼▼ 다크모드 훅 ***/
+function useDarkMode() {
+  const [isDark, setIsDark] = useState(false);
+
+  // 초기 로드: 저장값 > 시스템 선호
+  useEffect(() => {
+    try {
+      const root = document.documentElement;
+      const stored = localStorage.getItem(THEME_KEY);
+      const sys = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const wantsDark = stored ? stored === "dark" : sys;
+      setIsDark(wantsDark);
+      root.classList.toggle("dark", wantsDark);
+
+      // 시스템 테마 변경 감지 (사용자가 수동 지정 안했을 때만)
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const onChange = (e) => {
+        const hasManual = localStorage.getItem(THEME_KEY);
+        if (!hasManual) {
+          setIsDark(e.matches);
+          root.classList.toggle("dark", e.matches);
+        }
+      };
+      if (mq.addEventListener) mq.addEventListener("change", onChange);
+      else if (mq.addListener) mq.addListener(onChange);
+
+      return () => {
+        if (mq.removeEventListener) mq.removeEventListener("change", onChange);
+        else if (mq.removeListener) mq.removeListener(onChange);
+      };
+    } catch { /* no-op */ }
+  }, []);
+
+  const toggle = () => {
+    setIsDark((prev) => {
+      const next = !prev;
+      try {
+        const root = document.documentElement;
+        root.classList.toggle("dark", next);
+        localStorage.setItem(THEME_KEY, next ? "dark" : "light");
+      } catch { /* no-op */ }
+      return next;
+    });
+  };
+
+  return [isDark, toggle];
+}
 
 /*** ▼▼ 로컬스토리지 모의 DB ***/
 const LS_KEYS = {
@@ -71,16 +122,8 @@ function ensureSeed() {
   }
   if (!localStorage.getItem(LS_KEYS.faqs)) {
     const seed = [
-      {
-        id: uid(),
-        q: "구독 일시정지 가능한가요?",
-        a: "네, 마이페이지 > 구독관리에서 1~3개월 범위로 일시정지가 가능합니다.",
-      },
-      {
-        id: uid(),
-        q: "결제 수단 변경은 어떻게 하나요?",
-        a: "마이페이지 > 결제수단에서 새로운 카드를 등록 후 기본으로 설정하세요.",
-      },
+      { id: uid(), q: "구독 일시정지 가능한가요?", a: "네, 마이페이지 > 구독관리에서 1~3개월 범위로 일시정지가 가능합니다." },
+      { id: uid(), q: "결제 수단 변경은 어떻게 하나요?", a: "마이페이지 > 결제수단에서 새로운 카드를 등록 후 기본으로 설정하세요." },
     ];
     localStorage.setItem(LS_KEYS.faqs, JSON.stringify(seed));
   }
@@ -110,6 +153,7 @@ const api = {
       const total = rows.length;
       const start = (page - 1) * size;
       const data = rows.slice(start, start + size);
+      await new Promise(r => setTimeout(r, 200));
       return { data, total };
     } else {
       const url = new URL(`${BASE_URL}/posts`);
@@ -128,10 +172,10 @@ const api = {
       const all = JSON.parse(localStorage.getItem(LS_KEYS.posts) || "[]");
       const found = all.find((p) => p.id === id);
       if (found) {
-        // 조회수 증가
         found.views = (found.views || 0) + 1;
         localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
       }
+      await new Promise(r => setTimeout(r, 160));
       return found;
     } else {
       const res = await fetch(`${BASE_URL}/posts/${id}`);
@@ -153,6 +197,7 @@ const api = {
       };
       all.unshift(row);
       localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
+      await new Promise(r => setTimeout(r, 140));
       return row;
     } else {
       const res = await fetch(`${BASE_URL}/posts`, {
@@ -171,6 +216,7 @@ const api = {
       if (idx >= 0) {
         all[idx] = { ...all[idx], ...payload, updatedAt: Date.now() };
         localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
+        await new Promise(r => setTimeout(r, 140));
         return all[idx];
       }
       throw new Error("존재하지 않는 글");
@@ -191,6 +237,7 @@ const api = {
       if (idx >= 0) {
         all[idx].likes = (all[idx].likes || 0) + 1;
         localStorage.setItem(LS_KEYS.posts, JSON.stringify(all));
+        await new Promise(r => setTimeout(r, 120));
         return all[idx];
       }
       throw new Error("존재하지 않는 글");
@@ -202,6 +249,7 @@ const api = {
   },
   async listFaqs() {
     if (USE_MOCK) {
+      await new Promise(r => setTimeout(r, 140));
       return JSON.parse(localStorage.getItem(LS_KEYS.faqs) || "[]");
     } else {
       const res = await fetch(`${BASE_URL}/faqs`);
@@ -215,6 +263,7 @@ const api = {
       const row = { id: uid(), createdAt: Date.now(), status: "RECEIVED", ...payload };
       all.unshift(row);
       localStorage.setItem(LS_KEYS.inquiries, JSON.stringify(all));
+      await new Promise(r => setTimeout(r, 200));
       return row;
     } else {
       const res = await fetch(`${BASE_URL}/inquiries`, {
@@ -230,7 +279,7 @@ const api = {
 
 if (USE_MOCK) ensureSeed();
 
-/*** ▼▼ 공용 UI 컴포넌트 ***/
+/*** ▼▼ 공용 UI ***/
 function Chip({ children }) {
   return (
     <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs text-gray-700 dark:text-gray-200">
@@ -238,7 +287,6 @@ function Chip({ children }) {
     </span>
   );
 }
-
 function Badge({ children, tone = "blue" }) {
   const toneClass = {
     blue: "bg-blue-100 text-blue-700",
@@ -251,26 +299,17 @@ function Badge({ children, tone = "blue" }) {
   return <span className={`rounded-full px-2 py-0.5 text-xs ${toneClass}`}>{children}</span>;
 }
 
-function Empty({ title = "데이터가 없습니다", desc = "조건을 바꿔보세요." }) {
-  return (
-    <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-      <div className="text-3xl">🗂️</div>
-      <div className="text-base font-medium">{title}</div>
-      <div className="text-sm text-gray-500">{desc}</div>
-    </div>
-  );
-}
-
-/*** ▼▼ 메인: SmartBoard ***/
+/*** ▼▼ 메인 ***/
 export default function SmartBoard() {
-  const [tab, setTab] = useState("NOTICE"); // NOTICE | COMMUNITY | FAQ | INQUIRY | EVENT
+  const [tab, setTab] = useState("NOTICE");
+  const [isDark, toggleDark] = useDarkMode();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100">
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <Header />
+        <Header isDark={isDark} onToggleDark={toggleDark} />
 
-        <div className="mt-6 flex flex-wrap gap-2">
+        <nav className="mt-6 flex flex-wrap gap-2" aria-label="게시판 탭">
           {[
             { key: "NOTICE", label: "공지사항" },
             { key: "COMMUNITY", label: "커뮤니티" },
@@ -286,38 +325,63 @@ export default function SmartBoard() {
                   ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
                   : "bg-white/70 dark:bg-gray-800/50 hover:bg-white dark:hover:bg-gray-800"
               }`}
+              aria-current={tab === t.key ? "page" : undefined}
             >
               {t.label}
             </button>
           ))}
-        </div>
+        </nav>
 
-        <div className="mt-6 rounded-3xl border border-gray-200 bg-white/80 p-4 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-900/60">
+        <section className="mt-6 rounded-3xl border border-gray-200 bg-white/80 p-4 shadow-xl backdrop-blur dark:border-gray-800 dark:bg-gray-900/60">
           {tab === "NOTICE" && <PostList board="NOTICE" allowWrite title="공지사항" />}
           {tab === "COMMUNITY" && <PostList board="COMMUNITY" allowWrite title="커뮤니티" />}
           {tab === "FAQ" && <FaqPanel />}
           {tab === "INQUIRY" && <InquiryPanel />}
           {tab === "EVENT" && <EventPanel />}
-        </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function Header() {
+function Header({ isDark, onToggleDark }) {
   return (
-    <div className="flex items-center justify-between">
+    <header className="flex items-center justify-between">
       <div>
         <div className="text-xs tracking-widest text-gray-500">SMART • BOARD</div>
         <h1 className="mt-1 text-2xl font-bold">소통 게시판</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          한 화면에서 관리
-        </p>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">한 화면에서 관리</p>
       </div>
-      <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 px-4 py-2 text-sm text-white shadow-lg">
-        React UI
+      <div className="flex items-center gap-3">
+        {/* 다크모드 토글 */}
+        <button
+          type="button"
+          onClick={onToggleDark}
+          className={`${styles.themeSwitch} ${isDark ? styles.isOn : ""}`}
+          aria-pressed={isDark}
+          aria-label={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
+          title={isDark ? "라이트 모드로 전환" : "다크 모드로 전환"}
+        >
+          <span className={styles.sun} aria-hidden="true">
+            {/* Sun */}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+          </span>
+          <span className={styles.moon} aria-hidden="true">
+            {/* Moon */}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79Z"></path>
+            </svg>
+          </span>
+          <span className={styles.knob} aria-hidden="true"></span>
+        </button>
+
+        <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-500 px-4 py-2 text-sm text-white shadow-lg">
+          다크모드 UI
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 
@@ -360,7 +424,9 @@ function PostList({ board, title, allowWrite }) {
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="text-lg font-semibold">{title}</div>
         <div className="flex items-center gap-2">
+          <label className={styles.visuallyHidden} htmlFor="searchInput">검색</label>
           <input
+            id="searchInput"
             className="w-48 rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-gray-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800"
             placeholder="검색 (제목/내용/태그)"
             value={q}
@@ -373,7 +439,8 @@ function PostList({ board, title, allowWrite }) {
             className="rounded-xl border border-gray-300 bg-white px-2 py-2 text-sm shadow-sm dark:border-gray-700 dark:bg-gray-800"
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-          > 
+            aria-label="정렬"
+          >
             <option value="new">최신순</option>
             <option value="view">조회순</option>
             <option value="like">좋아요순</option>
@@ -385,6 +452,7 @@ function PostList({ board, title, allowWrite }) {
               setPage(1);
               setSize(Number(e.target.value));
             }}
+            aria-label="페이지 크기"
           >
             {[10, 20, 30].map((n) => (
               <option key={n} value={n}>
@@ -404,24 +472,22 @@ function PostList({ board, title, allowWrite }) {
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-        <table className="min-w-full text-sm">
+        <table className={`${styles.tableRoot} min-w-full text-sm`} role="grid">
           <thead className={styles.tableReadable}>
-          <tr>
-            <th className="px-4 py-3">제목</th>
-            <th className="px-4 py-3">태그</th>
-            <th className="px-4 py-3">작성자</th>
-            <th className="px-4 py-3">조회</th>
-            <th className="px-4 py-3">좋아요</th>
-            <th className="px-4 py-3">작성일</th>
-          </tr>
+            <tr>
+              <th>제목</th>
+              <th>태그</th>
+              <th>작성자</th>
+              <th>조회</th>
+              <th>좋아요</th>
+              <th>작성일</th>
+            </tr>
           </thead>
           <tbody>
             {loading && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-500">
-                  로딩 중...
-                </td>
-              </tr>
+              <>
+                <SkeletonRow /><SkeletonRow /><SkeletonRow />
+              </>
             )}
             {!loading && rows.length === 0 && (
               <tr>
@@ -433,21 +499,21 @@ function PostList({ board, title, allowWrite }) {
             {!loading &&
               rows.map((row) => (
                 <tr key={row.id} className="border-t border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/40">
-                  <td className="cursor-pointer px-4 py-3" onClick={() => setDetailId(row.id)}>
+                  <td className={styles.cellTitle} onClick={() => setDetailId(row.id)}>
                     <div className="line-clamp-1 font-medium">{row.title}</div>
-                    <div className="mt-0.5 line-clamp-1 text-xs text-gray-500">{row.content}</div>
+                    <div className={styles.cellSubText}>{row.content}</div>
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1">
+                  <td>
+                    <div className={styles.tagsRow}>
                       {(row.tags || []).map((t) => (
                         <Chip key={t}>#{t}</Chip>
                       ))}
                     </div>
                   </td>
-                  <td className="px-4 py-3">{row.author}</td>
-                  <td className="px-4 py-3">{row.views ?? 0}</td>
-                  <td className="px-4 py-3">{row.likes ?? 0}</td>
-                  <td className="px-4 py-3 whitespace-nowrap">{fmtDate(row.createdAt)}</td>
+                  <td className={styles.cellNowrap}>{row.author}</td>
+                  <td className={styles.cellNowrap}>{row.views ?? 0}</td>
+                  <td className={styles.cellNowrap}>{row.likes ?? 0}</td>
+                  <td className={styles.cellNowrap}>{fmtDate(row.createdAt)}</td>
                 </tr>
               ))}
           </tbody>
@@ -510,6 +576,7 @@ function Pagination({ page, pageCount, onPage }) {
               ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
               : "border dark:border-gray-700"
           }`}
+          aria-current={i === page ? "true" : undefined}
         >
           {i}
         </button>
@@ -522,6 +589,20 @@ function Pagination({ page, pageCount, onPage }) {
         다음
       </button>
     </div>
+  );
+}
+
+/*** ▼▼ 스켈레톤 ***/
+function SkeletonRow() {
+  return (
+    <tr className="animate-pulse">
+      <td className={styles.padCell}><div className={styles.skelLine} style={{width:'85%'}} /></td>
+      <td className={styles.padCell}><div className={styles.skelLine} style={{width:'60%'}} /></td>
+      <td className={styles.padCell}><div className={styles.skelDot} /></td>
+      <td className={styles.padCell}><div className={styles.skelDot} /></td>
+      <td className={styles.padCell}><div className={styles.skelDot} /></td>
+      <td className={styles.padCell}><div className={styles.skelLine} style={{width:'70%'}} /></td>
+    </tr>
   );
 }
 
@@ -546,10 +627,15 @@ function PostDetailModal({ id, onClose, onUpdated }) {
   if (!row) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
         {loading ? (
-          <div className="py-12 text-center text-gray-500">로딩...</div>
+          <div className="py-6 space-y-3">
+            <div className={styles.skelLine} style={{width:'65%'}} />
+            <div className={styles.skelLine} style={{width:'95%'}} />
+            <div className={styles.skelLine} style={{width:'85%'}} />
+            <div className={styles.skelLine} style={{width:'80%'}} />
+          </div>
         ) : edit ? (
           <PostEditor
             initial={row}
@@ -565,28 +651,40 @@ function PostDetailModal({ id, onClose, onUpdated }) {
           <div>
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-semibold">{row.title}</h3>
-              <button
-                className="rounded-xl bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
-                onClick={onClose}
-              >
-                닫기
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEdit(true)}
+                  className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
+                >
+                  ✏️ 수정
+                </button>
+                <button
+                  className="rounded-xl bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  onClick={onClose}
+                >
+                  닫기
+                </button>
+              </div>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-              <span>작성자 {row.author}</span>
-              <span>·</span>
+
+            {/* 메타 정보 간격 강화 */}
+            <div className={styles.metaRow}>
+              <span>작성자 <b>{row.author}</b></span>
+              <span className={styles.dot}>•</span>
               <span>작성 {fmtDate(row.createdAt)}</span>
-              <span>·</span>
+              <span className={styles.dot}>•</span>
               <span>조회 {row.views ?? 0}</span>
-              <span>·</span>
+              <span className={styles.dot}>•</span>
               <span>좋아요 {row.likes ?? 0}</span>
               {row.board === "EVENT" && (
                 <>
-                  <span>·</span>
-                  <Badge tone={eventTone(row)}>{eventLabel(row)}</Badge>
+                  <span className={styles.dot}>•</span>
+                  <span>상태</span>
+                  <span><Badge tone={eventTone(row)}>{eventLabel(row)}</Badge></span>
                 </>
               )}
             </div>
+
             <div className="prose prose-sm mt-4 max-w-none dark:prose-invert">
               <p style={{ whiteSpace: "pre-line" }}>{row.content}</p>
             </div>
@@ -607,12 +705,6 @@ function PostDetailModal({ id, onClose, onUpdated }) {
                 >
                   👍 좋아요
                 </button>
-                <button
-                  onClick={() => setEdit(true)}
-                  className="rounded-xl border px-4 py-2 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800"
-                >
-                  ✏️ 수정
-                </button>
               </div>
               <div className="text-xs text-gray-500">최근 수정 {fmtDate(row.updatedAt)}</div>
             </div>
@@ -626,7 +718,7 @@ function PostDetailModal({ id, onClose, onUpdated }) {
 /*** ▼▼ 작성/수정 ***/
 function PostEditorModal({ board, onClose, onSaved }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-3xl rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl dark:border-gray-800 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">새 글쓰기</h3>
@@ -883,14 +975,14 @@ function InquiryPanel() {
           )}
         </div>
       </div>
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+      <aside className="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
         <div className="text-sm text-gray-500">안내</div>
         <ul className="mt-2 list-disc pl-5 text-sm text-gray-700 dark:text-gray-200">
           <li>운영시간: 09:00 ~ 18:00 (주말/공휴일 제외)</li>
           <li>민감 정보(주민등록번호 등)는 절대 기재하지 마세요.</li>
           <li>처리 결과는 등록하신 이메일로 안내됩니다.</li>
         </ul>
-      </div>
+      </aside>
     </div>
   );
 }
@@ -901,12 +993,15 @@ function EventPanel() {
   const [size] = useState(9);
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const pageCount = Math.ceil(total / size);
 
   const load = async () => {
+    setLoading(true);
     const { data, total } = await api.listPosts({ board: "EVENT", page, size, sort: "new" });
     setRows(data);
     setTotal(total);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -919,9 +1014,13 @@ function EventPanel() {
       <div className="mb-3 flex items-center justify-between">
         <div className="text-lg font-semibold">이벤트</div>
       </div>
-      {rows.length === 0 ? (
-        <Empty title="진행 중인 이벤트가 없습니다" />)
-       : (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <SkeletonCard /><SkeletonCard /><SkeletonCard />
+        </div>
+      ) : rows.length === 0 ? (
+        <Empty title="진행 중인 이벤트가 없습니다" />
+      ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {rows.map((ev) => (
             <div key={ev.id} className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-800 dark:bg-gray-900">
@@ -949,6 +1048,20 @@ function EventPanel() {
       )}
       <div className="mt-4 flex justify-end">
         <Pagination page={page} pageCount={pageCount} onPage={setPage} />
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl border p-4 shadow-sm">
+      <div className={styles.skelLine} style={{width:'70%'}} />
+      <div className="mt-2"><div className={styles.skelLine} style={{width:'45%'}} /></div>
+      <div className="mt-3 space-y-2">
+        <div className={styles.skelLine} />
+        <div className={styles.skelLine} style={{width:'90%'}} />
+        <div className={styles.skelLine} style={{width:'80%'}} />
       </div>
     </div>
   );
