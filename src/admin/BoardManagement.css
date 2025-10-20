@@ -1,0 +1,305 @@
+/* BoardManagement.css */
+
+.board-management {
+    padding: 2rem;
+}
+
+.board-management h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+}
+
+.management-section {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.management-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+/* Board List & Creation */
+.board-list-container {
+    display: flex; 
+    gap: 2rem;
+}
+
+.current-boards, .create-board-form {
+    flex: 1;
+}
+
+.board-list {
+    list-style: none;
+    padding: 0;
+}
+
+.board-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+}
+
+.board-list-item:hover {
+    background-color: #f9f9f9;
+}
+
+.board-info p {
+    margin: 0;
+}
+
+.board-info .board-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.board-info .board-id {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+.delete-btn {
+    padding: 0.4rem 0.8rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #dc3545;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.create-board-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.create-board-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.create-board-form input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.create-btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Post Management */
+.post-controls {
+    margin-bottom: 1.5rem;
+}
+
+.post-controls label {
+    margin-right: 1rem;
+    font-weight: 600;
+}
+
+.post-controls select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.post-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.post-table th,
+.post-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.post-table th {
+    background-color: #f7f7f7;
+}
+
+.post-table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+.board-list-item {
+    /* ... 기존 스타일 ... */
+    cursor: pointer; /* 클릭 가능하도록 커서 변경 */
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* 선택된 게시판 항목 스타일 */
+.board-list-item.active {
+    background-color: #e7f3ff;
+    border-color: #007bff;
+}
+
+.board-list-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* ... 기존 CSS ... */
+
+/* 게시글 테이블 컨테이너 */
+.post-table-container {
+    overflow-x: auto; /* 테이블이 넓어질 경우 스크롤 */
+}
+
+.post-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.post-table th,
+.post-table td {
+    padding: 0.8rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+.post-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.post-table tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+.post-table td {
+    font-size: 0.9rem;
+    color: #212529;
+}
+/* ... 기존 CSS ... */
+
+/* 클릭 가능한 게시글 제목 */
+.post-table .post-title {
+    cursor: pointer;
+    color: #007bff;
+    font-weight: 600;
+}
+.post-table .post-title:hover {
+    text-decoration: underline;
+}
+
+/* --- 모달 스타일 --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-content.wide {
+    max-width: 800px;
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #888;
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+}
+
+.post-meta {
+    margin-bottom: 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1rem;
+}
+
+.post-content {
+    line-height: 1.7;
+    color: #333;
+}
+
+/* 글쓰기 폼 */
+.post-create-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.post-create-form input,
+.post-create-form textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+.post-create-form textarea {
+    min-height: 250px;
+    resize: vertical;
+}
+
+.post-create-form button {
+    align-self: flex-end; /* 오른쪽 정렬 */
+}
+.edit-btn {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  margin-left: 0.5rem;
+}
+.edit-btn:hover {
+  background-color: #218838;
+}

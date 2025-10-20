@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { categories } from '../../utils/dummyData';
 import styles from './Navigation.module.css';
 
@@ -9,25 +9,20 @@ const Navigation = React.memo(() => {
   const navigationItems = useMemo(() => [
     {
       id: 'categories',
-      title: '카테고리',
+      title: '상품',
+      to: '/products',
       children: categories
     },
     {
       id: 'new',
-      title: '신상품',
-      to: '/search?filter=new',
+      title: '구독',
+      to: '/plans',
       children: []
     },
     {
       id: 'best',
-      title: '베스트',
-      to: '/search?filter=best',
-      children: []
-    },
-    {
-      id: 'sale',
-      title: '할인상품',
-      to: '/search?filter=sale',
+      title: '소통',
+      to: '/board',
       children: []
     }
   ], []);

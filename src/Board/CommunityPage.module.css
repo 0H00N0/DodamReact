@@ -1,0 +1,60 @@
+/* Container 전체 */
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* 가로 중앙 정렬 */
+}
+
+/* 페이지 제목 */
+.title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;          /* 🔥 가운데 정렬 확실하게 */
+}
+
+/* 탭 메뉴 wrapper - 가로 중앙 */
+.tabNavWrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* 탭 메뉴 가로 중앙 */
+  margin-bottom: 20px;
+}
+
+/* 메뉴 리스트 */
+.tabList {
+  display: flex;       /* ul 안 li 가로 배치 */
+  justify-content: center; /* li들 중앙 배치 */
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: auto;         /* ul이 100% 차지하지 않게 */
+}
+
+/* 메뉴 링크 */
+.tabLink {
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  padding: 0.3rem 0.6rem;
+}
+
+.tabLink:hover {
+  color: #2563eb;
+}
+
+.tabLink.active {
+  color: #007bff;
+  border-bottom: 2px solid #007bff; /* 선택된 탭 강조 */
+}
+
+/* 내용 영역 */
+.content {
+  width: 100%;
+  max-width: 900px;
+  text-align: left; /* 내용 왼쪽 정렬 */
+  margin-top: 20px;
+}

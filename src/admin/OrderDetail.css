@@ -1,0 +1,145 @@
+/* OrderDetail.css */
+
+.order-detail-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.order-detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.order-detail-header h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.back-to-list-btn {
+    padding: 0.6rem 1.2rem;
+    background-color: #6c757d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+.back-to-list-btn:hover {
+    background-color: #5a6268;
+}
+
+.order-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.detail-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+}
+
+.detail-card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.75rem;
+    color: #007bff;
+}
+
+.detail-card p {
+    margin: 0.5rem 0;
+    font-size: 1rem;
+    color: #555;
+}
+
+.detail-card strong {
+    color: #333;
+    margin-right: 0.5rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.status-badge.pending {
+    background-color: #fff0c2;
+    color: #a67c00;
+}
+
+.status-badge.shipping {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.status-badge.renting {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge.returned {
+    background-color: #e2e3e5;
+    color: #383d41;
+}
+
+.status-badge.overdue {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-badge.damaged {
+    background-color: #f5c6cb;
+    color: #721c24;
+}
+
+.order-actions {
+    grid-column: 1 / -1; /* Span across both columns */
+    margin-top: 1rem;
+}
+
+.order-actions button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+    margin-right: 1rem;
+}
+
+.action-approve-btn {
+    background-color: #28a745;
+    color: white;
+}
+.action-approve-btn:hover { background-color: #218838; }
+
+.action-shipping-btn {
+    background-color: #007bff;
+    color: white;
+}
+.action-shipping-btn:hover { background-color: #0056b3; }
+
+.shipping-form {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.shipping-form input {
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.95rem;
+}
