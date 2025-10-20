@@ -1,9 +1,9 @@
 // src/pages/CommunityPage/Community.jsx
 import React from "react";  //React 기능을 사용하려면 꼭 불러와야 하며, JSX문법을 사용하기 위해 필요함
-import { Link } from "react-router-dom"; //다른 페이지로 이동할 때 사용하는 Link라는 기능을 불러오며, 리액트 전용 링크이기 때문에 새로고침 없이 이동함
+import { Link } from "react-router-dom";  //다른 페이지로 이동할 때 사용하는 Link라는 기능을 불러오며, 리액트 전용 링크이기 때문에 새로고침 없이 이동함
 
 // 샘플 커뮤니티 게시글 데이터
-const posts = [  //게시글들을 담은 배열(목록)을 만들었음
+const posts = [   //게시글들을 담은 배열(목록)을 만들었음
   { id: 1, title: "자기소개 게시판", date: "2025-09-01", content: "여러분 안녕하세요! 자기소개 글입니다." },  //id, 제목(title), 날짜(date), 내용(content)이 담겨 있음
   { id: 2, title: "취미 공유", date: "2025-09-03", content: "저의 취미는 사진 촬영입니다." },
   { id: 3, title: "스터디 모집", date: "2025-09-05", content: "React 스터디 같이 하실 분 모집합니다." }
@@ -18,7 +18,7 @@ const Community = () => {  //Community라는 함수형 컨포넌트이며, 이 �
           <li key={post.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>  {/*각 게시글을 <li>로 감싸서 보여주고, 아래쪽에 여백을 주고 밑줄을 그어서 게시물끼리 구분되도록 했으며, key={post.id}는 리액트가 각각의 글을 구별할 수 있게 해주는 고유한 식별자임*/}
             {/* 상세 페이지로 이동 */}
             <Link to={`/board/community/${post.id}`} style={{ textDecoration: "none", color: "black" }}>  {/*Link를 사용해서 글 제목에 클릭 기능을 넣었으며, 밑줄을 없애고 글자색을 검정으로 지정함*/}
-              <h2>{post.title}</h2>    
+              <h2>{post.title}</h2>
             </Link>
             <p style={{ color: "gray", fontSize: "14px" }}>{post.date}</p>
           </li>
