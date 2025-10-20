@@ -17,7 +17,7 @@ const CommunityBoardForm = () => {
     }
 
     axios
-      .post("/api/boards", { title, author, content })
+      .post("/api/boards", { title, writer: author, content })  // writer로 맞춤
       .then(() => {
         navigate("/board/community");
       })
@@ -25,6 +25,7 @@ const CommunityBoardForm = () => {
         console.error(err);
         setError("글 작성에 실패했습니다.");
       });
+
   };
 
   return (

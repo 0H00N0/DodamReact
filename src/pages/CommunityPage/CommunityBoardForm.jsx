@@ -1,7 +1,7 @@
-// src/pages/CommunityPage/CommunityBoardForm.jsx
+// src/pages/CommunityBoardForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBoard } from "../../api/boardApi";
+import { createCommunityPost } from "../../api/communityApi";
 
 function CommunityBoardForm({ currentUser }) {
   const navigate = useNavigate();
@@ -10,27 +10,44 @@ function CommunityBoardForm({ currentUser }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 작성자 자동 설정
+  // 작성자 자동 설정: 로그인 유저가 없으면 '익명'
   const writer = currentUser?.username || "익명";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!title || !content) {
       setError("제목과 내용을 모두 입력해주세요.");
       return;
     }
 
-    const newBoard = { title, writer, content };
+    // ✅ 서버 엔티티 필드명과 정확히 맞춤
+    const newBoard = {
+      title: title,
+      content: content,
+      writer: writer,
+    };
+
     setLoading(true);
     setError("");
 
     try {
-      const res = await createBoard(newBoard); // API 호출
-      const newPostId = res.data.postId; // 새 글 ID 반환 가정
+      const res = await createCommunityPost(newBoard);
+      console.log("서버 응답:", res);
+
+      // 엔티티에서 id 필드 기준
+      const newPostId = res.id;
+
       alert("게시글이 등록되었습니다!");
-      navigate(`/board/community/${newPostId}`); // 상세 페이지 이동
+      navigate(`/board/community/${newPostId}`);
     } catch (err) {
       console.error("게시글 등록 실패:", err);
+      if (err.response) {
+        console.error("응답 상태코드:", err.response.status);
+        console.error("응답 데이터:", err.response.data);
+      } else {
+        console.error("서버 응답 없음:", err.message);
+      }
       setError("게시글 등록에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setLoading(false);
@@ -90,13 +107,12 @@ function CommunityBoardForm({ currentUser }) {
           className="p-4 bg-white text-black font-semibold rounded-2xl border-4 border-black shadow-md hover:bg-gray-100 transition disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {loading ? "등록 중..." : (
-            <>    
+            <>
               <span>등록하기</span>
               <span>💌</span>
             </>
           )}
         </button>
-
       </form>
     </div>
   );

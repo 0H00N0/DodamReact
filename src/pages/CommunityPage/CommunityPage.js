@@ -13,6 +13,7 @@ const CommunityPage = () => {
     { title: "문의", path: "inquiry" },
     { title: "FAQ", path: "faq" },
     { title: "회사소개", path: "company" },
+    { title: "스마트 보드", path: "smartboard" },
   ];
 
   return (
