@@ -1,6 +1,20 @@
-// src/admin/plans/PlanInvoices.js
 import React, { useEffect, useState } from "react";
 import { useAdmin } from "../admin/contexts/AdminContext";
+
+// ✅ 상태값 → 한글 변환 매핑 함수
+const toKoreanInvoiceStatus = (raw) => {
+  if (!raw) return "미정";
+  const s = String(raw).toUpperCase();
+  const map = {
+    PENDING: "결제 대기",
+    PAID: "결제 완료",
+    FAILED: "결제 실패",
+    CANCELED: "결제 취소",
+    REFUNDED: "환불 완료",
+    READY: "준비 중",
+  };
+  return map[s] || s; // 매핑되지 않은 값은 원문 표시
+};
 
 function PlanInvoices() {
   const { getAllInvoices } = useAdmin();
@@ -20,7 +34,6 @@ function PlanInvoices() {
     };
     fetchInvoices();
   }, [getAllInvoices]);
-
 
   if (loading) return <div>결제 내역을 불러오는 중...</div>;
 
@@ -60,7 +73,7 @@ function PlanInvoices() {
                   }).format(i.piAmount)}
                 </td>
                 <td>{i.piCurr}</td>
-                <td>{i.piStat}</td>
+                <td>{toKoreanInvoiceStatus(i.piStat)}</td> {/* ✅ 번역된 상태값 */}
                 <td>{i.piUid || "-"}</td>
                 <td>{i.piStart}</td>
                 <td>{i.piEnd}</td>
