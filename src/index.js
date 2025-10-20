@@ -5,13 +5,14 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { RouterProvider } from "react-router-dom";
 import { router } from "./Router";
-const root = ReactDOM.createRoot(document.getElementById('root'));
+
+/* const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);
-/*reportWebVitals();
+); */
+
+reportWebVitals();
 const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<RouterProvider router={router} />);
-*/
+root.render(<RouterProvider router={router} />); 

@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Routes, Route, Navigate } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
@@ -43,15 +43,6 @@ import Company from "./pages/CommunityPage/Company";
 import SmartBoard from "./Board/SmartBoard";
 // ...existing code...
 import './index.css';
-
-<Routes>
-  {/* ...기존 라우트... */}
-  <Route path="/smartboard" element={<SmartBoard />} />
-  {/* ...기존 라우트... */}
-</Routes>
-// ...existing code...
-
-
 // React.lazy로 코드 스플리팅
 
 // --- Logistics Guard ---
@@ -61,6 +52,13 @@ import LogisticsGuard from "./routes/LogisticsGuard";
 // --- Lazy Pages (기존) ---
 
 import { AuthProvider } from "./contexts/AuthContext";   // ✅ 추가
+
+<Routes>
+  {/* ...기존 라우트... */}
+  <Route path="/smartboard" element={<SmartBoard />} />
+  {/* ...기존 라우트... */}
+</Routes>
+// ...existing code...
 
 // React.lazy로 코드 스플리팅
 
