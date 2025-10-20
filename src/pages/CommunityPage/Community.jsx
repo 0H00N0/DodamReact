@@ -18,8 +18,8 @@ const Community = () => {  //Community라는 함수형 컨포넌트이며, 이 �
           <li key={post.id} style={{ marginBottom: "20px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>  {/*각 게시글을 <li>로 감싸서 보여주고, 아래쪽에 여백을 주고 밑줄을 그어서 게시물끼리 구분되도록 했으며, key={post.id}는 리액트가 각각의 글을 구별할 수 있게 해주는 고유한 식별자임*/}
             {/* 상세 페이지로 이동 */}
             <Link to={`/board/community/${post.id}`} style={{ textDecoration: "none", color: "black" }}>  {/*Link를 사용해서 글 제목에 클릭 기능을 넣었으며, 밑줄을 없애고 글자색을 검정으로 지정함*/}
-              <h2>{post.title}</h2>
-            </Link>
+              <h2>{post.title}</h2>  {/*게시글의 제목을 <h2> 크기로 화면에 보여줌*/}
+            </Link>   
             <p style={{ color: "gray", fontSize: "14px" }}>{post.date}</p>
           </li>
         ))}
