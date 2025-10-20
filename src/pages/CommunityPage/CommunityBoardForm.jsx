@@ -72,7 +72,6 @@ function CommunityBoardForm({ currentUser }) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            required
             className="p-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
         </div>
@@ -83,7 +82,6 @@ function CommunityBoardForm({ currentUser }) {
           <input
             type="text"
             value={writer}
-            readOnly
             className="p-4 rounded-2xl border border-gray-200 bg-gray-100 text-gray-600"
           />
         </div>
@@ -95,7 +93,6 @@ function CommunityBoardForm({ currentUser }) {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={10}
-            required
             className="p-4 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-pink-300"
           />
         </div>

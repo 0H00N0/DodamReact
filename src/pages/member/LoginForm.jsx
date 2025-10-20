@@ -60,10 +60,29 @@ export default function LoginForm() {
       window.dispatchEvent(new Event("auth:changed"));
       navigate("/", { replace: true }); // 로그인 성공 후 메인으로
     } catch (err) {
-      const message =
+      const KOREAN_INVALID = "아이디 혹은 비밀번호가 맞지 않습니다.";
+      const status = err?.response?.status;
+      let message =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        "아이디/비밀번호를 확인해 주세요.";
+        "";
+      if (!err?.response) {
+        setMsg("로그인 서버와 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }  
+
+      // 1) 서버가 401만 주고 메시지가 없거나 애매하면 → 고정 문구
+      if (status === 401 && !message) {
+        message = KOREAN_INVALID;
+      }
+      // 2) 서버가 영문 "invalid id/pw" 류를 내려온 경우 → 한글로 치환
+      if (typeof message === "string" && /invalid id\/pw/i.test(message)) {
+        message = KOREAN_INVALID;
+      }
+      // 3) 그래도 메시지가 비어있다면 기본값
+      if (!message) {
+        message = KOREAN_INVALID;
+      }
       setMsg(message);
     } finally {
       setLoading(false);

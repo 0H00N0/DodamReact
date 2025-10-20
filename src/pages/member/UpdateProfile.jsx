@@ -110,6 +110,7 @@ const UpdateProfile = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
+    setMessage('');
   };
 
   // 자녀 정보 입력/수정
@@ -120,6 +121,7 @@ const UpdateProfile = () => {
       children[idx] = { ...children[idx], [name]: value };
       return { ...prev, children };
     });
+    setMessage('');
   };
 
   // 자녀 추가
@@ -141,6 +143,31 @@ const UpdateProfile = () => {
   // ✅ 수정 요청 (회원 생일은 비워도 OK, 자녀는 둘 다 채운 행만 전송)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const today = toYYYYMMDD(new Date());
+    if (form.mbirth) {
+    if (form.mbirth > today) { setMessage("생년월일은 미래일 수 없습니다."); return; }
+    if (form.mbirth < "1900-01-01") { setMessage("생년월일은 1900-01-01 이후여야 합니다."); return; }
+  }
+  for (const [i, c] of (form.children || []).entries()) {
+    const b = toYYYYMMDD(c.chbirth);
+    if (!b) continue;
+    if (b > today) { setMessage(`자녀 ${i+1}의 생년월일은 미래일 수 없습니다.`); return; }
+    if (b < "2000-01-01") { setMessage(`자녀 ${i+1}의 생년월일은 2000-01-01 이후여야 합니다.`); return; }
+  }
+
+    // ✅ 이메일/전화번호 형식 검증 (선택: UX 향상)
+    if (form.memail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.memail)) {
+      setMessage('이메일 형식이 올바르지 않습니다.');
+      return;
+    }
+    if (form.mtel) {
+      const digits = form.mtel.replace(/\D/g, '');
+    if (!/^\d{9,13}$/.test(digits)) {
+      setMessage('전화번호는 숫자 9~13자리로 입력하세요.');
+      return;
+    }
+  }
+
     setSaving(true);
     setMessage('');
     try {
@@ -148,7 +175,8 @@ const UpdateProfile = () => {
       const partial = (form.children || []).find(isPartialChild);
       if (partial) {
         setSaving(false);
-        setMessage('자녀 행을 추가했다면 이름과 생년월일을 모두 입력해주세요.');
+        const idx = (form.children || []).findIndex(isPartialChild);
+        setMessage(`자녀 ${idx + 1} 행: 이름과 생년월일을 모두 입력해주세요.`);
         return;
       }
 
@@ -162,6 +190,11 @@ const UpdateProfile = () => {
 
       const payload = {
         ...form,
+        mname: (form.mname || '').trim(),
+        memail: (form.memail || '').trim(),
+        mtel: (form.mtel || '').replace(/\D/g, ''),   // ← 숫자만
+        maddr: (form.maddr || '').trim(),
+        mnic: (form.mnic || '').trim(),
         mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)), // 회원 생일: 비워두면 null
         mpost:  numOrNull(form.mpost),                // 숫자 변환 (빈값 null)
         children: cleanedChildren
@@ -179,15 +212,17 @@ const UpdateProfile = () => {
   };
 
   if (loading) return <div>로딩 중...</div>;
-
+  const today = toYYYYMMDD(new Date());
   return (
     <div style={{ padding: '2rem' }}>
       <h2>회원정보 수정</h2>
       <form onSubmit={handleSubmit}>
         <label>이름: <input type="text" name="mname" value={form.mname} onChange={handleChange} /></label><br />
-        <label>생년월일: <input type="date" name="mbirth" value={form.mbirth || ""} onChange={handleChange} /></label><br />
+        <label>생년월일: <input type="date" name="mbirth" value={form.mbirth || ""} onChange={handleChange}
+          min="1900-01-01" max={today} /></label><br />
         <label>이메일: <input type="email" name="memail" value={form.memail} onChange={handleChange} /></label><br />
-        <label>전화번호: <input type="text"  name="mtel"   value={form.mtel}   onChange={handleChange} /></label><br />
+        <label>전화번호: <input type="text"  name="mtel" value={form.mtel}   onChange={handleChange}
+          inputMode="numeric" placeholder="-없이 숫자만" /></label><br />
 
         <label>주소:</label>
         <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -223,12 +258,13 @@ const UpdateProfile = () => {
                 placeholder="자녀 이름"
                 style={{ width: "250px" }} 
               />
-              <input
-                name="chbirth"
-                type="date"
-                value={c.chbirth || ''}
-                onChange={e => handleChildChange(idx, e)}
-                style={{ width: "250px" }} 
+             <input
+              name="chbirth"
+              type="date"
+              value={c.chbirth || ''}
+              onChange={e => handleChildChange(idx, e)}
+              min="2000-01-01" max={today}
+              style={{ width: "250px" }}
               />
               <button
                 type="button"
