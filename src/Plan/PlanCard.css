@@ -1,0 +1,116 @@
+/* ✦ Soft Pastel Theme (배경색 변경 없음) */
+:root {
+  --ink: #39424e;              /* 살짝 부드러운 다크그레이 */
+  --sub: #7b8794;              /* 중간 회색 */
+  --line: #eceff3;             /* 옅은 라인 */
+  --soft-rose: #f7dfe3;        /* 아주 연한 로즈 */
+  --soft-peach: #ffe7d3;       /* 아주 연한 피치 */
+  --soft-lilac: #efe7ff;       /* 아주 연한 라일락 */
+  --btn-grad-a: #fbd6de;       /* 버튼 그라데이션(은은) */
+  --btn-grad-b: #f6cbd6;
+  --shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  --shadow-hover: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.plan-card {
+  position: relative;
+  background: #fff;                    /* 배경 유지 */
+  border: 1px solid var(--line);
+  border-radius: 18px;                 /* 더 둥글게 */
+  padding: 20px 18px;
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: #e9edf3;
+  background-color: #fff;              /* 배경 그대로 */
+}
+
+/* 뱃지: 아주 옅은 파스텔 */
+.plan-badge {
+  position: absolute;
+  top: -10px;
+  left: 14px;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--soft-peach);
+  border: 1px solid rgba(0,0,0,0.03);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+}
+.plan-badge.standard { background: var(--soft-rose); }
+.plan-badge.premium  { background: var(--soft-lilac); }
+.plan-badge.family   { background: #f6f0d6; } /* 연한 샌드 */
+.plan-badge.vip      { background: #eaf7f2; } /* 연한 민트 */
+
+.plan-title {
+  margin: 6px 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: .1px;
+}
+
+.plan-note {
+  margin: 0 0 12px;
+  color: var(--sub);
+  font-size: 13.5px;
+  line-height: 1.58;                   /* 더 부드러운 행간 */
+}
+
+/* 정보 박스: 테두리 대신 옅은 배경으로 부드럽게 */
+.plan-meta {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 14px;
+  display: grid;
+  gap: 8px;
+}
+.plan-meta li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fafbff;                  /* 아주 옅은 파스텔 블루 */
+  border: 1px solid var(--line);
+}
+
+.plan-meta-key {
+  color: var(--sub);
+  font-size: 13px;
+}
+
+.plan-meta-val {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14px;
+}
+.plan-meta-val.strong {
+  font-size: 18px;
+  font-weight: 800;
+  color: #e77a8b;                       /* 채도 낮은 코랄 */
+}
+
+/* 버튼: 밝고 부드러운 코랄 그라데이션 */
+.plan-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.03);
+  background: linear-gradient(180deg, var(--btn-grad-a) 0%, var(--btn-grad-b) 100%);
+  color: #5d2330;                       /* 코랄과 어울리는 잉크 */
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .15s ease, transform .05s ease, box-shadow .15s ease;
+  box-shadow: 0 6px 14px rgba(233, 83, 113, 0.08);
+}
+
+.plan-btn:hover { filter: brightness(1.03); box-shadow: 0 10px 20px rgba(233,83,113,.12); }
+.plan-btn:active { transform: translateY(1px); }

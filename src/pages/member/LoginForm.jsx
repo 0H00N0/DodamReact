@@ -38,6 +38,13 @@ export default function LoginForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+      // ✅ 1) 프론트 유효성 검사: 요청 전
+    if (!form.mid.trim() || !form.mpw) {
+      setMsg("아이디/비밀번호를 입력하세요.");
+      return; // 여기서 끝내면 네트워크 요청 안 감
+    }
+
     if (loading) return;
     setLoading(true);
     setMsg("");
@@ -45,7 +52,11 @@ export default function LoginForm() {
       await api.post("/member/loginForm", {
         mid: form.mid.trim(),
         mpw: form.mpw,
+      },{
+        withCredentials: true //로그인 유지
       });
+
+      sessionStorage.setItem("auth_hint", "1");
       window.dispatchEvent(new Event("auth:changed"));
       navigate("/", { replace: true }); // 로그인 성공 후 메인으로
     } catch (err) {
@@ -75,29 +86,11 @@ export default function LoginForm() {
     <div style={styles.wrapper}>
       <form onSubmit={onSubmit} style={styles.form} noValidate>
         <h2>로그인</h2>
-
         <label htmlFor="mid">아이디</label>
-        <input
-          id="mid"
-          name="mid"
-          value={form.mid}
-          onChange={onChange}
-          placeholder="아이디"
-          autoComplete="username"
-          required
-        />
+        <input id="mid" name="mid" value={form.mid} onChange={onChange} />
 
         <label htmlFor="mpw">비밀번호</label>
-        <input
-          id="mpw"
-          name="mpw"
-          type="password"
-          value={form.mpw}
-          onChange={onChange}
-          placeholder="비밀번호"
-          autoComplete="current-password"
-          required
-        />
+        <input id="mpw" name="mpw" type="password" value={form.mpw} onChange={onChange} />
 
         {msg && <div style={styles.error}>{msg}</div>}
 

@@ -11,7 +11,8 @@ export default function Profile() {
     (async () => {
       try {
         const { data } = await api.get("/member/me");  // ★ 올바른 엔드포인트
-        setMember(data);
+        if (data?.login === false) { setMember(null); }
+        else { setMember(data.member); }   // ★ 핵심
       } catch {
         setMember(null);
       } finally {
@@ -23,6 +24,7 @@ export default function Profile() {
   const goToUpdate = () => {
     navigate("/member/updateProfile");
   };
+
   const goToChangePw = () => {
     navigate("/member/changePw");
   }

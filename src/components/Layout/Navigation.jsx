@@ -79,12 +79,13 @@ const Navigation = React.memo(() => {
                 <ul className={styles.dropdownList}>
                   {item.children.map((child) => (
                     <li key={child.id} className={styles.dropdownItem}>
-                      <Link 
-                        to={`/category/${child.id}`} 
-                        className={styles.dropdownLink}
-                      >
+                      <Link
+                         to={`/category/${encodeURIComponent(child.name)}`}  // ← 카테고리명 한글로 사용!
+                         className={styles.dropdownLink}
+                         key={child.id}
+         >
                         <span className={styles.categoryIcon}>{child.icon}</span>
-                        {child.name}
+                      {child.name}
                       </Link>
                     </li>
                   ))}

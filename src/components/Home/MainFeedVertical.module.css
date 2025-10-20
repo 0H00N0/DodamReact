@@ -1,0 +1,252 @@
+/* ===== Pink Theme (scoped) ===== */
+.pinkTheme {
+  /* soft pink palette */
+  --pink-50:  #fff7fa;
+  --pink-75:  #fff2f6;
+  --pink-100: #ffeef4;
+  --pink-150: #ffe7ef;
+  --pink-200: #ffdfe8;
+  --pink-300: #ffc6d9;
+  --pink-400: #ffa9c5;
+  --pink-500: #ff8ab1;
+
+  --rose-600: #c24d77; /* 강조 텍스트 */
+  --ink-800:  #2a2427; /* 본문 */
+  --ink-500:  #6a5f66; /* 보조 */
+
+  --card-bg:  #ffffff;
+  --card-br:  #ffdfe8;
+  --card-hov: #fff2f6;
+
+  --chip-bg:  #ffe3ef;
+  --chip-tx:  #a33e66;
+
+  --shadow-sm: 0 4px 16px rgba(255, 138, 177, .12);
+  --shadow-md: 0 12px 28px rgba(255, 138, 177, .18);
+}
+
+/* ===== Layout ===== */
+.wrapper {
+  max-width: 1100px;
+  margin: 40px auto 64px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+
+  /* 배경을 섹션 안에서만 은은한 핑크 그라데로 */
+  background:
+    radial-gradient(1200px 400px at 20% 0%, var(--pink-100), transparent 60%),
+    radial-gradient(1000px 500px at 90% 10%, var(--pink-75), transparent 65%);
+  border-radius: 20px;
+}
+
+/* 섹션 타이틀 */
+.sectionTitle {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--ink-800);
+  letter-spacing: -0.02em;
+  margin: 8px 4px 2px;
+  position: relative;
+}
+.sectionTitle::after {
+  content: "";
+  display: block;
+  width: 88px; height: 6px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--pink-300), var(--pink-500));
+  box-shadow: 0 6px 16px rgba(255, 138, 177, .35);
+}
+
+/* 카드 블록 */
+.block {
+  background: var(--card-bg);
+  border: 1px solid var(--card-br);
+  border-radius: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 16px 14px;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.block:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+
+/* 블록 헤더 */
+.blockHead {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.blockHead h3 {
+  font-size: 1.08rem; font-weight: 800;
+  color: var(--ink-800);
+  letter-spacing: -0.01em;
+}
+.more {
+  background: linear-gradient(180deg, var(--pink-300), var(--pink-500));
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(255, 138, 177, .25);
+}
+.more:hover { filter: brightness(.95); transform: translateY(-1px); }
+.more:active { transform: translateY(0); }
+
+/* 리스트 */
+.list {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.item {
+  display: flex; gap: 12px; padding: 10px 10px;
+  border-radius: 14px;
+  transition: background-color .15s ease, transform .15s ease;
+  cursor: pointer;
+}
+.item:hover { background: var(--card-hov); transform: translateX(2px); }
+
+/* 썸네일 / 아이콘 */
+.thumb, .icon {
+  width: 72px; height: 72px; flex-shrink: 0; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.thumb { object-fit: cover; }
+.icon {
+  font-size: 1.6rem; color: var(--rose-600);
+  background:
+    radial-gradient(circle at 30% 30%, #fff, #fff 40%, transparent 41%),
+    linear-gradient(180deg, #fff, var(--pink-100));
+  border: 1px solid var(--card-br);
+}
+
+/* 텍스트 */
+.meta { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.title {
+  font-weight: 700; color: var(--ink-800);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sub {
+  display: flex; gap: 10px; align-items: center;
+  color: var(--ink-500); font-size: .92rem;
+}
+.badge {
+  background: var(--chip-bg); color: var(--chip-tx);
+  padding: 2px 6px; border-radius: 999px; font-weight: 700; font-size: .82rem;
+}
+
+/* 비어있음 */
+.empty {
+  color: var(--ink-500); text-align: center; padding: 16px 8px;
+}
+
+/* 접근성: 포커스 */
+.item:focus-visible, .more:focus-visible {
+  outline: 3px solid var(--pink-400);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* 모바일 */
+@media (max-width: 600px) {
+  .wrapper { padding: 10px 14px; border-radius: 16px; }
+  .thumb, .icon { width: 60px; height: 60px; border-radius: 10px; }
+  .sectionTitle { font-size: 1.3rem; }
+  .block { padding: 14px 12px; }
+  .title { font-size: .98rem; }
+  .sub { font-size: .88rem; }
+}
+/* =========================
+   Light Pink — subtle overrides
+   (append at the end of MainFeedVertical.module.css)
+   ========================= */
+.pinkTheme {
+  /* softer palette */
+  --pink-25:  #fff9fb;
+  --pink-50:  #fff6f8;
+  --pink-75:  #fff2f6;
+  --pink-100: #ffedf3;
+  --pink-200: #ffdfe8;
+  --pink-300: #ffd0df;
+
+  --accent-500: #e38aa9;    /* 톤 다운된 포인트 */
+  --ink-800:    #332a2f;    /* 본문 */
+  --ink-500:    #6b5f65;    /* 보조 */
+
+  --card-bg:  #ffffff;
+  --card-br:  #ffe6ee;
+  --card-hov: #fff6f8;
+
+  --chip-bg:  #ffeef4;
+  --chip-tx:  #9a5f73;
+
+  --shadow-sm: 0 6px 16px rgba(227,138,169,.08);
+  --shadow-md: 0 12px 28px rgba(227,138,169,.12);
+}
+
+/* 섹션 배경의 그라데를 훨씬 옅게 */
+.pinkTheme.wrapper {
+  background:
+    radial-gradient(900px 300px at 15% -10%, var(--pink-50), transparent 60%),
+    radial-gradient(700px 260px at 95% 0%, var(--pink-25), transparent 60%);
+}
+
+/* 타이틀 언더라인도 연하게 */
+.pinkTheme .sectionTitle::after {
+  background: linear-gradient(90deg, var(--pink-200), var(--pink-300));
+  box-shadow: 0 4px 10px rgba(227,138,169,.20);
+}
+
+/* 카드/호버 톤 다운 */
+.pinkTheme .block {
+  border-color: var(--card-br);
+  box-shadow: var(--shadow-sm);
+}
+.pinkTheme .block:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* 리스트 아이템 호버는 아주 은은하게 */
+.pinkTheme .item:hover {
+  background: var(--pink-50);
+  transform: translateX(2px);
+}
+
+/* 아이콘 배경/색 약화 */
+.pinkTheme .icon {
+  background: linear-gradient(180deg, #fff, var(--pink-25));
+  border: 1px solid var(--card-br);
+  color: #b56884;
+}
+
+/* 배지도 연한 칩 컬러 */
+.pinkTheme .badge {
+  background: var(--chip-bg);
+  color: var(--chip-tx);
+}
+
+/* 버튼: 그라데 제거, 라이트 아웃라인 */
+.pinkTheme .more {
+  background: #fff;
+  color: #b25f7e;
+  border: 1px solid var(--pink-300);
+  box-shadow: none;
+}
+.pinkTheme .more:hover {
+  background: var(--pink-50);
+  border-color: var(--pink-300);
+  transform: translateY(-1px);
+}
+
+/* 텍스트 컬러 유지(가독성) */
+.pinkTheme .title { color: var(--ink-800); }
+.pinkTheme .sub   { color: var(--ink-500); }
+
+/* 모바일 여백/크기도 살짝 더 가볍게 */
+@media (max-width: 600px) {
+  .pinkTheme.wrapper { padding: 8px 12px; }
+  .pinkTheme .thumb, .pinkTheme .icon { width: 56px; height: 56px; }
+  .pinkTheme .block { padding: 12px 10px; }
+}

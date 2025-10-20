@@ -26,13 +26,19 @@
   text-decoration: none;
   color: var(--text-secondary);
   font-weight: 500;
-  font-size: 16px;
-  padding: 20px 0;
-  transition: color 0.2s ease;
+  font-size: 20px;
+  padding: 10px 28px;
+  transition: background-color .15s ease, box-shadow .15s ease, transform .05s ease, color .15s ease, border-color .15s ease;
   cursor: pointer;
 }
 
-.navLink:hover,
+.navLink:hover {
+  background: var(--nav-bg-hov);
+  border-color: #efd6df;
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-1px);
+  color: var(--nav-ink);
+}
 .navLink.active {
   color: var(--text-primary);
 }

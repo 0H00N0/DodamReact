@@ -1,12 +1,12 @@
-// src/App.js
 import React, { Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import "./App.css";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+
 import { AdminProvider } from "./admin/contexts/AdminContext";
 
 import PlanSelectPage from "./Plan/PlanSelectPage";
@@ -59,6 +59,11 @@ import LogisticsGuard from "./routes/LogisticsGuard";
 
 
 // --- Lazy Pages (기존) ---
+
+import { AuthProvider } from "./contexts/AuthContext";   // ✅ 추가
+
+// React.lazy로 코드 스플리팅
+
 const Home = React.lazy(() => import("./pages/Home"));
 const LoginForm = React.lazy(() => import("./pages/member/LoginForm"));
 const SignupForm = React.lazy(() => import("./pages/member/SignupForm"));
@@ -84,6 +89,8 @@ const DetailProducts = React.lazy(() => import("./logistics/pages/detail/Product
 const DetailCustomer = React.lazy(() => import("./logistics/pages/detail/Customer")); // /logistics/detail/customer
 
 // --- Loading ---
+
+// 로딩 스피너 컴포넌트
 const LoadingSpinner = () => (
   <div className="loading-container">
     <div className="loading-spinner" role="status" aria-label="페이지 로딩 중">
@@ -92,35 +99,21 @@ const LoadingSpinner = () => (
   </div>
 );
 
-function App() {
-  function FooterCondition() {
-    const location = useLocation();
-    const noFooterPaths = [
-      "/member/findIdModal",
-      "/member/findIdEmail",
-      "/member/findIdTel",
-      "/member/findPw",
-      "/member/findPwByMemail",
-      "/member/findPwByMtel"
-    ];
-    const hideFooter = noFooterPaths.includes(location.pathname);
-    return !hideFooter && <Footer />;
-  }
-
+ function App() {
   return (
     <ThemeProvider>
-      <CartProvider>
-        <WishlistProvider>
-          <Router>
+      <AuthProvider>{/* ✅ 전체를 감싸서 /member/me 부팅 시도 */}
+        <CartProvider>
+          <WishlistProvider>
             <div className="App">
+
               {/* 접근성: 스킵 링크 */}
               <a href="#main-content" className="skip-link">
                 메인 콘텐츠로 건너뛰기
               </a>
 
               <Header />
-
-              <main id="main-content" role="main" className="main-content" tabIndex="-1">
+              <main id="main-content" role="main" className="main-content" tabIndex={-1}>
                 <Suspense fallback={<LoadingSpinner />}>
                   <Routes>
                     {/* 메인 */}
@@ -227,16 +220,16 @@ function App() {
                     {/* oauth callback */}
                     <Route path="/oauth/callback/:provider" element={<OAuthCallback />} />
                   </Routes>
+
+                  <Outlet />
                 </Suspense>
               </main>
-
-              <FooterCondition />
+              <Footer />
             </div>
-          </Router>
-        </WishlistProvider>
-      </CartProvider>
+          </WishlistProvider>
+        </CartProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
-
 export default App;

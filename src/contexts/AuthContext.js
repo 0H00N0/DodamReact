@@ -1,33 +1,60 @@
 // src/contexts/AuthContext.js
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { getWithSession } from 'utils/api';   // 경로 규칙에 맞춰 import (상대/절대 중 프로젝트 규약대로)
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
+import { getWithSession } from '../utils/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null);   // null=게스트, object=로그인 유저
   const [booted, setBooted] = useState(false);
+  const bootOnceRef = useRef(false);        // StrictMode 중복 실행 방지
 
-  // 공통으로 쓰는 me 호출 함수
+  // ✅ /member/me 응답 정규화: {login:false} => 비로그인, 그 외(회원객체) => 로그인
   const fetchMe = useCallback(async () => {
     try {
-      // 너희 서버 구현에 맞게 /member/me 또는 /oauth/me 사용
-      const me = await getWithSession('/member/me'); 
-      // 또는: const me = await getWithSession('/oauth/me'); // { login:true, sid:... }
-      setUser(me?.mid ? me : { mid: me?.sid }); // 반환 형태에 맞춰 저장
+      const me = await getWithSession('/oauth/me');
+      if (!me || me.login === false) {
+        setUser(null);
+      } else {
+        // ✅ 정규화해서 저장 (UI는 user.name, user.mid만 보면 됨)
+        setUser({
+          isAuthenticated: true,
+          mid: me.sid || '',
+          // name: me.name || '',     // 유지(다른 화면 대비)
+          mname: me.name || '',    // ✅ 드롭다운 호환용으로 채워줌
+          email: me.email || '',
+        });
+      }
     } catch {
       setUser(null);
-    } finally {
-      setBooted(true);
     }
   }, []);
 
-  // 앱 최초 진입 시 현재 로그인 상태 로드
-  useEffect(() => { fetchMe(); }, [fetchMe]);
-
-  // ✅ 여기! 콜백/로그아웃 등에서 auth:changed 이벤트를 쏘면 상태를 다시 로드
+  // ✅ 앱 최초 진입 시: 무조건 /oauth/me 조회
   useEffect(() => {
-    const refetch = () => { fetchMe(); };
+    if (bootOnceRef.current) return;
+    bootOnceRef.current = true;
+
+    (async () => {
+      try {
+        await fetchMe();          // <— 힌트 체크 없이 항상 호출
+      } finally {
+        setBooted(true);
+      }
+    })();
+  }, [fetchMe]);
+
+
+  // ✅ 콜백/로그아웃 등에서 auth:changed 이벤트를 쏘면 상태 재로드
+  useEffect(() => {
+    const refetch = () => fetchMe();
     window.addEventListener('auth:changed', refetch);
     return () => window.removeEventListener('auth:changed', refetch);
   }, [fetchMe]);

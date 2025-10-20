@@ -1,248 +1,261 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { searchProducts, sortProducts, filterProductsByPrice, priceRanges, sortOptions, categories } from '../utils/dummyData';
-import { useCart } from '../contexts/CartContext';
-import { useWishlist } from '../contexts/WishlistContext';
-import ProductCard from '../components/Product/ProductCard';
-import styles from './Search.module.css';
+// src/pages/Search.jsx  (네가 준 컴포넌트 파일 대체)
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { searchProductsByName } from "../components/MainProductApi";
+import ProductCard from "../components/Product/ProductCard";
+import styles from "./Search.module.css";
 
-/**
- * 검색 결과 페이지
- */
+const normalizeImage = (url) => {
+  if (!url) return "/placeholder.png";
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = process.env.REACT_APP_API_BASE || "";
+  return base.replace(/\/$/, "") + (url.startsWith("/") ? url : `/${url}`);
+};
+
+const mapDtoToCard = (dto) => ({
+  id: dto.id,
+  name: dto.name,
+  price: Number(dto.price ?? 0),
+  discountPrice: null,
+  discountRate: null,
+  image: normalizeImage(dto.thumbnailUrl),
+  rating: null,
+  reviewCount: null,
+});
+
+// 프리셋
+const AGE_PRESETS = [
+  { label: "전체", v: [null, null] },
+  { label: "0–2세", v: [0, 2] },
+  { label: "3–5세", v: [3, 5] },
+  { label: "6–8세", v: [6, 8] },
+  { label: "9–12세", v: [9, 12] },
+];
+const PRICE_PRESETS = [
+  { label: "전체", v: [null, null] },
+  { label: "~ 20,000", v: [0, 20000] },
+  { label: "20,000 ~ 50,000", v: [20000, 50000] },
+  { label: "50,000 ~ 100,000", v: [50000, 100000] },
+  { label: "100,000+", v: [100000, null] },
+];
+
 const Search = () => {
   const navigate = useNavigate();
+  const { keyword } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToCart } = useCart();
-  const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [searchResults, setSearchResults] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
-  const [sortBy, setSortBy] = useState('popularity');
-  const [selectedPriceRange, setSelectedPriceRange] = useState(null);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // 검색 실행
-  const performSearch = (query) => {
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
-
-    setIsLoading(true);
-    // 실제로는 API 호출이지만 여기서는 더미 데이터 사용
-    setTimeout(() => {
-      const results = searchProducts(query);
-      setSearchResults(results);
-      setIsLoading(false);
-    }, 300);
-  };
-
-  // URL 파라미터에서 검색어 변경 감지
+  // /search?q=... 로 들어온 경우 리다이렉트 (기존 동작 유지)
   useEffect(() => {
-    const query = searchParams.get('q') || '';
-    setSearchQuery(query);
-    performSearch(query);
+    const q = searchParams.get("q");
+    if (!keyword && q) navigate(`/search/${encodeURIComponent(q)}?${searchParams.toString()}`, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyword, searchParams, navigate]);
+
+  // 폼 입력 상태(상단 검색창)
+  const [query, setQuery] = useState(keyword || "");
+
+  // 필터 상태 (URL <-> 상태 동기화)
+  const [ageMin, setAgeMin] = useState(null);
+  const [ageMax, setAgeMax] = useState(null);
+  const [priceMin, setPriceMin] = useState(null);
+  const [priceMax, setPriceMax] = useState(null);
+  const [sort, setSort] = useState("RECENT");
+
+  // 로딩/데이터
+  const [isLoading, setIsLoading] = useState(false);
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  // 최초/URL 변경 시 URL -> state 반영
+  useEffect(() => {
+    const sp = new URLSearchParams(searchParams);
+    const readNum = (k) => {
+      const v = sp.get(k);
+      if (v == null) return null;
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    };
+    setAgeMin(readNum("ageMin"));
+    setAgeMax(readNum("ageMax"));
+    setPriceMin(readNum("priceMin"));
+    setPriceMax(readNum("priceMax"));
+    setSort(sp.get("sort") || "RECENT");
   }, [searchParams]);
 
-  // 필터링 및 정렬 적용
+  // 서버 호출 파라미터 메모
+  const fetchArgs = useMemo(() => {
+    return {
+      q: keyword || "",
+      ageMin,
+      ageMax,
+      priceMin,
+      priceMax,
+      sort,
+      page: 0,
+      size: 24,
+    };
+  }, [keyword, ageMin, ageMax, priceMin, priceMax, sort]);
+
+  // 주소 파라미터/키워드 바뀔 때마다 검색
   useEffect(() => {
-    let filtered = [...searchResults];
+    const run = async () => {
+      const q = keyword || "";
+      setQuery(q);
+      if (!q) { setItems([]); setTotal(0); return; }
 
-    // 카테고리 필터 적용
-    if (selectedCategory) {
-      filtered = filtered.filter(product => product.category === selectedCategory);
-    }
+      setIsLoading(true);
+      try {
+        const pageResp = await searchProductsByName(fetchArgs);
+        const list = (pageResp?.content || []).map(mapDtoToCard);
+        setItems(list);
+        setTotal(pageResp?.totalElements ?? list.length);
+      } catch (e) {
+        console.error(e);
+        setItems([]); setTotal(0);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    run();
+  }, [keyword, fetchArgs]);
 
-    // 가격 필터 적용
-    if (selectedPriceRange) {
-      filtered = filterProductsByPrice(filtered, selectedPriceRange);
-    }
-
-    // 정렬 적용
-    filtered = sortProducts(filtered, sortBy);
-
-    setFilteredResults(filtered);
-  }, [searchResults, selectedCategory, selectedPriceRange, sortBy]);
-
-  // 검색어 입력 핸들러
-  const handleSearchSubmit = (e) => {
+  // 상단 검색 폼 제출
+  const onSubmit = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      setSearchParams({ q: searchQuery.trim() });
-    }
+    const q = (query || "").trim();
+    if (!q) return;
+    // 현재 필터/정렬 유지하여 이동
+    const next = new URLSearchParams(searchParams);
+    next.delete("q"); // path param으로 대체
+    navigate(`/search/${encodeURIComponent(q)}?${next.toString()}`);
   };
 
-  // 정렬 변경 핸들러
-  const handleSortChange = (newSortBy) => {
-    setSortBy(newSortBy);
+  // 칩/셀렉트 조작 시 URL 동기화
+  const applyFilters = (next = {}) => {
+    const sp = new URLSearchParams(searchParams);
+    Object.entries(next).forEach(([k, v]) => {
+      if (v === null || v === undefined || v === "") sp.delete(k);
+      else sp.set(k, String(v));
+    });
+    // keyword 유지
+    const path = `/search/${encodeURIComponent(keyword || query || "")}`;
+    navigate(`${path}?${sp.toString()}`, { replace: false });
   };
 
-  // 가격 필터 변경 핸들러
-  const handlePriceFilterChange = (priceRange) => {
-    setSelectedPriceRange(
-      selectedPriceRange?.id === priceRange.id ? null : priceRange
-    );
+  // 프리셋 핸들러
+  const onAgePreset = ([min, max]) => {
+    applyFilters({ ageMin: min, ageMax: max });
+  };
+  const onPricePreset = ([min, max]) => {
+    applyFilters({ priceMin: min, priceMax: max });
+  };
+  const onSortChange = (e) => {
+    applyFilters({ sort: e.target.value });
   };
 
-  // 카테고리 필터 변경 핸들러
-  const handleCategoryFilterChange = (categoryId) => {
-    setSelectedCategory(
-      selectedCategory === categoryId ? null : categoryId
-    );
-  };
+  const activeAge = `${ageMin ?? ""}-${ageMax ?? ""}`;
+  const activePrice = `${priceMin ?? ""}-${priceMax ?? ""}`;
 
-  // 필터 초기화
-  const handleClearFilters = () => {
-    setSelectedPriceRange(null);
-    setSelectedCategory(null);
-    setSortBy('popularity');
-  };
-
-  // 상품 카드 클릭 핸들러
-  const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`);
-  };
-
-  // 장바구니 추가 핸들러
-  const handleAddToCart = (productId) => {
-    addToCart(productId, 1);
-  };
-
-  // 찜하기 핸들러
-  const handleWishlist = (productId) => {
-    toggleWishlist(productId);
-  };
-
-  const hasActiveFilters = selectedPriceRange || selectedCategory || sortBy !== 'popularity';
+  const handleProductClick = (id) => navigate(`/product/${id}`);
 
   return (
     <div className={styles.searchPage}>
-      {/* 검색 헤더 */}
       <div className={styles.searchHeader}>
-        <form onSubmit={handleSearchSubmit} className={styles.searchForm}>
+        <form onSubmit={onSubmit} className={styles.searchForm}>
           <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="상품을 검색해보세요..."
             className={styles.searchInput}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="상품명을 입력하세요"
           />
-          <button type="submit" className={styles.searchBtn}>
-            검색
-          </button>
+          <button type="submit" className={styles.searchBtn}>검색</button>
         </form>
 
-        {searchQuery && (
+        {/* 🔽 필터 바 추가 */}
+        <div className={styles.filterBar}>
+          <div className={styles.filterGroup}>
+            <span className={styles.filterLabel}>연령대</span>
+            <div className={styles.chips}>
+              {AGE_PRESETS.map(p => {
+                const key = `${p.v[0] ?? ""}-${p.v[1] ?? ""}`;
+                const active = key === activeAge;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    className={`${styles.chip} ${active ? styles.active : ""}`}
+                    onClick={() => onAgePreset(p.v)}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.filterGroup}>
+            <span className={styles.filterLabel}>가격대</span>
+            <div className={styles.chips}>
+              {PRICE_PRESETS.map(p => {
+                const key = `${p.v[0] ?? ""}-${p.v[1] ?? ""}`;
+                const active = key === activePrice;
+                return (
+                  <button
+                    key={p.label}
+                    type="button"
+                    className={`${styles.chip} ${active ? styles.active : ""}`}
+                    onClick={() => onPricePreset(p.v)}
+                  >
+                    {p.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.filterGroupRight}>
+            <label className={styles.filterLabel} htmlFor="sortSel">정렬</label>
+            <select id="sortSel" value={sort} onChange={onSortChange} className={styles.select}>
+              <option value="RECENT">최신순</option>
+              <option value="PRICE_ASC">가격↑</option>
+              <option value="PRICE_DESC">가격↓</option>
+            </select>
+          </div>
+        </div>
+
+        {keyword && (
           <div className={styles.searchInfo}>
-            <h1 className={styles.searchTitle}>
-              '{searchQuery}' 검색 결과
-            </h1>
-            <p className={styles.resultCount}>
-              {isLoading ? '검색 중...' : `총 ${filteredResults.length}개의 상품`}
-            </p>
+            <h1 className={styles.searchTitle}>‘{keyword}’ 검색 결과</h1>
+            <p className={styles.resultCount}>{isLoading ? "검색 중..." : `총 ${total}개의 상품`}</p>
           </div>
         )}
       </div>
 
-      {/* 검색 결과가 있을 때만 필터 섹션 표시 */}
-      {searchResults.length > 0 && (
-        <div className={styles.filterSection}>
-          {/* 정렬 옵션 */}
-          <div className={styles.sortOptions}>
-            <label htmlFor="sort-select" className={styles.sortLabel}>정렬:</label>
-            <select 
-              id="sort-select"
-              value={sortBy} 
-              onChange={(e) => handleSortChange(e.target.value)}
-              className={styles.sortSelect}
-            >
-              {sortOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 카테고리 필터 */}
-          <div className={styles.categoryFilter}>
-            <span className={styles.filterLabel}>카테고리:</span>
-            <div className={styles.categoryButtons}>
-              {categories.map(category => (
-                <button
-                  key={category.id}
-                  className={`${styles.categoryButton} ${
-                    selectedCategory === category.id ? styles.active : ''
-                  }`}
-                  onClick={() => handleCategoryFilterChange(category.id)}
-                >
-                  {category.icon} {category.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 가격 필터 */}
-          <div className={styles.priceFilter}>
-            <span className={styles.filterLabel}>가격대:</span>
-            <div className={styles.priceButtons}>
-              {priceRanges.map(range => (
-                <button
-                  key={range.id}
-                  className={`${styles.priceButton} ${
-                    selectedPriceRange?.id === range.id ? styles.active : ''
-                  }`}
-                  onClick={() => handlePriceFilterChange(range)}
-                >
-                  {range.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 필터 초기화 */}
-          {hasActiveFilters && (
-            <button 
-              onClick={handleClearFilters}
-              className={styles.clearFilters}
-            >
-              필터 초기화
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* 검색 결과 */}
       <div className={styles.searchResults}>
         {isLoading ? (
           <div className={styles.loading}>
             <div className={styles.loadingSpinner}></div>
             <p>검색 중...</p>
           </div>
-        ) : !searchQuery ? (
+        ) : !keyword ? (
           <div className={styles.noQuery}>
             <div className={styles.searchIcon}>🔍</div>
-            <h2>상품을 검색해보세요</h2>
-            <p>원하는 상품명을 입력하여 검색할 수 있습니다.</p>
+            <h2>상품명을 검색해보세요</h2>
           </div>
-        ) : filteredResults.length > 0 ? (
+        ) : items.length > 0 ? (
           <div className={styles.productGrid}>
-            {filteredResults.map(product => (
-              <div key={product.id} onClick={() => handleProductClick(product.id)}>
+            {items.map((p) => (
+              <div key={p.id} onClick={() => handleProductClick(p.id)}>
                 <ProductCard
-                  id={product.id}
-                  name={product.name}
-                  price={product.price}
-                  discountPrice={product.discountPrice}
-                  discountRate={product.discountRate}
-                  image={product.image}
-                  rating={product.rating}
-                  reviewCount={product.reviewCount}
-                  onAddToCart={handleAddToCart}
-                  onWishlist={handleWishlist}
-                  isWishlisted={isInWishlist(product.id)}
+                  id={p.id}
+                  name={p.name}
+                  price={p.price}
+                  discountPrice={p.discountPrice}
+                  discountRate={p.discountRate}
+                  image={p.image}
+                  rating={p.rating}
+                  reviewCount={p.reviewCount}
                 />
               </div>
             ))}
@@ -251,15 +264,7 @@ const Search = () => {
           <div className={styles.noResults}>
             <div className={styles.noResultsIcon}>😔</div>
             <h2>검색 결과가 없습니다</h2>
-            <p>
-              '{searchQuery}'에 대한 검색 결과를 찾을 수 없습니다.<br />
-              다른 검색어로 시도해보세요.
-            </p>
-            {hasActiveFilters && (
-              <button onClick={handleClearFilters} className={styles.resetBtn}>
-                필터 초기화
-              </button>
-            )}
+            <p>다른 상품명으로 시도해보세요.</p>
           </div>
         )}
       </div>

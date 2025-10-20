@@ -1,162 +1,381 @@
-import React, { useState, useEffect } from 'react';
-import styles from './HeroSection.module.css';
+// src/components/Home/HeroSection.jsx
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./HeroSection.module.css";
+import {
+  fetchNewProducts,
+  fetchPopularProducts,
+  fetchProductImages,
+} from "../MainProductApi";
 
-const HeroSection = () => {
+const PLACEHOLDER_IMG =
+  "https://dummyimage.com/480x360/eeeeee/999999&text=No+Image";
+
+const COMMUNITY_IMAGES = [
+  "https://private-cyan-i5ea7ssejx.edgeone.app/%EC%97%AC%EC%9E%90%EC%95%84%EC%9D%B4.jpg",
+];
+const NOTICE_IMAGES = [
+  "https://dodamdodam.edgeone.app/%EC%95%8C%EB%A0%A4%20%EB%93%9C%EB%A6%BD%EB%8B%88%EB%8B%A4%EC%99%80%20%EC%9E%A5%EB%82%9C%EA%B0%90%EB%93%A4.png",
+];
+
+const USE_DETAIL_IMAGES = true;
+const AUTO_MS = 7000;
+
+export default function HeroSection() {
+  const navigate = useNavigate();
+
+  const [newest, setNewest] = useState(null);
+  const [topRented, setTopRented] = useState(null);
+
+  const [newestImages, setNewestImages] = useState([]);
+  const [topRentedImages, setTopRentedImages] = useState([]);
+
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // 슬라이드 데이터
-  const slides = [
-    {
-      id: 1,
-      theme: 'astronaut',
-      title: '우주 비행사의 꿈',
-      subtitle: '광활한 우주를 탐험하며 새로운 별을 발견하는 꿈',
-      description: '로켓을 타고 우주를 여행하며 별들과 친구가 되어보세요',
-      icons: ['🚀', '⭐', '🌙', '🛸'],
-      bgGradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-    },
-    {
-      id: 2,
-      theme: 'princess',
-      title: '공주님의 꿈',
-      subtitle: '마법의 성에서 모든 이들을 행복하게 만드는 꿈',
-      description: '아름다운 성에서 마법봉을 휘두르며 모두를 웃게 만들어요',
-      icons: ['🏰', '👑', '🪄', '✨'],
-      bgGradient: 'linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)'
-    },
-    {
-      id: 3,
-      theme: 'explorer',
-      title: '탐험가의 꿈',
-      subtitle: '미지의 땅을 탐험하며 숨겨진 보물을 찾는 꿈',
-      description: '나침반과 지도를 들고 신비로운 모험을 떠나보세요',
-      icons: ['🗺️', '🧭', '💎', '⛰️'],
-      bgGradient: 'linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)'
-    },
-    {
-      id: 4,
-      theme: 'artist',
-      title: '예술가의 꿈',
-      subtitle: '아름다운 그림과 음악으로 세상을 물들이는 꿈',
-      description: '색색깔 물감과 아름다운 선율로 마음을 표현해보세요',
-      icons: ['🎨', '🖌️', '🎵', '🎭'],
-      bgGradient: 'linear-gradient(135deg, #fd79a8 0%, #a29bfe 100%)'
-    }
-  ];
+  // 자동 슬라이드 타이머
+  const timerRef = useRef(null);
+  const restartTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slidesLenRef.current);
+    }, AUTO_MS);
+  };
+  useEffect(() => () => timerRef.current && clearInterval(timerRef.current), []);
 
-  // 자동 슬라이드 전환 (4초마다)
+  // 동적 카드 높이 계산을 위한 비율(필요 시)
+  const [cardRatioById, setCardRatioById] = useState({});
+  const setAutoRatio = (slideId) => (e) => {
+    const w = e?.target?.naturalWidth || 4;
+    const h = e?.target?.naturalHeight || 3;
+    setCardRatioById((p) => ({ ...p, [slideId]: `${w} / ${h}` }));
+  };
+
+  const getProductId = (p) => {
+    const cand =
+      p?.pronum ??
+      p?.proId ??
+      p?.proid ??
+      p?.id ??
+      p?.productId ??
+      p?.pid ??
+      p?.code ??
+      p?.productCode;
+    const n =
+      typeof cand === "string"
+        ? parseInt(cand, 10)
+        : typeof cand === "number"
+        ? cand
+        : NaN;
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
+    let mounted = true;
+    (async () => {
+      try {
+        const [nRes, pRes] = await Promise.all([
+          fetchNewProducts(1),
+          fetchPopularProducts(1),
+        ]);
+        if (!mounted) return;
+        const newestList = Array.isArray(nRes?.data) ? nRes.data : [];
+        const popularList = Array.isArray(pRes?.data) ? pRes.data : [];
+        setNewest(newestList[0] || null);
+        setTopRented(popularList[0] || null);
+      } catch {
+        setNewest(null);
+        setTopRented(null);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-    return () => clearInterval(interval);
-  }, [slides.length]);
+  useEffect(() => {
+    let mounted = true;
+    if (!USE_DETAIL_IMAGES) {
+      setNewestImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+    const id = getProductId(newest);
+    if (!id) {
+      setNewestImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+    (async () => {
+      const urls = await fetchProductImages(id, 4);
+      if (mounted) setNewestImages(Array.isArray(urls) ? urls : []);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [newest]);
 
-  // 이전 슬라이드로 이동
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  useEffect(() => {
+    let mounted = true;
+    if (!USE_DETAIL_IMAGES) {
+      setTopRentedImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+    const id = getProductId(topRented);
+    if (!id) {
+      setTopRentedImages([]);
+      return () => {
+        mounted = false;
+      };
+    }
+    (async () => {
+      const urls = await fetchProductImages(id, 4);
+      if (mounted) setTopRentedImages(Array.isArray(urls) ? urls : []);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [topRented]);
+
+  const pick = (obj, keys, fallback = "") =>
+    (obj &&
+      keys.reduce(
+        (acc, k) => (acc !== undefined && acc !== null ? acc : obj[k]),
+        undefined
+      )) ?? fallback;
+
+  const productToSlide = (product, opts) => {
+    if (!product) return null;
+    const id =
+      pick(product, ["pronum", "proId", "proid", "id", "productId", "pid"]) ||
+      pick(product, ["code", "productCode"]);
+    const name = pick(
+      product,
+      ["name", "productName", "title", "proname"],
+      "상품"
+    );
+    const repImage =
+      pick(product, ["imageUrl", "mainImage", "thumbnailUrl", "img", "proimg"]) ||
+      null;
+
+    return {
+      id: opts.id,
+      type: "product",
+      title: opts.titlePrefix ? `${opts.titlePrefix} ${name}` : name,
+      subtitle: opts.subtitle ?? "",
+      description: opts.description ?? "",
+      bgGradient: opts.bgGradient,
+      imageUrls:
+        (opts.imageUrls && opts.imageUrls.length && opts.imageUrls) ||
+        (repImage ? [repImage] : [PLACEHOLDER_IMG]),
+      productId: id,
+      primaryText: "상품 상세 정보",
+      onPrimary: () => navigate(id ? `/products/${id}` : "/products"),
+      imageFit: opts.imageFit ?? "contain",
+      aspectRatio: opts.aspectRatio,
+      imagePosition: opts.imagePosition,
+    };
   };
 
-  // 다음 슬라이드로 이동
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  const communitySlide = {
+    id: "community",
+    type: "link",
+    title: "도담 커뮤니티",
+    subtitle: "우리 아이 장난감 사용팁, 인증샷, 리뷰를 공유해요",
+    description: "다른 가족들의 실제 후기와 팁을 확인해 보세요.",
+    bgGradient: "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    imageUrls: COMMUNITY_IMAGES.filter(Boolean),
+    imageFit: "contain",
+    aspectRatio: "1 / 1",
+    imagePosition: "center center",
+    icons: ["💬"],
+    primaryText: "커뮤니티 바로가기",
+    onPrimary: () => navigate("/board/community"),
   };
 
-  // 특정 슬라이드로 이동
-  const goToSlide = (index) => {
-    setCurrentSlide(index);
+  const noticeSlide = {
+    id: "notice",
+    type: "link",
+    title: "공지사항",
+    subtitle: "서비스 업데이트, 이벤트, 점검 일정을 안내합니다",
+    description: "가장 빠른 새 소식을 확인하세요.",
+    bgGradient: "linear-gradient(135deg, #ffd3a5 0%, #fd6585 100%)",
+    imageUrls: NOTICE_IMAGES.filter(Boolean),
+    imageFit: "contain",
+    aspectRatio: "1 / 1",
+    imagePosition: "center center",
+    icons: ["📢"],
+    primaryText: "공지사항 바로가기",
+    onPrimary: () => navigate("/board/notice"),
   };
 
-  const currentSlideData = slides[currentSlide];
+  const slides = useMemo(() => {
+    const results = [];
+
+    const newestSlide =
+      productToSlide(newest, {
+        id: "newest",
+        titlePrefix: "신규 등록:",
+        subtitle: "방금 올라온 따끈따끈 신상",
+        description: "아이 취향을 즉시 캐치해 보세요.",
+        bgGradient: "linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)",
+        imageUrls: newestImages,
+      }) ||
+      {
+        id: "newest-fallback",
+        type: "product",
+        title: "신규 등록 상품",
+        subtitle: "방금 올라온 상품을 확인해 보세요",
+        description: "데이터를 불러오는 중입니다…",
+        bgGradient: "linear-gradient(135deg, #81ecec 0%, #74b9ff 100%)",
+        imageUrls: [PLACEHOLDER_IMG],
+        primaryText: "상품 상세 정보",
+        onPrimary: () => navigate("/products"),
+      };
+
+    const topRentedSlide =
+      productToSlide(topRented, {
+        id: "top",
+        titlePrefix: "대여 인기:",
+        subtitle: "가장 많이 대여된 베스트셀러",
+        description: "검증된 만족도, 실패 없는 선택!",
+        bgGradient: "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)",
+        imageUrls: topRentedImages,
+      }) ||
+      {
+        id: "top-fallback",
+        type: "product",
+        title: "베스트셀러",
+        subtitle: "가장 많이 대여된 상품을 만나보세요",
+        description: "데이터를 불러오는 중입니다…",
+        bgGradient: "linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%)",
+        imageUrls: [PLACEHOLDER_IMG],
+        primaryText: "상품 상세 정보",
+        onPrimary: () => navigate("/products"),
+      };
+
+    results.push(newestSlide, topRentedSlide, communitySlide, noticeSlide);
+    return results;
+  }, [newest, topRented, newestImages, topRentedImages, navigate]);
+
+  // 자동 슬라이드 시작/재시작
+  const slidesLenRef = useRef(slides.length);
+  useEffect(() => {
+    slidesLenRef.current = slides.length;
+    restartTimer();
+  }, [slides.length, currentSlide]);
+
+  const go = (idx) => {
+    setCurrentSlide(idx);
+    restartTimer(); // ➜ 화살표/점 클릭 시 7초 타이머 리셋
+  };
+  const prevSlide = () =>
+    go((currentSlide - 1 + slides.length) % slides.length);
+  const nextSlide = () => go((currentSlide + 1) % slides.length);
+
+  const current = slides[currentSlide] || {};
 
   return (
     <section className={styles.hero}>
-      <div 
+      <div
         className={styles.slideBackground}
-        style={{ background: currentSlideData.bgGradient }}
+        style={{ background: current.bgGradient }}
       />
-      
+
       <div className={styles.container}>
         <div className={styles.content}>
+          {/* 왼쪽: 텍스트(상단 = 제목, 하단 = 버튼) */}
           <div className={styles.textContent}>
-            <div className={styles.slideIndicator}>
-              <span className={styles.dreamLabel}>Dream {currentSlide + 1}</span>
+            <div className={styles.textTop}>
+              <div className={styles.slideIndicator}>
+                <span className={styles.dreamLabel}>
+                  {currentSlide + 1} / {slides.length}
+                </span>
+              </div>
+              <h1 className={styles.title}>{current.title}</h1>
+              {current.subtitle && (
+                <p className={styles.subtitle}>{current.subtitle}</p>
+              )}
+              {current.description && (
+                <p className={styles.description}>{current.description}</p>
+              )}
             </div>
-            
-            <h1 className={styles.title}>
-              {currentSlideData.title}
-            </h1>
-            
-            <p className={styles.subtitle}>
-              {currentSlideData.subtitle}
-            </p>
-            
-            <p className={styles.description}>
-              {currentSlideData.description}
-            </p>
-            
-            <div className={styles.buttonGroup}>
-              <button className={styles.primaryButton}>
-                꿈 실현하기
-              </button>
-              <button className={styles.secondaryButton}>
-                더 많은 꿈 보기
-              </button>
+
+            <div className={styles.ctaRow}>
+              {current.onPrimary && (
+                <button className={styles.primaryButton} onClick={current.onPrimary}>
+                  {current.primaryText || "바로가기"}
+                </button>
+              )}
+              {current.onSecondary && (
+                <button
+                  className={styles.secondaryButton}
+                  onClick={current.onSecondary}
+                >
+                  {current.secondaryText || "자세히 보기"}
+                </button>
+              )}
             </div>
           </div>
-          
+
+          {/* 오른쪽: 이미지 카드(텍스트 칼럼과 동일 높이) */}
           <div className={styles.imageContent}>
-            <div className={styles.dreamCard}>
-              <div className={styles.iconGrid}>
-                {currentSlideData.icons.map((icon, index) => (
-                  <div 
-                    key={index} 
-                    className={`${styles.iconBlock} ${styles[`icon${index + 1}`]}`}
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                  >
-                    {icon}
-                  </div>
-                ))}
-              </div>
-              
+            <div
+              className={styles.dreamCard}
+              style={{
+                "--card-ratio":
+                  cardRatioById[current.id] || current.aspectRatio || "4 / 3",
+              }}
+            >
+              {Array.isArray(current.imageUrls) && current.imageUrls.length > 1 ? (
+                <div className={styles.iconGrid}>
+                  {current.imageUrls.slice(0, 4).map((url, i) => (
+                    <div key={i} className={styles.iconBlock}>
+                      <img
+                        src={url || PLACEHOLDER_IMG}
+                        alt={`${current.title} #${i + 1}`}
+                        className={styles.productThumb}
+                        onLoad={i === 0 ? setAutoRatio(current.id) : undefined}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <img
+                  src={current.imageUrls?.[0] || PLACEHOLDER_IMG}
+                  alt={current.title}
+                  className={styles.productImage}
+                  onLoad={setAutoRatio(current.id)}
+                />
+              )}
               <div className={styles.dreamGlow} />
             </div>
           </div>
         </div>
       </div>
-      
-      {/* 슬라이드 네비게이션 - container 밖으로 이동 */}
+
+      {/* 하단 네비게이션 — 버튼과 겹치지 않게 중앙 하단 고정 */}
       <div className={styles.slideNavigation}>
-        <button 
-          className={styles.navButton}
-          onClick={prevSlide}
-          aria-label="이전 슬라이드"
-        >
+        <button className={styles.navButton} onClick={prevSlide} aria-label="이전">
           ←
         </button>
-        
         <div className={styles.dotNavigation}>
-          {slides.map((_, index) => (
+          {slides.map((_, i) => (
             <button
-              key={index}
-              className={`${styles.dot} ${index === currentSlide ? styles.activeDot : ''}`}
-              onClick={() => goToSlide(index)}
-              aria-label={`슬라이드 ${index + 1}로 이동`}
+              key={i}
+              className={`${styles.dot} ${i === currentSlide ? styles.activeDot : ""}`}
+              onClick={() => go(i)}
+              aria-label={`${i + 1}번 슬라이드로 이동`}
             />
           ))}
         </div>
-        
-        <button 
-          className={styles.navButton}
-          onClick={nextSlide}
-          aria-label="다음 슬라이드"
-        >
+        <button className={styles.navButton} onClick={nextSlide} aria-label="다음">
           →
         </button>
       </div>
     </section>
   );
-};
-
-export default HeroSection;
+}
