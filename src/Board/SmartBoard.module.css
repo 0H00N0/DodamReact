@@ -395,8 +395,10 @@
   opacity: 0.9;
 }
 .tableReadable th {
-  letter-spacing: 0.7em;
-  word-spacing: 3.0em;
+  letter-spacing: 0.03em;   /* 0.02~0.06em 권장 */
+  white-space: nowrap;      /* 한 줄 유지 */
+  word-break: keep-all;     /* 한글 단어 중간 줄바꿈 방지 */
+  padding: 10px 16px;       /* 글자 간격 대신 여백으로 공간 확보 */
 }
 .tableReadable tr {
   line-height: 1.5em;
