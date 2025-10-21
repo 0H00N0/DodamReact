@@ -29,6 +29,7 @@ import OrderReturns from "./pages/orders/OrderReturns";
 import OrderExchanges from "./pages/orders/OrderExchanges";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
+import ReviewList from "./pages/member/ReviewList";
 
 // Product
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -87,6 +88,7 @@ export const router = createRouter([
       { path: "member/membership", element: <Membership /> },
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
+      { path: "member/reviewList", element: <ReviewList /> },
 
       // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
       { path: "cart", element: <Cart /> },           // 헤더 카트
