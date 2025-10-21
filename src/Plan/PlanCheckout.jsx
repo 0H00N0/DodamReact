@@ -1,21 +1,20 @@
+// src/Plan/CheckOut.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import PortOne from "@portone/browser-sdk/v2";
 import { billingKeysApi, paymentsApi, subscriptionApi } from "../utils/api";
 
 export default function CheckoutPage() {
-  const { search } = useLocation();
+  // ✅ 경로 파라미터
+  const { planCode = "", months: monthsStr = "1" } = useParams();
+  const months = Number(monthsStr) || 1;
   const navigate = useNavigate();
-  const qs = new URLSearchParams(search);
-
-  const planCode = qs.get("code") || qs.get("planCode") || "";
-  const months = Number(qs.get("months") || qs.get("term") || 1) || 1;
 
   const [cards, setCards] = useState([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  // === 반응형: 모바일 감지 (<= 640px)
+  // 반응형
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined" || !window.matchMedia) return false;
     return window.matchMedia("(max-width: 640px)").matches;
@@ -25,7 +24,6 @@ export default function CheckoutPage() {
     const mql = window.matchMedia("(max-width: 640px)");
     const handler = (e) => setIsMobile(e.matches);
     mql.addEventListener?.("change", handler);
-    // Safari 등 구형 브라우저 대응
     mql.addListener?.(handler);
     return () => {
       mql.removeEventListener?.("change", handler);
@@ -39,15 +37,17 @@ export default function CheckoutPage() {
   );
   const selectedPayId = selectedCard?.payId ?? selectedCard?.id ?? null;
 
-  // ===== 폴링 관련(표시 UI 없음)
+  // ===== 폴링 관련 =====
   const alive = useRef(true);
   const elapsedSec = useRef(0);
   const elapsedTick = useRef(null);
   const pollTimer = useRef(null);
   const startedAt = useRef(null);
-  const [uiStatus, setUiStatus] = useState(null);
-  const [handleId, setHandleId] = useState(null);
+
+  const [uiStatus, setUiStatus] = useState(null);     // PENDING, PAID, ...
+  const [handleId, setHandleId] = useState(null);     // paymentId or orderId
   const [shownPaymentId, setShownPaymentId] = useState(null);
+  const [elapsedUi, setElapsedUi] = useState(0);      // 경과초(화면 표시용)
 
   useEffect(() => {
     return () => {
@@ -67,15 +67,29 @@ export default function CheckoutPage() {
   const startElapsed = () => {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
     elapsedSec.current = 0;
+    setElapsedUi(0);
     startedAt.current = Date.now();
     elapsedTick.current = setInterval(() => {
-      elapsedSec.current = Math.floor((Date.now() - startedAt.current) / 1000);
+      const secs = Math.floor((Date.now() - startedAt.current) / 1000);
+      elapsedSec.current = secs;
+      // 리렌더 유도
+      setElapsedUi(secs);
     }, 1000);
   };
   const stopElapsed = () => {
     if (elapsedTick.current) clearInterval(elapsedTick.current);
   };
 
+  const statusLabel = (s) => {
+    const u = norm(s);
+    if (["PAID", "SUCCEEDED", "SUCCESS", "PARTIAL_PAID"].includes(u)) return "결제 완료";
+    if (["PENDING", "READY", "IN_PROGRESS", "NEEDS_CONFIRMATION"].includes(u)) return "결제 진행 중";
+    if (["FAILED"].includes(u)) return "결제 실패";
+    if (["CANCELLED", "CANCELED"].includes(u)) return "결제 취소됨";
+    return "처리 중";
+  };
+
+  // ✅ 1회 폴링 — 완료되면 결과 페이지로 이동
   const pollOnce = async (handle) => {
     try {
       const r = await paymentsApi.lookup(handle);
@@ -86,10 +100,8 @@ export default function CheckoutPage() {
       if (pid) setShownPaymentId(pid);
       if (done) {
         stopElapsed();
-        const invId = r?.data?.invoiceId ?? "";
-        navigate(
-          `/plan/checkout/result?invoiceId=${invId}&paymentId=${pid || handle}&status=${s}`
-        );
+        const paymentKey = pid || handle;
+        navigate(`/plan/checkout/result/${encodeURIComponent(paymentKey)}`);
         return true;
       }
       return false;
@@ -130,12 +142,14 @@ export default function CheckoutPage() {
   }
 
   useEffect(() => {
-    loadCards();
-    try {
-      sessionStorage.setItem("lastCheckoutUrl", window.location.href);
-      sessionStorage.setItem("lastCheckoutQuery", window.location.search || "");
-    } catch {}
-  }, []);
+    (async () => {
+      await loadCards();
+      try {
+        sessionStorage.setItem("lastCheckoutUrl", window.location.href);
+      } catch {}
+      window.scrollTo({ top: 0, behavior: "instant" });
+    })();
+  }, [planCode, months]);
 
   // ===== 카드 등록
   async function handleRegisterCard() {
@@ -150,7 +164,6 @@ export default function CheckoutPage() {
       const redirectUrl = `${window.location.origin}/#/billing-keys/redirect`;
       try {
         sessionStorage.setItem("lastCheckoutUrl", window.location.href);
-        sessionStorage.setItem("lastCheckoutQuery", window.location.search || "");
       } catch {}
 
       let resp;
@@ -215,7 +228,7 @@ export default function CheckoutPage() {
     }
   }
 
-  // ===== 결제 시작
+  // ===== 결제 시작 (RESTful 경로 기반)
   async function handleStart() {
     if (busy || !selectedCard) return;
     setBusy(true);
@@ -224,6 +237,7 @@ export default function CheckoutPage() {
       if (selectedPayId) payload.payId = selectedPayId;
       else if (selectedCard?.billingKey) payload.billingKey = selectedCard.billingKey;
 
+      // 인보이스 생성/즉시결제
       const invRes = await subscriptionApi.start(payload);
       const invoiceId =
         invRes?.data?.invoiceId ??
@@ -232,22 +246,33 @@ export default function CheckoutPage() {
         invRes?.data?.pi_id;
       if (!invoiceId) return;
 
+      // 결제 확정
       const payRes = await paymentsApi.confirm({ invoiceId });
-      const pid =
-        payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
+      const pid = payRes?.data?.paymentId || payRes?.data?.id || payRes?.data?.payment_id;
       const oid = payRes?.data?.orderId;
       if (!pid && !oid) return;
 
       const handle = pid ?? oid;
       setHandleId(handle);
       if (pid) setShownPaymentId(pid);
+
+      // 폴링 → 완료 시 결과 페이지 이동
       await pollForeverUntilPaid(handle);
-    } catch {} finally {
-      setBusy(false);
+    } catch {
+      // 실패 시 상태 표시
+      setUiStatus("FAILED");
+    } finally {
+      // busy는 오버레이가 닫힐 때까지 유지 (poll에서 완료되면 라우팅됨)
+      // 라우팅이 안 되면 사용자가 다시 시도할 수 있도록 3초 뒤에만 해제
+      setTimeout(() => {
+        if (!["PENDING", "READY", "IN_PROGRESS", "NEEDS_CONFIRMATION"].includes(norm(uiStatus))) {
+          setBusy(false);
+        }
+      }, 3000);
     }
   }
 
-  // ===== 파스텔 연핑크 테마 (연하고 꽉 차는 레이아웃)
+  // ===== 테마/스타일 =====
   const theme = {
     bg: "#FFFAFC",
     panel: "#FFFFFF",
@@ -265,166 +290,87 @@ export default function CheckoutPage() {
   };
 
   const styles = {
-    page: {
-      background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`,
-      padding: "24px 16px 40px",
-    },
-    wrap: {
-      maxWidth: 880,
-      margin: "0 auto",
-    },
+    page: { background: `linear-gradient(180deg, ${theme.bg} 0%, #FFFFFF 100%)`, padding: "24px 16px 40px" },
+    wrap: { maxWidth: 880, margin: "0 auto" },
     headerCard: {
-      background: theme.panel,
-      border: `1px solid ${theme.border}`,
-      borderRadius: theme.radius,
-      boxShadow: theme.shadow,
-      padding: "22px 24px",
-      display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
-      alignItems: "center",
-      gap: 16,
-      marginBottom: 18,
+      background: theme.panel, border: `1px solid ${theme.border}`, borderRadius: theme.radius,
+      boxShadow: theme.shadow, padding: "22px 24px",
+      display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr auto", alignItems: "center", gap: 16, marginBottom: 18,
     },
-    title: {
-      fontSize: isMobile ? 22 : 26,
-      fontWeight: 900,
-      color: theme.text,
-      letterSpacing: 0.2,
-      lineHeight: 1.25,
-      margin: 0,
-    },
-    summary: {
-      fontSize: 14,
-      color: theme.textSub,
-      marginTop: 6,
-    },
+    title: { fontSize: isMobile ? 22 : 26, fontWeight: 900, color: theme.text, letterSpacing: 0.2, lineHeight: 1.25, margin: 0 },
+    summary: { fontSize: 14, color: theme.textSub, marginTop: 6 },
     summaryBadge: {
-      display: "inline-block",
-      padding: "6px 12px",
-      borderRadius: 999,
-      background: theme.accentSoft,
-      border: `1px solid ${theme.borderStrong}`,
-      color: theme.text,
-      fontWeight: 700,
-      fontSize: 12,
-      marginLeft: 8,
+      display: "inline-block", padding: "6px 12px", borderRadius: 999,
+      background: theme.accentSoft, border: `1px solid ${theme.borderStrong}`, color: theme.text,
+      fontWeight: 700, fontSize: 12, marginLeft: 8,
     },
-    sectionCard: {
-      background: theme.panel,
-      border: `1px solid ${theme.border}`,
-      borderRadius: theme.radius,
-      boxShadow: theme.shadow,
-      padding: isMobile ? 14 : 18,
-      marginBottom: 18,
-    },
-    sectionH: {
-      fontSize: 16,
-      fontWeight: 800,
-      color: theme.text,
-      margin: "2px 2px 12px",
-    },
-    empty: {
-      padding: 16,
-      borderRadius: 14,
-      background: theme.accentSoft,
-      border: `1.5px dashed ${theme.borderStrong}`,
-      color: theme.textSub,
-      textAlign: "center",
-    },
-    // ★ 카드 목록: 모바일 1열, 데스크톱 2열
-    cardList: {
-      display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
-      gap: 12,
-    },
+    sectionCard: { background: theme.panel, border: `1px solid ${theme.border}`, borderRadius: theme.radius, boxShadow: theme.shadow, padding: isMobile ? 14 : 18, marginBottom: 18 },
+    sectionH: { fontSize: 16, fontWeight: 800, color: theme.text, margin: "2px 2px 12px" },
+    empty: { padding: 16, borderRadius: 14, background: theme.accentSoft, border: `1.5px dashed ${theme.borderStrong}`, color: theme.textSub, textAlign: "center" },
+    cardList: { display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 },
     cardItem: (active) => ({
       padding: isMobile ? "12px 12px" : "14px 14px",
-      borderRadius: 14,
-      border: `1.5px solid ${active ? theme.accentDeep : theme.border}`,
+      borderRadius: 14, border: `1.5px solid ${active ? theme.accentDeep : theme.border}`,
       background: active ? theme.panelAlt : theme.panel,
       boxShadow: active ? "0 6px 16px rgba(255, 180, 205, 0.12)" : "none",
       transition: "transform .08s ease, box-shadow .2s ease, background .2s ease",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
+      cursor: "pointer", display: "flex", alignItems: "center", gap: 12,
     }),
     radio: (active) => ({
-      width: 18,
-      height: 18,
-      borderRadius: 999,
-      border: `2px solid ${active ? theme.accentDeep : theme.borderStrong}`,
-      background: active ? theme.accentDeep : "#fff",
-      boxShadow: active ? "0 0 0 6px rgba(255, 179, 208, 0.15)" : "none",
-      flex: "0 0 auto",
+      width: 18, height: 18, borderRadius: 999, border: `2px solid ${active ? theme.accentDeep : theme.borderStrong}`,
+      background: active ? theme.accentDeep : "#fff", boxShadow: active ? "0 0 0 6px rgba(255, 179, 208, 0.15)" : "none", flex: "0 0 auto",
     }),
     cardMetaWrap: { flex: 1, minWidth: 0 },
     cardBrand: { fontWeight: 800, color: theme.text, fontSize: isMobile ? 14 : 15 },
     cardMeta: { fontSize: 12, color: theme.textSub, marginTop: 2 },
-    delBtn: {
-      background: "#fff",
-      border: `1px solid ${theme.borderStrong}`,
-      color: theme.text,
-      padding: "8px 10px",
-      borderRadius: 999,
-      fontSize: 12,
-      flex: "0 0 auto",
-    },
-    divider: {
-      height: 1,
-      background: theme.divider,
-      margin: "14px 0 0",
-    },
-    metaRow: {
-      display: "flex",
-      gap: 10,
-      flexWrap: "wrap",
-      color: theme.textSub,
-      fontSize: 13,
-      marginTop: 6,
-    },
-    // ★ 액션바: 모바일 세로 스택, 데스크톱 2열
-    actionBar: {
-      marginTop: 18,
-      display: "grid",
-      gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr",
-      gap: 10,
-    },
+    delBtn: { background: "#fff", border: `1px solid ${theme.borderStrong}`, color: theme.text, padding: "8px 10px", borderRadius: 999, fontSize: 12, flex: "0 0 auto" },
+    divider: { height: 1, background: theme.divider, margin: "14px 0 0" },
+    metaRow: { display: "flex", gap: 10, flexWrap: "wrap", color: theme.textSub, fontSize: 13, marginTop: 6 },
+    actionBar: { marginTop: 18, display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1.2fr", gap: 10 },
     btn: {
-      padding: isMobile ? "14px 16px" : "16px 18px",
-      borderRadius: 999,
-      border: `1px solid ${theme.borderStrong}`,
-      background: "#fff",
-      color: theme.text,
-      fontWeight: 800,
-      letterSpacing: 0.2,
-      fontSize: isMobile ? 15 : 16,
-      boxShadow: "0 3px 0 rgba(0,0,0,0.03)",
-      transition: "transform .06s ease, box-shadow .2s ease",
-      width: "100%",
+      padding: isMobile ? "14px 16px" : "16px 18px", borderRadius: 999, border: `1px solid ${theme.borderStrong}`,
+      background: "#fff", color: theme.text, fontWeight: 800, letterSpacing: 0.2, fontSize: isMobile ? 15 : 16,
+      boxShadow: "0 3px 0 rgba(0,0,0,0.03)", transition: "transform .06s ease, box-shadow .2s ease", width: "100%",
     },
     btnPrimary: {
-      padding: isMobile ? "14px 18px" : "16px 20px",
-      borderRadius: 999,
-      border: "none",
-      background: `linear-gradient(180deg, ${theme.accent}, ${theme.accentDeep})`,
-      color: "#fff",
-      fontWeight: 900,
-      letterSpacing: 0.3,
-      fontSize: isMobile ? 16 : 17,
-      boxShadow: "0 10px 20px rgba(255, 160, 200, 0.25)",
-      transition: "transform .06s ease, box-shadow .2s ease",
-      width: "100%",
+      padding: isMobile ? "14px 18px" : "16px 20px", borderRadius: 999, border: "none",
+      background: `linear-gradient(180deg, ${theme.accent}, ${theme.accentDeep})`, color: "#fff",
+      fontWeight: 900, letterSpacing: 0.3, fontSize: isMobile ? 16 : 17,
+      boxShadow: "0 10px 20px rgba(255, 160, 200, 0.25)", transition: "transform .06s ease, box-shadow .2s ease", width: "100%",
     },
-    btnDisabled: {
-      opacity: 0.6,
-      pointerEvents: "none",
+    btnDisabled: { opacity: 0.6, pointerEvents: "none" },
+
+    // ==== 진행중 오버레이 ====
+    overlay: {
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)",
+      display: "grid", placeItems: "center", zIndex: 9999,
     },
+    overlayCard: {
+      width: "min(92vw, 520px)", background: "#fff", borderRadius: 18,
+      border: `1px solid ${theme.borderStrong}`, boxShadow: theme.shadow, padding: 20,
+    },
+    overlayTitle: { fontSize: 18, fontWeight: 900, color: theme.text, margin: 0 },
+    overlaySub: { marginTop: 6, fontSize: 13, color: theme.textSub },
+    overlayRow: { marginTop: 14, display: "flex", alignItems: "center", gap: 12 },
+    spinnerBox: { width: 44, height: 44, flex: "0 0 auto" },
+    statusPill: { display: "inline-block", padding: "4px 10px", borderRadius: 999, background: theme.accentSoft, border: `1px solid ${theme.borderStrong}`, fontSize: 12, fontWeight: 800, color: theme.text },
   };
 
   const onHover = (e) => (e.currentTarget.style.transform = "translateY(-1px)");
   const onLeave = (e) => (e.currentTarget.style.transform = "translateY(0)");
   const onPress = (e) => (e.currentTarget.style.transform = "translateY(1px)");
+
+  // 진행중 오버레이 표시 여부
+  const progressOpen =
+    busy ||
+    ["PENDING", "READY", "IN_PROGRESS", "NEEDS_CONFIRMATION"].includes(norm(uiStatus));
+
+  // 경과 시간 포맷
+  const mmss = (s) => {
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    return `${String(m).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  };
 
   return (
     <div style={styles.page}>
@@ -446,9 +392,7 @@ export default function CheckoutPage() {
           <div style={styles.sectionH}>결제수단</div>
 
           {cards.length === 0 ? (
-            <div style={styles.empty}>
-              등록된 카드가 없습니다. 아래에서 먼저 등록해 주세요.
-            </div>
+            <div style={styles.empty}>등록된 카드가 없습니다. 아래에서 먼저 등록해 주세요.</div>
           ) : (
             <div style={styles.cardList}>
               {cards.map((c, idx) => {
@@ -493,9 +437,7 @@ export default function CheckoutPage() {
             <span>선택된 결제수단</span>
             <b>
               {selectedCard
-                ? `${selectedCard.brand || "카드"}${
-                    selectedCard.last4 ? ` ···· ${selectedCard.last4}` : ""
-                  }`
+                ? `${selectedCard.brand || "카드"}${selectedCard.last4 ? ` ···· ${selectedCard.last4}` : ""}`
                 : "없음"}
             </b>
           </div>
@@ -517,10 +459,7 @@ export default function CheckoutPage() {
           <button
             onClick={handleStart}
             disabled={busy || !selectedCard}
-            style={{
-              ...styles.btnPrimary,
-              ...((busy || !selectedCard) ? styles.btnDisabled : {}),
-            }}
+            style={{ ...styles.btnPrimary, ...((busy || !selectedCard) ? styles.btnDisabled : {}) }}
             onMouseEnter={onHover}
             onMouseLeave={onLeave}
             onMouseDown={onPress}
@@ -530,6 +469,52 @@ export default function CheckoutPage() {
           </button>
         </div>
       </div>
+
+      {/* ==== 진행중 오버레이 ==== */}
+      {progressOpen && (
+        <div style={styles.overlay} role="dialog" aria-live="polite" aria-busy="true">
+          <div style={styles.overlayCard}>
+            <h2 style={styles.overlayTitle}>구독 진행중입니다…</h2>
+            <div style={styles.overlaySub}>
+              결제 확인까지 잠시만 기다려 주세요. 창을 닫아도 결제는 계속 진행됩니다.
+            </div>
+
+            <div style={styles.overlayRow}>
+              {/* SVG 스피너 (CSS Keyframes 없이 동작) */}
+              <div style={styles.spinnerBox}>
+                <svg viewBox="0 0 50 50" width="44" height="44">
+                  <circle cx="25" cy="25" r="20" fill="none" stroke="#FFD1E5" strokeWidth="6" />
+                  <circle cx="25" cy="25" r="20" fill="none" stroke="#FFB3D0" strokeWidth="6" strokeLinecap="round" strokeDasharray="31.4 125.6">
+                    <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.9s" repeatCount="indefinite" />
+                  </circle>
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontWeight: 900, color: "#6F5663" }}>{statusLabel(uiStatus || "PENDING")}</div>
+                <div style={{ marginTop: 4, fontSize: 13, color: "#9A8190" }}>
+                  경과 시간: <b>{mmss(elapsedUi)}</b>
+                  {shownPaymentId ? <> · 결제ID: <code style={{ fontSize: 12 }}>{shownPaymentId}</code></> : null}
+                </div>
+                {handleId ? (
+                  <div style={{ marginTop: 4, fontSize: 12, color: "#B097A6" }}>
+                    처리 토큰: <code>{handleId}</code>
+                  </div>
+                ) : null}
+                <div style={{ marginTop: 8 }}>
+                  <span style={styles.statusPill}>자동 확인 중</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 실패 시 안내 문구 (자동으로 3초 뒤 버튼 활성화) */}
+            {norm(uiStatus) === "FAILED" && (
+              <div style={{ marginTop: 12, fontSize: 13, color: "#B42318" }}>
+                결제 시도에 실패했어요. 잠시 후 다시 시도해 주세요.
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -6,7 +6,8 @@ import Footer from "./components/Layout/Footer";
 import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { AuthProvider } from "./contexts/AuthContext";   // ✅ 추가
+import { AuthProvider } from "./contexts/AuthContext";
+import ScrollToTopRoute from "./components/ScrollToTopRoute";
 
 // React.lazy로 코드 스플리팅
 const Home = React.lazy(() => import("./pages/Home"));
@@ -33,6 +34,7 @@ const LoadingSpinner = () => (
             <div className="App">
               <Header />
               <main id="main-content" role="main" className="main-content" tabIndex={-1}>
+                <ScrollToTopRoute />
                 <Suspense fallback={<LoadingSpinner />}>
                   <Outlet />
                 </Suspense>

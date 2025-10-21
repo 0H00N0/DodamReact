@@ -112,7 +112,24 @@
   width: 72px; height: 72px; flex-shrink: 0; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
-.thumb { object-fit: cover; }
+.thumb {
+  width: 65px;
+  height: 65px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* ✅ 아이콘 PNG 배경색과 완벽히 일치 (정밀 추출값) */
+  background-color: #FFE3E4;
+  border: 1px solid #FFE7EF;    /* 경계선 없이 자연스럽게 */
+  box-sizing: border-box;
+
+  object-fit: contain;
+  object-position: center;
+  padding: 6px;                 /* 여백 균형 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 .icon {
   font-size: 1.6rem; color: var(--rose-600);
   background:
@@ -151,7 +168,8 @@
 /* 모바일 */
 @media (max-width: 600px) {
   .wrapper { padding: 10px 14px; border-radius: 16px; }
-  .thumb, .icon { width: 60px; height: 60px; border-radius: 10px; }
+  .thumb, .icon { width: 56px; height: 56px; border-radius: 10px; }
+  .thumb { padding: 5px; }
   .sectionTitle { font-size: 1.3rem; }
   .block { padding: 14px 12px; }
   .title { font-size: .98rem; }

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// src/pages/member/Membership.js
+import React, { useEffect, useState, useCallback } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 
@@ -9,7 +10,7 @@ export default function Membership() {
   const [busyPmId, setBusyPmId] = useState(null);
   const navigate = useNavigate();
 
-  // ---- Theme (soft pink) ----
+  // ---- Theme (soft pink, PlanDetailPage 톤과 매칭) ----
   const color = {
     bg: "#fff7fa",
     card: "#ffffff",
@@ -20,47 +21,65 @@ export default function Membership() {
     muted: "#8a8a8a",
     warnBg: "#fff4e6",
     warnBorder: "#ffd9b3",
-    shadow: "0 10px 24px rgba(255,111,165,0.15)",
+    shadow: "0 10px 24px rgba(255,160,200,0.20)",
   };
+
+  // ===== 공통 모달 상태 =====
+  const [modal, setModal] = useState({
+    open: false,
+    title: "",
+    description: "",
+    tone: "info", // "info" | "confirm" | "success" | "error" | "warn"
+    primaryLabel: "확인",
+    secondaryLabel: "취소",
+    onConfirm: null,
+    onCancel: null,
+  });
+
+  const openModal = useCallback((cfg) => {
+    setModal((m) => ({ ...m, ...cfg, open: true }));
+  }, []);
+  const closeModal = useCallback(() => {
+    setModal((m) => ({ ...m, open: false, onConfirm: null, onCancel: null }));
+  }, []);
+
+  // 접근성: ESC로 닫기
+  useEffect(() => {
+    if (!modal.open) return;
+    const onKey = (e) => e.key === "Escape" && closeModal();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modal.open, closeModal]);
 
   // =========================
   // Date helpers
   // =========================
   const pad2 = (n) => String(n).padStart(2, "0");
-
   const fmtDate = (raw) => {
     if (!raw && raw !== 0) return "-";
-
-    // 배열 [yyyy,MM,dd]
     if (Array.isArray(raw) && raw.length >= 3) {
       const y = raw[0], m = raw[1], d = raw[2];
       if (!isNaN(Number(y)) && !isNaN(Number(m)) && !isNaN(Number(d))) {
         return `${y}-${pad2(m)}-${pad2(d)}`;
       }
     }
-    // 객체 {year,month,day}
     if (typeof raw === "object" && raw) {
       const y = raw.year ?? raw.y, m = raw.month ?? raw.m, d = raw.day ?? raw.d;
       if (y && m && d) return `${y}-${pad2(m)}-${pad2(d)}`;
     }
-    // 문자열
     if (typeof raw === "string") {
       if (raw.includes("T") || raw.includes(":")) {
         const d = new Date(raw);
         if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
       }
       const digits = raw.replace(/\D/g, "");
-      if (digits.length >= 8) {
-        return `${digits.slice(0,4)}-${digits.slice(4,6)}-${digits.slice(6,8)}`;
-      }
+      if (digits.length >= 8) return `${digits.slice(0,4)}-${digits.slice(4,6)}-${digits.slice(6,8)}`;
     }
-    // 숫자 epoch
     if (typeof raw === "number") {
       const ms = raw < 2e10 ? raw * 1000 : raw;
       const d = new Date(ms);
       if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
     }
-    // 마지막 시도
     const d = new Date(raw);
     if (!isNaN(d)) return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
     return "-";
@@ -76,7 +95,6 @@ export default function Membership() {
   const getNextBillingAt = (s) =>
     s.nextBillingAt ?? s.pmNextBil ?? s.pmNextBill ?? s.nextBillAt ?? s.nextBillingDate ?? s.next_billing_at ?? null;
 
-  // ---- 다음 갱신 예정 표시용 ----
   const getPlanName = (s, next=false) =>
     next ? (s.nextPlanName ?? s.nextPlan?.planName ?? s.nextPlan?.name ?? s.nextPlanCode ?? null)
          : (s.planName ?? s.plan?.planName ?? s.plan?.name ?? s.planCode ?? null);
@@ -108,60 +126,45 @@ export default function Membership() {
        s.nextPlanCode || s.nextPlanName || s.nextTermMonth || s.nextPriceAmount);
 
   const addMonths = (raw, m = 1) => {
-  if (raw == null) return null;
-
-  let d = null;
-
-  // 1) 배열 [yyyy, MM, dd, hh?, mm?, ss?]
-  if (Array.isArray(raw)) {
-    if (raw.length >= 3) {
-      const [y, M, D, hh = 0, mm = 0, ss = 0] = raw.map((v) => Number(v));
+    if (raw == null) return null;
+    let d = null;
+    if (Array.isArray(raw)) {
+      if (raw.length >= 3) {
+        const [y, M, D, hh = 0, mm = 0, ss = 0] = raw.map((v) => Number(v));
+        if (!Number.isNaN(y) && !Number.isNaN(M) && !Number.isNaN(D)) {
+          d = new Date(y, M - 1, D, hh, mm, ss);
+        }
+      }
+    } else if (typeof raw === "object") {
+      const y = Number(raw.year ?? raw.y);
+      const M = Number(raw.month ?? raw.m);
+      const D = Number(raw.day ?? raw.d);
+      const hh = Number(raw.hour ?? raw.h ?? 0);
+      const mm = Number(raw.minute ?? raw.min ?? 0);
+      const ss = Number(raw.second ?? raw.s ?? 0);
       if (!Number.isNaN(y) && !Number.isNaN(M) && !Number.isNaN(D)) {
-        d = new Date(y, M - 1, D, hh, mm, ss);
+        d = new Date(y, M - 1, D, isNaN(hh) ? 0 : hh, isNaN(mm) ? 0 : mm, isNaN(ss) ? 0 : ss);
+      }
+    } else if (typeof raw === "number") {
+      const ms = raw < 2e10 ? raw * 1000 : raw;
+      d = new Date(ms);
+    } else if (typeof raw === "string") {
+      if (raw.includes("T") || raw.includes(":")) d = new Date(raw);
+      else {
+        const digits = raw.replace(/\D/g, "");
+        if (digits.length >= 8) {
+          const y = Number(digits.slice(0,4));
+          const M = Number(digits.slice(4,6));
+          const D = Number(digits.slice(6,8));
+          d = new Date(y, M - 1, D);
+        } else d = new Date(raw);
       }
     }
-  }
-  // 2) 객체 {year, month, day, hour?, minute?, second?}
-  else if (typeof raw === "object") {
-    const y = Number(raw.year ?? raw.y);
-    const M = Number(raw.month ?? raw.m);
-    const D = Number(raw.day ?? raw.d);
-    const hh = Number(raw.hour ?? raw.h ?? 0);
-    const mm = Number(raw.minute ?? raw.min ?? 0);
-    const ss = Number(raw.second ?? raw.s ?? 0);
-    if (!Number.isNaN(y) && !Number.isNaN(M) && !Number.isNaN(D)) {
-      d = new Date(y, M - 1, D, isNaN(hh) ? 0 : hh, isNaN(mm) ? 0 : mm, isNaN(ss) ? 0 : ss);
-    }
-  }
-  // 3) 숫자 epoch(s/ms)
-  else if (typeof raw === "number") {
-    const ms = raw < 2e10 ? raw * 1000 : raw;
-    d = new Date(ms);
-  }
-  // 4) 문자열
-  else if (typeof raw === "string") {
-    if (raw.includes("T") || raw.includes(":")) {
-      d = new Date(raw);
-    } else {
-      const digits = raw.replace(/\D/g, "");
-      if (digits.length >= 8) {
-        // yyyyMMdd
-        const y = Number(digits.slice(0, 4));
-        const M = Number(digits.slice(4, 6));
-        const D = Number(digits.slice(6, 8));
-        d = new Date(y, M - 1, D);
-      } else {
-        d = new Date(raw);
-      }
-    }
-  }
-
-  if (!(d instanceof Date) || Number.isNaN(d.getTime())) return null;
-
-  const nd = new Date(d);
-  nd.setMonth(nd.getMonth() + Number(m || 0));
-  return nd.toISOString();
-};
+    if (!(d instanceof Date) || Number.isNaN(d.getTime())) return null;
+    const nd = new Date(d);
+    nd.setMonth(nd.getMonth() + Number(m || 0));
+    return nd.toISOString();
+  };
 
   // data load
   const load = async () => {
@@ -204,42 +207,85 @@ export default function Membership() {
   };
   const goNewPlans = () => navigate("/plans");
 
-  // cancel schedule
-  const scheduleCancel = async (pmId) => {
+  // ===== 모달 기반 캔슬/리버트 플로우 =====
+  const scheduleCancel = (pmId) => {
     if (!pmId) return;
-    if (!window.confirm("이번 결제기간 종료 시 자동으로 해지됩니다. 진행할까요?")) return;
-    try {
-      setBusyPmId(pmId);
-      await api.post(`/subscriptions/${pmId}/cancel`);
-      await load();
-      alert("해지 예약이 완료되었습니다. 기간 종료일까지 이용 가능합니다.");
-    } catch (e) {
-      const msg =
-        e?.response?.data?.error || e?.response?.data?.message || "해지 예약에 실패했습니다.";
-      alert(msg);
-    } finally {
-      setBusyPmId(null);
-    }
+    openModal({
+      tone: "confirm",
+      title: "해지 예약하시겠어요?",
+      description: "이번 결제기간 종료 시 자동으로 해지되며, 종료일까지는 이용 가능합니다.",
+      primaryLabel: "해지 예약",
+      secondaryLabel: "계속 이용",
+      onConfirm: async () => {
+        try {
+          setBusyPmId(pmId);
+          await api.post(`/subscriptions/${pmId}/cancel`);
+          await load();
+          openModal({
+            tone: "success",
+            title: "해지 예약 완료",
+            description: "기간 종료일까지 이용 가능하며, 다음 결제는 진행되지 않습니다.",
+            primaryLabel: "확인",
+            onConfirm: () => closeModal(),
+          });
+        } catch (e) {
+          const msg =
+            e?.response?.data?.error ||
+            e?.response?.data?.message ||
+            "해지 예약에 실패했습니다.";
+          openModal({
+            tone: "error",
+            title: "해지 예약 실패",
+            description: msg,
+            primaryLabel: "확인",
+            onConfirm: () => closeModal(),
+          });
+        } finally {
+          setBusyPmId(null);
+        }
+      },
+      onCancel: () => closeModal(),
+    });
   };
 
-  // revert cancel
-  const revertCancel = async (pmId) => {
+  const revertCancel = (pmId) => {
     if (!pmId) return;
-    if (!window.confirm("해지 예약을 취소하고 계속 이용하시겠어요?")) return;
-    try {
-      setBusyPmId(pmId);
-      await api.post(`/subscriptions/${pmId}/cancel/revert`);
-      await load();
-      alert("해지 예약이 취소되었습니다. 계속 이용하실 수 있어요.");
-    } catch (e) {
-      const msg =
-        e?.response?.data?.error ||
-        e?.response?.data?.message ||
-        "해지 예약 취소에 실패했습니다.";
-      alert(msg);
-    } finally {
-      setBusyPmId(null);
-    }
+    openModal({
+      tone: "confirm",
+      title: "해지 예약을 취소할까요?",
+      description: "해지 예약이 취소되고, 다음 결제부터 정상적으로 갱신됩니다.",
+      primaryLabel: "해지 예약 취소",
+      secondaryLabel: "닫기",
+      onConfirm: async () => {
+        try {
+          setBusyPmId(pmId);
+          await api.post(`/subscriptions/${pmId}/cancel/revert`);
+          await load();
+          openModal({
+            tone: "success",
+            title: "해지 예약이 취소되었습니다",
+            description: "계속 이용하실 수 있어요.",
+            primaryLabel: "확인",
+            onConfirm: () => closeModal(),
+          });
+        } catch (e) {
+          const msg =
+            e?.response?.data?.error ||
+            e?.response?.data?.message ||
+            "해지 예약 취소에 실패했습니다.";
+          openModal({
+            tone: "error",
+            title: "해지 예약 취소 실패",
+            description: msg,
+            primaryLabel: "확인",
+            onConfirm: () => closeModal(),
+          });
+        } finally {
+          setBusyPmId(null);
+        }
+      },
+      onCancel: () => closeModal(),
+    });
   };
 
   // buttons
@@ -313,6 +359,8 @@ export default function Membership() {
     return (
       <div style={{ padding: 24, display: "grid", placeItems: "center", minHeight: 240 }}>
         <div style={{ color: "tomato" }}>{err}</div>
+        {/* 에러도 모달로 띄우고 싶으면 아래 주석 해제 */}
+        {/* <button style={{...btnPrimary, marginTop: 12}} onClick={() => openModal({ tone:'error', title:'오류', description: err, primaryLabel:'닫기', onConfirm: closeModal })}>자세히 보기</button> */}
       </div>
     );
   }
@@ -324,7 +372,7 @@ export default function Membership() {
         {/* Page header */}
         <div style={{ textAlign: "center", marginBottom: 18 }}>
           <h2 style={{ margin: 0, color: color.text, fontSize: 28, letterSpacing: 0.2 }}>
-            내 구독
+            구독 확인
           </h2>
           <p style={{ marginTop: 8, color: color.muted, fontSize: 14 }}>
             플랜과 결제 일정을 한 곳에서 관리하세요.
@@ -512,23 +560,12 @@ export default function Membership() {
                     const scheduled = hasScheduledChange(s);
                     const nPlanName = getPlanName(s, scheduled);
                     const nPlanCode = getPlanCode(s, scheduled);
-
-                    // 프론트 계산 규칙:
-                    // 1) 다음 결제일 nStart = nextBillingAt
-                    // 2) 개월수 months = (변경예약이면 nextTermMonth) else (termMonth → pmCycle → 1)
-                    // 3) nEnd = addMonths(nStart, months)
                     const months =
-                      getMonths(s, scheduled) ??
-                      s.termMonth ??
-                      s.pmCycle ??
-                      1;
-
+                      getMonths(s, scheduled) ?? s.termMonth ?? s.pmCycle ?? 1;
                     const nStart = getNextBillingAt(s);
                     const nEnd = nStart ? addMonths(nStart, months) : null;
-
                     const nAmount = getAmount(s, scheduled);
                     const nCurr   = getCurr(s, scheduled);
-
                     if (!nStart) return null;
 
                     return (
@@ -594,6 +631,20 @@ export default function Membership() {
           </div>
         )}
       </div>
+
+      {/* ===== 공통 모달 ===== */}
+      {modal.open && (
+        <Modal
+          tone={modal.tone}
+          title={modal.title}
+          description={modal.description}
+          primaryLabel={modal.primaryLabel}
+          secondaryLabel={modal.secondaryLabel}
+          onClose={closeModal}
+          onConfirm={modal.onConfirm}
+          onCancel={modal.onCancel ?? closeModal}
+        />
+      )}
     </div>
   );
 }
@@ -604,6 +655,94 @@ function Field({ label, value }) {
     <div style={{ display: "grid", gap: 4 }}>
       <div style={{ fontSize: 12, color: "#8a8a8a" }}>{label}</div>
       <div style={{ fontWeight: 600, color: "#333" }}>{value ?? "-"}</div>
+    </div>
+  );
+}
+
+/* === PlanDetailPage 톤에 맞춘 공통 모달 컴포넌트 === */
+function Modal({
+  tone = "info",
+  title,
+  description,
+  primaryLabel = "확인",
+  secondaryLabel,
+  onConfirm,
+  onCancel,
+  onClose,
+}) {
+  const palette = {
+    info:   { badge: "정보",  bg: "#FFF6FA", border: "#FFD1E5", text: "#6F5663", gradFrom: "#FFC8DB", gradTo: "#FFB3D0" },
+    confirm:{ badge: "확인",  bg: "#FFF6FA", border: "#FFD1E5", text: "#6F5663", gradFrom: "#FFC8DB", gradTo: "#FFB3D0" },
+    success:{ badge: "완료",  bg: "#F6FFF9", border: "#CFEFD8", text: "#2F6B41", gradFrom: "#98E3B2", gradTo: "#7ED59F" },
+    warn:   { badge: "주의",  bg: "#FFF8EE", border: "#FFD9B3", text: "#8A4B00", gradFrom: "#FFD9B3", gradTo: "#FFC68A" },
+    error:  { badge: "오류",  bg: "#FFF5F5", border: "#FFB8B8", text: "#8E2D2D", gradFrom: "#FFB8B8", gradTo: "#FF9B9B" },
+  }[tone] || {
+    badge: "알림", bg: "#FFF6FA", border: "#FFD1E5", text: "#6F5663", gradFrom: "#FFC8DB", gradTo: "#FFB3D0"
+  };
+
+  const styles = {
+    overlay: {
+      position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)",
+      display: "grid", placeItems: "center", zIndex: 9999,
+    },
+    card: {
+      width: "min(92vw, 520px)", background: "#fff", borderRadius: 18,
+      border: `1px solid ${palette.border}`, boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
+      padding: 20,
+    },
+    badge: {
+      display: "inline-block", padding: "3px 10px", borderRadius: 999,
+      background: palette.bg, border: `1px solid ${palette.border}`,
+      color: palette.text, fontSize: 12, fontWeight: 800, marginBottom: 10,
+    },
+    title: { fontSize: 18, fontWeight: 900, color: "#4A3C44", margin: 0 },
+    desc: { marginTop: 8, fontSize: 14, color: "#9A8190", lineHeight: 1.5 },
+    actions: { marginTop: 16, display: "grid", gridTemplateColumns: secondaryLabel ? "1fr 1fr" : "1fr", gap: 10 },
+    btn: {
+      padding: "14px 16px", borderRadius: 999, border: `1px solid ${palette.border}`,
+      background: "#fff", color: "#6F5663", fontWeight: 800, fontSize: 15, width: "100%",
+      boxShadow: "0 3px 0 rgba(0,0,0,0.03)",
+    },
+    btnPrimary: {
+      padding: "14px 18px", borderRadius: 999, border: "none",
+      background: `linear-gradient(180deg, ${palette.gradFrom}, ${palette.gradTo})`,
+      color: "#fff", fontWeight: 900, fontSize: 16, width: "100%",
+      boxShadow: "0 10px 20px rgba(0,0,0,0.06)",
+    },
+  };
+
+  return (
+    <div style={styles.overlay} role="dialog" aria-modal="true" onMouseDown={onClose}>
+      <div style={styles.card} onMouseDown={(e) => e.stopPropagation()}>
+        <div style={styles.badge}>{palette.badge}</div>
+        <h3 style={styles.title}>{title}</h3>
+        {description && <div style={styles.desc}>{description}</div>}
+
+        <div style={styles.actions}>
+          {secondaryLabel && (
+            <button
+              type="button"
+              style={styles.btn}
+              onClick={() => {
+                onCancel && onCancel();
+                onClose && onClose();
+              }}
+            >
+              {secondaryLabel}
+            </button>
+          )}
+          <button
+            type="button"
+            style={styles.btnPrimary}
+            onClick={async () => {
+              if (onConfirm) await onConfirm();
+              onClose && onClose();
+            }}
+          >
+            {primaryLabel}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
