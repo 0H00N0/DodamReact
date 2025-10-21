@@ -1,4 +1,4 @@
-// SmartBoard.premium.jsx — 프리미엄 + 다크모드 토글 내장 (v3)
+// SmartBoard.jsx — 프리미엄 + 다크모드 토글 내장 (v3)
 // - Header에 다크모드 토글 버튼 추가 (localStorage 지속, 시스템 테마 감지)
 // - CSS 모듈과 연동된 애니메이션 스위치(햇님/달 아이콘, 슬라이딩 노브)
 // - 기존 v2의 간격/가독성 개선 유지
@@ -9,8 +9,8 @@ import styles from "./SmartBoard.module.css";
 import { Empty } from "antd";
 
 /*** ▼▼ 환경 설정 ▼▼ ***/
-const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
-const BASE_URL = "http://localhost:8080/api"; // Spring Boot 기본 예시
+const USE_MOCK = false; // 실제 백엔드(/api) 연동 시 false 로 변경
+const BASE_URL = "http://localhost:8080"; // Spring Boot 기본 예시
 const THEME_KEY = "smartboard_theme";
 
 /*** ▼▼ 유틸 ***/
