@@ -53,12 +53,6 @@ import LogisticsGuard from "./routes/LogisticsGuard";
 
 import { AuthProvider } from "./contexts/AuthContext";   // ✅ 추가
 
-<Routes>
-  {/* ...기존 라우트... */}
-  <Route path="/smartboard" element={<SmartBoard />} />
-  {/* ...기존 라우트... */}
-</Routes>
-// ...existing code...
 
 // React.lazy로 코드 스플리팅
 
