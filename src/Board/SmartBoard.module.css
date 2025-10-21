@@ -401,9 +401,5 @@
 .tableReadable tr {
   line-height: 1.5em;
 }
-:global(.flex.items-center.justify-between .text-xs.text-gray-500 svg) {
-  vertical-align: middle;  /* 아이콘과 텍스트 수직 정렬 */
-  display: inline-block;   /* 인라인 요소처럼 정렬 */
-  transition: transform .12s ease, opacity .12s ease;
-}
+
 
