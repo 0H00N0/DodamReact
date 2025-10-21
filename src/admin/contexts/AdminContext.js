@@ -118,7 +118,16 @@ const request = async (url, options = {}) => {
 
   // --- Product ---
 const getAllProductStates = async () => request(`${API_BASE_URL}/admin/prostates`);
-const getAllProducts = async () => request(`${API_BASE_URL}/admin/products`);
+const getAllProducts = async () => {
+  console.log('========== getAllProducts 호출됨 ==========');
+  console.log('호출 스택:', new Error().stack);
+  console.log('요청 URL:', `${API_BASE_URL}/admin/products`);
+  
+  const result = await request(`${API_BASE_URL}/admin/products`);
+  
+  console.log('응답:', result);
+  return result;
+};
 const getProductById = async (id) => request(`${API_BASE_URL}/admin/products/${id}`);
 
 const createProduct = async (productData) => {
