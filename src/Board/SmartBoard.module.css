@@ -395,8 +395,8 @@
   opacity: 0.9;
 }
 .tableReadable th {
-  letter-spacing: 0.12em;
-  word-spacing: 0.12em;
+  letter-spacing: 0.7em;
+  word-spacing: 3.0em;
 }
 .tableReadable tr {
   line-height: 1.5em;
