@@ -120,7 +120,7 @@ export default function LoginForm() {
           
           <button
             type="button"
-            onClick={() => window.open("/member/findIdModal", "_blank", "width=500,height=600")}
+            onClick={() => window.open("/auth/find-id", "_blank", "width=500,height=600")}
             disabled={loading}
             style={styles.linkBtn}
           >
@@ -128,7 +128,7 @@ export default function LoginForm() {
           </button>
           <button
             type="button"
-            onClick={() => window.open("/member/findPw", "_blank", "width=500,height=600")}
+            onClick={() => window.open("/auth/find-pw", "_blank", "width=500,height=600")}
             disabled={loading}
             style={styles.linkBtn}
           >
