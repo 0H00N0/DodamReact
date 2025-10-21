@@ -24,9 +24,6 @@ import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
-import OrderHistory from "./pages/orders/OrderHistory";
-import OrderReturns from "./pages/orders/OrderReturns";
-import OrderExchanges from "./pages/orders/OrderExchanges";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
 
@@ -51,9 +48,6 @@ import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
 import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
 import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
 import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
-
-import OrderInquiryNew from "./pages/orders/OrderInquiryNew"; // 상품 문의
-import MyInquiries from "./pages/member/MyInquiries"; // 문의 내역
 
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
@@ -81,6 +75,7 @@ import FooterYouthPolicyPage from "./pages/FooterPage/FooterYouthPolicyPage";
 import FooterEcommercePage from "./pages/FooterPage/FooterEcommercePage";
 
 import ErrorPage from "./pages/ErrorPage";
+import SmartBoard from "./Board/SmartBoard";
 
 export const router = createRouter([
   {
@@ -112,19 +107,7 @@ export const router = createRouter([
       // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
       { path: "cart", element: <Cart /> },           // 헤더 카트
       { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
-      { path: "orders", element: <OrderHistory /> },
-
-      //상품 교환 및 반품
-      { path: "orders/returns", element: <OrderReturns /> },
-      { path: "orders/exchanges", element: <OrderExchanges /> },
-
-      // 주문 관련
-      { path: "orders/inquiry", element: <OrderInquiryNew /> },
       
-      // 마이페이지
-      { path: "member/inquiries", element: <MyInquiries /> },
-
-
       // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
@@ -165,6 +148,7 @@ export const router = createRouter([
           { path: "inquiry", element: <Inquiry /> },
           { path: "faq", element: <FAQ /> },
           { path: "company", element: <Company /> },
+          { path: "smartboard", element: <SmartBoard /> },  // 스마트 보드도 커뮤니티 게시판으로 처리
         ],
       },
 
