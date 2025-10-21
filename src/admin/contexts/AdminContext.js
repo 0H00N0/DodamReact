@@ -216,6 +216,19 @@ const getOrderById = async (orderId) => {
   const { data } = await api.get(`/admin/orders/${orderId}`);
   return data;
 };
+ /** ✨ 배송 상태 변경 — 경로를 /admin/orders 로 고정 */
+const updateOrderStatus = async (renNum, status) => {
+  try {
+    const { data } = await api.patch(`/admin/orders/${renNum}/status`, { status });
+    addNotification("배송 상태가 변경되었습니다.", "success");
+    return data;
+  } catch (err) {
+    const res = err?.response?.data;
+    const msg = res?.message || res?.error || err?.message || "배송 상태 변경 실패";
+    addNotification(msg, "error");
+    throw err;
+  }
+};
   // --- Members ---
   const getAllMembers = async () => request(`${API_BASE_URL}/admin/members`);
   const getMemberById = async (id) => request(`${API_BASE_URL}/admin/members/${id}`);
@@ -489,6 +502,7 @@ const getAllPlanTerms = async () => request(`${API_BASE_URL}/admin/planterms`);
     getAllSubscriptions,
     getAllInvoices,
     updateTrackingNumber,
+    updateOrderStatus,
   };
 
   return (

@@ -1,27 +1,53 @@
-// src/main/frontend/.../OrderManagement.js
-import React, { useEffect, useState, useCallback } from 'react';
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
-import { useAdmin } from './contexts/AdminContext';
-import OrderDetail from './OrderDetail';
-import './OrderManagement.css';
+// src/admin/orders/OrderManagement.js
+import React, { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { useAdmin } from "./contexts/AdminContext";
+import "./OrderManagement.css";
 
-const OrderTable = ({ title, orders }) => {
+const statusLabel = (s) => {
+  const m = { PENDING: "대기중", SHIPPING: "배송중", DELIVERED: "배송완료", RETURNED: "반납완료" };
+  return m[s] || s || "미정";
+};
+
+const OrderTable = ({ title, orders, onReload }) => {
+  const { updateOrderStatus } = useAdmin();
+  const [statusDraft, setStatusDraft] = useState({}); // renNum -> status
+
+  const handleSave = async (renNum) => {
+    const next = statusDraft[renNum];
+    if (!next) return;
+    await updateOrderStatus(renNum, next);
+    await onReload?.();
+  };
+
   const columns = [
-    { header: '주문번호', accessor: o => <Link to={`/admin/orders/${o.renNum}`}>{o.renNum}</Link> },
-    { header: '주문자명', accessor: o => o.mid || '미정' },
-    { header: '상품명', accessor: o => o.prodName || '미정' },
-    { header: '대여일', accessor: o => o.rentalDate ? new Date(o.rentalDate).toLocaleDateString() : '-' },
-    { header: '반납일', accessor: o => o.returnDate ? new Date(o.returnDate).toLocaleDateString() : '미정' },
-    { header: '배송상태', accessor: o => {
-      const statusMap = {
-        'PENDING': '대기중',
-        'SHIPPING': '배송중',
-        'DELIVERED': '배송완료',
-        'RETURNED': '반납완료'
-      };
-      return statusMap[o.status] || o.status || '미정';
-    }},
-    { header: '운송장', accessor: o => o.trackingNum || '미입력' },
+    { header: "주문번호", render: (o) => <Link to={`/admin/orders/${o.renNum}`}>{o.renNum}</Link> },
+    { header: "주문자명", render: (o) => o.mid || "미정" },
+    { header: "상품명", render: (o) => o.prodName || "미정" },
+    { header: "대여일", render: (o) => (o.rentalDate ? new Date(o.rentalDate).toLocaleDateString() : "-") },
+    { header: "반납일", render: (o) => (o.returnDate ? new Date(o.returnDate).toLocaleDateString() : "미정") },
+    { header: "배송상태", render: (o) => statusLabel(o.status || o.renShip) },
+    { header: "운송장", render: (o) => o.trackingNum || "미입력" },
+    {
+      header: "상태변경",
+      render: (o) => (
+        <div className="status-actions">
+          <select
+            className="status-select"
+            defaultValue={(o.status || o.renShip || "SHIPPING").toUpperCase()}
+            onChange={(e) =>
+              setStatusDraft((prev) => ({ ...prev, [o.renNum]: e.target.value }))
+            }
+          >
+            <option value="SHIPPING">배송중</option>
+            <option value="DELIVERED">배송완료</option>
+          </select>
+          <button className="status-save-btn" onClick={() => handleSave(o.renNum)}>
+            저장
+          </button>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -33,12 +59,18 @@ const OrderTable = ({ title, orders }) => {
             <tr>{columns.map((c, i) => <th key={i}>{c.header}</th>)}</tr>
           </thead>
           <tbody>
-            {orders?.length ? orders.map(o => (
-              <tr key={o.renNum}>
-                {columns.map((c, i) => <td key={i}>{c.accessor(o)}</td>)}
+            {Array.isArray(orders) && orders.length ? (
+              orders.map((o) => (
+                <tr key={o.renNum}>
+                  {columns.map((c, i) => (
+                    <td key={i}>{c.render(o)}</td>
+                  ))}
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={columns.length} className="no-data">주문이 없습니다.</td>
               </tr>
-            )) : (
-              <tr><td colSpan={columns.length} className="no-data">주문이 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -57,16 +89,10 @@ const OrderManagement = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('주문 목록 조회 시작');
       const data = await getAllOrders();
-      console.log('받은 주문 데이터:', data);
-      if (!data) {
-        throw new Error('주문 데이터가 없습니다');
-      }
-      setOrders(Array.isArray(data) ? data : data.content || []);
+      setOrders(Array.isArray(data) ? data : data?.content || []);
     } catch (e) {
-      console.error('주문 목록 조회 실패:', e);
-      setError(e.message || '주문 데이터를 불러오는데 실패했습니다.');
+      setError(e?.message || "주문 데이터를 불러오는데 실패했습니다.");
     } finally {
       setLoading(false);
     }
@@ -79,7 +105,7 @@ const OrderManagement = () => {
 
   return (
     <div className="order-management-container">
-      <OrderTable title="전체 대여 목록" orders={orders} />
+      <OrderTable title="전체 대여 목록" orders={orders} onReload={fetchOrders} />
     </div>
   );
 };
