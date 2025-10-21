@@ -25,13 +25,17 @@ export default function ProductCard({ item, onClick }) {
         if (cancelled) return;
         if (Array.isArray(data) && data.length > 0) {
           const v = data[0];
+
+          // 방어 로직: data: 가 포함된 경우 data URI를 추출/직접 사용
           let resolvedUrl;
-          if (typeof v === "string" && v.startsWith("data:")) {
-            resolvedUrl = v; // data URI 직접 사용
+          if (typeof v === "string" && v.includes("data:")) {
+            // v 가 "data:..." 이거나 "http://.../images/data:..." 같이 섞여있을 수 있으므로 data: 인덱스부터 사용
+            const idx = v.indexOf("data:");
+            resolvedUrl = v.substring(idx);
           } else if (typeof v === "string" && v.startsWith("http")) {
-            resolvedUrl = `http://localhost:8080/api/image/proxy?url=${encodeURIComponent(v)}`; // 외부 URL -> 프록시
+            resolvedUrl = `http://localhost:8080/api/image/proxy?url=${encodeURIComponent(v)}`;
           } else if (typeof v === "string" && v.length > 0) {
-            resolvedUrl = `http://localhost:8080/images/${v}`; // 파일명 -> 백엔드 이미지 경로
+            resolvedUrl = `http://localhost:8080/images/${v}`;
           } else {
             resolvedUrl = fallbackUrl;
           }
