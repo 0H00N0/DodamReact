@@ -2,7 +2,21 @@ import React from "react";
 import { createBrowserRouter as createRouter } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import App from "./App";
-
+/** Admin */
+import Admin from "./admin/Admin"; // 레이아웃
+import Dashboard from "./admin/Dashboard";
+import UserManagement from "./admin/UserManagement";
+import ProductManagement from "./admin/ProductManagement";
+import PlanManagement from "./admin/PlanManagement";
+import CategoryManagement from "./admin/CategoryManagement";
+import DeliverymanManagement from "./admin/DeliverymanManagement";
+import OrderManagement from "./admin/OrderManagement";
+import OrderDetail from "./admin/OrderDetail";
+import BoardManagement from "./admin/BoardManagement";
+import VocManagement from "./admin/VocManagement";
+import EventManagement from "./admin/EventManagement";
+import DiscountManagement from "./admin/DiscountManagement";
+import BulkProductUpload from "./admin/BulkProductUpload";
 /** Plan */
 import CheckoutPage from "./Plan/PlanCheckOut";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
@@ -28,12 +42,8 @@ import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
-import OrderHistory from "./pages/orders/OrderHistory";
-import OrderReturns from "./pages/orders/OrderReturns";
-import OrderExchanges from "./pages/orders/OrderExchanges";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
-import ReviewList from "./pages/member/ReviewList";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -52,12 +62,9 @@ import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
 import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
 import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
-import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
-import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
-import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
-
-import OrderInquiryNew from "./pages/orders/OrderInquiryNew"; // 상품 문의
-import MyInquiries from "./pages/member/MyInquiries"; // 문의 내역
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";
+import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
@@ -94,6 +101,29 @@ export const router = createRouter([
       /** Home */
       { index: true, element: <Home /> },
 
+      /*admin*/
+      {
+      path: "admin",
+      element: <Admin />, // ✅ Admin 레이아웃
+      children: [
+        { index: true, element: <Navigate to="dashboard" replace /> },
+        { path: "dashboard", element: <Dashboard /> },
+        { path: "users", element: <UserManagement /> },
+        { path: "products", element: <ProductManagement /> },
+        { path: "plans", element: <PlanManagement /> },
+        { path: "categories", element: <CategoryManagement /> },
+        { path: "deliverymen", element: <DeliverymanManagement /> },
+        { path: "orders", element: <OrderManagement /> },
+        { path: "orders/:orderId", element: <OrderDetail /> },
+        { path: "boards", element: <BoardManagement /> },
+        { path: "voc", element: <VocManagement /> },
+        { path: "events", element: <EventManagement /> },
+        { path: "discounts", element: <DiscountManagement /> },
+        { path: "products/bulk-upload", element: <BulkProductUpload /> },
+        { path: "*", element: <ErrorPage /> }, // or 404 페이지
+      ],
+    },
+
       /** Member */
       { path: "login", element: <LoginForm /> },
       { path: "signup", element: <SignupForm /> },
@@ -111,29 +141,15 @@ export const router = createRouter([
       { path: "member/membership", element: <Membership /> },
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
-      { path: "member/reviewList", element: <ReviewList /> },
 
-      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
-      { path: "cart", element: <Cart /> },           // 헤더 카트
-      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
-      { path: "orders", element: <OrderHistory /> },
+      /** Cart */
+      { path: "cart", element: <Cart /> },
+      { path: "member/cart", element: <Cart /> },
 
-      //상품 교환 및 반품
-      { path: "orders/returns", element: <OrderReturns /> },
-      { path: "orders/exchanges", element: <OrderExchanges /> },
-
-      // 주문 관련
-      { path: "orders/inquiry", element: <OrderInquiryNew /> },
-      
-      // 마이페이지
-      { path: "member/inquiries", element: <MyInquiries /> },
-
-
-      // Product
+      /** Product */
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
-      { path: "product/:productId", element: <ProductDetailPage /> },
       { path: "category/:categoryName", element: <Category /> },
 
       /** Plan (목록/상세) */
