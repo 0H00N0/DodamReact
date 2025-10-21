@@ -160,7 +160,7 @@ export default function SignupForm() {
   return (
     <div style={styles.wrapper}>
       <form onSubmit={onSubmit} style={styles.form}>
-        <h2>회원가입</h2>
+        <h2 style={{ color: "#111" }}>회원가입</h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
   <span style={{ color: "red" }}>*</span>는 필수 입력사항입니다.
 </div>
@@ -372,6 +372,7 @@ const styles = {
     borderRadius: 12,
     background: "#fff",
     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+    color: "#111",            // ← 라벨/제목/안내문 등 폼 내부 텍스트를 항상 어두운색으로
   },
   error: { color: "#c13030", fontSize: 14, marginTop: 4 },
   linkBtn: { background: "transparent", color: "#333", marginTop: 4, cursor: "pointer" },
