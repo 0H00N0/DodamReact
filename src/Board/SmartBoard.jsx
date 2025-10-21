@@ -71,16 +71,9 @@ function ensureSeed() {
   }
   if (!localStorage.getItem(LS_KEYS.faqs)) {
     const seed = [
-      {
-        id: uid(),
-        q: "구독 일시정지 가능한가요?",
-        a: "네, 마이페이지 > 구독관리에서 1~3개월 범위로 일시정지가 가능합니다.",
-      },
-      {
-        id: uid(),
-        q: "결제 수단 변경은 어떻게 하나요?",
-        a: "마이페이지 > 결제수단에서 새로운 카드를 등록 후 기본으로 설정하세요.",
-      },
+      { id: uid(), q: "배송은 얼마나 걸리나요?", a: "보통 결제일 기준 2~3일 소요됩니다." },
+      { id: uid(), q: "교환/환불은 어떻게 하나요?", a: "고개센터나 1:1 문의를 통해 접수 가능합니다." },
+      { id: uid(), q: "회원탈퇴는 어디서 하나요?", a: "마이페이지 > 결제수단에서 새로운 카드를 등록 후 기본으로 설정하세요." }
     ];
     localStorage.setItem(LS_KEYS.faqs, JSON.stringify(seed));
   }
