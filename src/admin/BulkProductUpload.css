@@ -1,0 +1,105 @@
+/* BulkProductUpload.css */
+
+.bulk-upload-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.bulk-upload-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  font-weight: bold;
+}
+
+.bulk-upload-container .form-group {
+  margin-bottom: 1.2rem;
+}
+
+.bulk-upload-container label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+  color: #444;
+}
+
+.bulk-upload-container input[type="file"] {
+  display: block;
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.bulk-upload-container input[type="file"]:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+}
+
+.bulk-upload-container .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 1.5rem;
+}
+
+.bulk-upload-container .admin-btn {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.bulk-upload-container .admin-btn.primary {
+  background: #007bff;
+  border: none;
+  color: #fff;
+}
+
+.bulk-upload-container .admin-btn.primary:hover {
+  background: #0069d9;
+}
+
+.bulk-upload-container .admin-btn.secondary {
+  background: #f1f1f1;
+  border: none;
+  color: #333;
+}
+
+.bulk-upload-container .admin-btn.secondary:hover {
+  background: #e2e2e2;
+}
+
+/* 이미지 미리보기 (멀티파일 업로드 시 작은 썸네일) */
+.bulk-upload-container .image-preview-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+.bulk-upload-container .image-preview-item {
+  width: 100px;
+  height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bulk-upload-container .image-preview-item img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
