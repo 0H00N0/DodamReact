@@ -1,19 +1,14 @@
 import React, { useState, useEffect } from "react";
 
 export default function ProductCard({ item, onClick }) {
-  if (!item) return null;
-
-  // 클릭 디버그용 로그
-  const handleClick = (e) => {
-    console.log("ProductCard clicked:", item?.pronum);
-    if (typeof onClick === "function") onClick(item.pronum);
-  };
-
-  const [imgSrc, setImgSrc] = useState(item.image || "/default-image.png");
+  
+  const [imgSrc, setImgSrc] = useState(item?.image || "/default-image.png");
   const fallbackUrl = "/default-image.png";
 
   useEffect(() => {
-    // 이미 image가 있으면 fetch 불필요
+    console.log('[ProductCard effect start]', item?.pronum, 'initial imgSrc=', imgSrc);
+    if (!item) return;
+    
     if (item.image) {
       setImgSrc(item.image);
       return;
@@ -30,24 +25,59 @@ export default function ProductCard({ item, onClick }) {
         if (cancelled) return;
         if (Array.isArray(data) && data.length > 0) {
           const v = data[0];
-          const url = v.startsWith("http") ? v : `http://localhost:8080/images/${v}`;
-          setImgSrc(url);
+          let resolvedUrl;
+          if (typeof v === "string" && v.startsWith("data:")) {
+            resolvedUrl = v; // data URI 직접 사용
+          } else if (typeof v === "string" && v.startsWith("http")) {
+            resolvedUrl = `http://localhost:8080/api/image/proxy?url=${encodeURIComponent(v)}`; // 외부 URL -> 프록시
+          } else if (typeof v === "string" && v.length > 0) {
+            resolvedUrl = `http://localhost:8080/images/${v}`; // 파일명 -> 백엔드 이미지 경로
+          } else {
+            resolvedUrl = fallbackUrl;
+          }
+
+          console.log("[ProductCard] resolved image url:", resolvedUrl);
+          setImgSrc(resolvedUrl);
         } else {
           setImgSrc(fallbackUrl);
         }
       })
-      .catch(() => {
-        if (!cancelled) setImgSrc(fallbackUrl);
-      });
+       .catch(err => {
+      console.error('[ProductCard] fetch error', item.pronum, err);
+      if (!cancelled) setImgSrc(fallbackUrl);
+    });
 
     return () => { cancelled = true; };
-  }, [item.pronum, item.image]);
+  }, [item?.pronum, item?.image]);
+
+  // item 없을 때는 UI를 렌더하지 않음
+  if (!item) return null;
+
+  // 클릭 디버그용 로그
+  const handleClick = (e) => {
+    console.log("ProductCard clicked:", item?.pronum);
+    if (typeof onClick === "function") onClick(item.pronum);
+  };
 
   const handleImgError = (e) => {
-    if (!e.currentTarget.dataset.fallback) {
-      e.currentTarget.dataset.fallback = "true";
-      e.currentTarget.src = fallbackUrl;
+    const img = e.currentTarget;
+    console.error("image load error (onError):", img.src);
+
+    //(무한루프 방지)
+    if (img.dataset.fallback) return;
+
+    if (img.naturalWidth && img.naturalWidth > 0) {
+      console.warn("onError fired but image already has natural size, ignoring:", img.src);
+      return;
     }
+    img.dataset.fallback = "true";
+    img.src = fallbackUrl;
+  };
+
+  const handleImgLoad = (e) => {
+    console.log("image loaded:", e.currentTarget.src,
+                "natural:", e.currentTarget.naturalWidth, "x", e.currentTarget.naturalHeight,
+                "client:", e.currentTarget.clientWidth, "x", e.currentTarget.clientHeight);
   };
 
   return (
@@ -57,7 +87,7 @@ export default function ProductCard({ item, onClick }) {
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") handleClick(e); }}
-      style={{ WebkitTapHighlightColor: "transparent" }} // 모바일 클릭 invisible layer 방지
+      style={{ WebkitTapHighlightColor: "transparent" }}
     >
       <div className="ProductCard_imageContainer__i8YUo" style={{ pointerEvents: "none" }}>
         <img
@@ -65,6 +95,7 @@ export default function ProductCard({ item, onClick }) {
           src={imgSrc}
           alt={item.proname || "product"}
           onError={handleImgError}
+          onLoad={handleImgLoad}
           style={{ pointerEvents: "auto" }}
         />
       </div>
