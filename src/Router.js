@@ -68,6 +68,10 @@ import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
+// ...existing code...
+import SmartBoard from "./Board/SmartBoard";
+// ...existing code...
+import './index.css';
 
 /** Main */
 import Search from "./pages/Search";
@@ -196,8 +200,10 @@ export const router = createRouter([
           { path: "inquiry", element: <Inquiry /> },
           { path: "faq", element: <FAQ /> },
           { path: "company", element: <Company /> },
+          { path: "smartboard", element: <SmartBoard /> },
         ],
       },
+   
 
       /** FAQ 리다이렉트 */
       { path: "customer/faq", element: <Navigate to="/board/faq" replace /> },
