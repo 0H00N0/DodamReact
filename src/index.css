@@ -2,6 +2,9 @@
 @import './styles/variables.css';
 @import './styles/globals.css';
 @import './styles/typography.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 body {
   margin: 0;

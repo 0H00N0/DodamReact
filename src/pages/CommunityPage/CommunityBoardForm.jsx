@@ -1,7 +1,7 @@
 // src/pages/CommunityBoardForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createBoard } from "../../api/boardApi"; // axios POST 호출 함수
+import { createCommunityPost } from "../../api/communityApi";
 
 function CommunityBoardForm({ currentUser }) {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ function CommunityBoardForm({ currentUser }) {
     setError("");
 
     try {
-      const res = await createBoard(newBoard); // axios POST
+      const res = await createCommunityPost(newBoard);
       console.log("서버 응답:", res);
 
       // 엔티티에서 id 필드 기준
