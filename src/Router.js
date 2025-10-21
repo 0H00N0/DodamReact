@@ -108,6 +108,7 @@ export const router = createRouter([
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
+      { path: "product/:productId", element: <ProductDetailPage /> },
       { path: "category/:categoryName", element: <Category /> },
 
       // 구독 플랜 (목록/상세)

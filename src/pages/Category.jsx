@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { priceRanges, sortOptions, sortProducts, filterProductsByPrice } from '../utils/dummyData';
 import { useCart } from '../contexts/CartContext';
 import { useWishlist } from '../contexts/WishlistContext';
-import ProductCard from '../components/Product/ProductCard';
+import ProductCard from '../Product/pages/ProductCard';
 import styles from './Category.module.css';
 
 /**
@@ -99,6 +99,7 @@ const Category = () => {
 
   // 상품 카드 클릭 핸들러
   const handleProductClick = (productId) => {
+    console.log("handleProductClick called:", productId);
     navigate(`/product/${productId}`);
   };
 
@@ -197,13 +198,13 @@ const Category = () => {
       {filteredProducts.length > 0 ? (
         <div className={styles.productGrid}>
           {filteredProducts.map(product => (
-  <div key={product.pronum}>
-    <ProductCard
-      item={product}
-      onClick={() => handleProductClick(product.pronum)} 
-    />
-  </div>
-))}
+            <div key={product.pronum}>
+              <ProductCard
+                item={product}
+                onClick={handleProductClick} // 핸들러 함수 자체 전달
+              />
+            </div>
+          ))}
         </div>
       ) : (
         <div className={styles.noProducts}>
