@@ -9,8 +9,8 @@ import styles from "./SmartBoard.module.css";
 import { Empty } from "antd";
 
 /*** ▼▼ 환경 설정 ▼▼ ***/
-const USE_MOCK = false; // 실제 백엔드(/api) 연동 시 false 로 변경
-const BASE_URL = "http://localhost:8080"; // Spring Boot 기본 예시
+const USE_MOCK = true; // 실제 백엔드(/api) 연동 시 false 로 변경
+const BASE_URL = "http://localhost:8080/api"; // Spring Boot 기본 예시
 const THEME_KEY = "smartboard_theme";
 
 /*** ▼▼ 유틸 ***/
