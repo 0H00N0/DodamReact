@@ -19,10 +19,10 @@ const Community = () => {  //Community라는 함수형 컨포넌트이며, 이 �
             {/* 상세 페이지로 이동 */}
             <Link to={`/board/community/${post.id}`} style={{ textDecoration: "none", color: "black" }}>  {/*Link를 사용해서 글 제목에 클릭 기능을 넣었으며, 밑줄을 없애고 글자색을 검정으로 지정함*/}
               <h2>{post.title}</h2>  {/*게시글의 제목을 <h2> 크기로 화면에 보여줌*/}
-            </Link>   
-            <p style={{ color: "gray", fontSize: "14px" }}>{post.date}</p>
-          </li>
-        ))}
+            </Link> {/*링크 종료*/}
+            <p style={{ color: "gray", fontSize: "14px" }}>{post.date}</p>  {/*글자색 회색, 글자 크기 14px 적용된 p 태그로 post.date를 출력함*/}
+          </li>  {/*li 태그를 닫음*/}
+        ))}  {/*map() qk*/}
       </ul>
     </div>
   );
