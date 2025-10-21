@@ -145,10 +145,14 @@ export const router = createRouter([
       { path: "member/membership", element: <Membership /> },
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
-
-      /** Cart */
-      { path: "cart", element: <Cart /> },
-      { path: "member/cart", element: <Cart /> },
+      { path: "member/reviewList", element: <ReviewList /> },
+      { path: "auth/find-id", element: <FindIdModal /> },
+      { path: "auth/find-pw",  element: <FindPw /> },
+      
+      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
+      { path: "cart", element: <Cart /> },           // 헤더 카트
+      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
+      { path: "orders", element: <OrderHistory /> },
 
       /** Product */
       { path: "products", element: <ProductsPage /> },
