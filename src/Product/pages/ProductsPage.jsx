@@ -71,10 +71,13 @@ export default function ProductsPage() {
     else navigate(`/products/page/${next}`);
   };
 
-  const onCardClick = (item) => {
-  if (!item || !item.pronum) return;
-  navigate(`/products/${item.pronum}`);  //방어코드
-};
+  const onCardClick = (itemOrId) => {
+    // item 또는 id 둘 다 처리
+    const id = typeof itemOrId === "number" ? itemOrId : itemOrId?.pronum;
+    console.log("onCardClick called with:", itemOrId, "resolved id:", id);
+    if (!id) return;
+    navigate(`/products/${id}`);
+  };
 
   const items = pageData?.content ?? [];
   const page = pageData?.number ?? 0;

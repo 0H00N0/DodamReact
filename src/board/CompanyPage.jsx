@@ -20,7 +20,7 @@ const CompanyPage = () => {
             풍부한 경험과 차별화된 전략을 바탕으로 다양한 IT 솔루션과 서비스를 제공하고 있습니다.
           </p>
         </section>
-
+ 
         <section style={{ marginTop: '40px' }}>
           <h2 style={{ color: '#444', textAlign: 'center' }}>비전 & 가치</h2>
           <p>혁신적인 아이디어와 고객 중심의 서비스를 통해 세상을 더 편리하게 만듭니다.</p>

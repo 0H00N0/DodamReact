@@ -28,8 +28,12 @@ import FindPwByMtel from "./pages/member/FindPwByMtel";
 import ChangePwDirect from "./pages/member/ChangePwDirect";
 import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
+import OrderHistory from "./pages/orders/OrderHistory";
+import OrderReturns from "./pages/orders/OrderReturns";
+import OrderExchanges from "./pages/orders/OrderExchanges";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
+import ReviewList from "./pages/member/ReviewList";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -48,9 +52,12 @@ import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
 import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
 import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
-import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";
-import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";
-import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete";
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";   // 글 작성
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";   // 글 수정
+import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete"; // 글 삭제
+
+import OrderInquiryNew from "./pages/orders/OrderInquiryNew"; // 상품 문의
+import MyInquiries from "./pages/member/MyInquiries"; // 문의 내역
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
@@ -104,15 +111,29 @@ export const router = createRouter([
       { path: "member/membership", element: <Membership /> },
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
+      { path: "member/reviewList", element: <ReviewList /> },
 
-      /** Cart */
-      { path: "cart", element: <Cart /> },
-      { path: "member/cart", element: <Cart /> },
+      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
+      { path: "cart", element: <Cart /> },           // 헤더 카트
+      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
+      { path: "orders", element: <OrderHistory /> },
 
-      /** Product */
+      //상품 교환 및 반품
+      { path: "orders/returns", element: <OrderReturns /> },
+      { path: "orders/exchanges", element: <OrderExchanges /> },
+
+      // 주문 관련
+      { path: "orders/inquiry", element: <OrderInquiryNew /> },
+      
+      // 마이페이지
+      { path: "member/inquiries", element: <MyInquiries /> },
+
+
+      // Product
       { path: "products", element: <ProductsPage /> },
       { path: "products/page/:page", element: <ProductsPage /> },
       { path: "products/:pronum", element: <ProductDetailPage /> },
+      { path: "product/:productId", element: <ProductDetailPage /> },
       { path: "category/:categoryName", element: <Category /> },
 
       /** Plan (목록/상세) */

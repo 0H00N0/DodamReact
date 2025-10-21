@@ -4,6 +4,15 @@ import { api } from "../../utils/api";
 
 export default function SignupForm() {
   const navigate = useNavigate();
+
+  const todayStr = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+  };
+
   const [form, setForm] = useState({
     mid: "",
     mpw: "",
@@ -19,6 +28,9 @@ export default function SignupForm() {
   const [child, setChild] = useState({ chname: "", chbirth: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 숫자만 남기고 최대 13자리 제한
+  const digitsOnly = (s = "") => s.replace(/\D/g, "").slice(0, 13);
 
   // 카카오 주소검색 스크립트
   useEffect(() => {
@@ -49,7 +61,7 @@ export default function SignupForm() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm((f) => ({ ...f, [name]: name === "mtel" ? digitsOnly(value) : value }));
   };
 
   const onChildChange = (e) => {
@@ -78,19 +90,58 @@ export default function SignupForm() {
     e.preventDefault();
     if (loading) return;
     setMsg("");
+
+    // 🔒 미래 생일 금지 (문자열 yyyy-MM-dd 비교가 타임존 이슈 없이 안전)
+   const today = todayStr();
+   const MEMBER_MIN = "1900-01-01";
+   const childMin = "2000-01-01";
+   if (form.mbirth && form.mbirth > today) {
+     setMsg("생년월일은 오늘 이후(미래)로 설정할 수 없습니다.");
+     return;
+   }
+   if (form.mbirth && form.mbirth < MEMBER_MIN) {
+     setMsg("회원 생년월일은 1900-01-01 이후여야 합니다.");
+     return;
+   }
+   // 🔒 자녀 생일도 모두 체크
+   if (Array.isArray(form.children)) {
+     for (const [idx, ch] of form.children.entries()) {
+       if (ch?.chbirth && ch.chbirth > today) {
+         setMsg(`자녀 ${idx + 1}의 생년월일이 미래로 설정되어 있습니다.`);
+         return;
+       }
+       if (ch?.chbirth && ch.chbirth < childMin) {
+          setMsg(`자녀 ${idx + 1}의 생년월일은 2000-01-01 이후여야 합니다.`);
+          return;
+        }
+     }
+   }
+
+    // 🔒 전화번호: 9~13자리 숫자만 허용
+    const mtelDigits = digitsOnly(form.mtel);
+    if (!/^\d{9,13}$/.test(mtelDigits)) {
+      setMsg("전화번호는 숫자 9~13자리로 입력하세요.");
+      return;
+    }
+   
     setLoading(true);
     try {
-      const payload = {
-        ...form,
-        mid: form.mid.trim(),
-        mpw: form.mpw,
-        mname: form.mname.trim(),
-        mtel: form.mtel.trim(),
-        memail: form.memail.trim(),
-        maddr: form.maddr.trim(),
-        mpost: form.mpost,
-        children: form.children,
-      };
+      // 🔒 빈 자녀 행 제거 (chname, chbirth 둘 다 있어야 전송)
+     const cleanChildren = (form.children || []).filter(
+       (c) => c?.chname?.trim() && c?.chbirth
+     );
+ 
+     const payload = {
+       ...form,
+       mid: form.mid.trim(),
+       mpw: form.mpw,
+       mname: form.mname.trim(),
+       mtel: mtelDigits,             // ← 숫자만 전송
+       memail: form.memail.trim(),
+       maddr: form.maddr.trim(),
+       mpost: form.mpost,
+       children: cleanChildren,
+     };
       await api.post("/member/signup", payload);
       navigate("/", { replace: true });
     } catch (err) {
@@ -108,8 +159,8 @@ export default function SignupForm() {
 
   return (
     <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form} noValidate>
-        <h2>회원가입</h2>
+      <form onSubmit={onSubmit} style={styles.form}>
+        <h2 style={{ color: "#111" }}>회원가입</h2>
         <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
   <span style={{ color: "red" }}>*</span>는 필수 입력사항입니다.
 </div>
@@ -149,14 +200,19 @@ export default function SignupForm() {
 
         <label htmlFor="mtel">전화번호<span style={{ color: "red" }}>*</span></label>
         <input
-          id="mtel"
-          name="mtel"
-          value={form.mtel}
-          onChange={onChange}
-          placeholder="-없이 숫자만 입력"
-          autoComplete="tel"
-        />
-        <label htmlFor="mbirth">생년월일</label>
+           id="mtel"
+           name="mtel"
+           type="tel"
+           inputMode="numeric"
+           pattern="[0-9]*"
+           maxLength={13}
+           value={form.mtel}
+           onChange={onChange}
+           placeholder="-없이 숫자만 입력"
+           autoComplete="tel"
+           required
+         />
+        <label htmlFor="mbirth">생년월일<span style={{ color: "red" }}>*</span></label>
           <input
             id="mbirth"
             name="mbirth"
@@ -165,9 +221,12 @@ export default function SignupForm() {
             onChange={onChange}
             placeholder="생년월일"
             autoComplete="bday"
+            max={todayStr()}
+            min="1900-01-01"
+            required
           />
 
-        <label htmlFor="memail">이메일 주소<span style={{ color: "red" }}>*</span></label>
+        <label htmlFor="memail">이메일 주소</label>
         <input
           id="memail"
           name="memail"
@@ -175,6 +234,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="이메일"
           autoComplete="email"
+          pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
         />
         <label htmlFor="mpost">우편번호<span style={{ color: "red" }}>*</span></label>
         <input
@@ -184,6 +244,7 @@ export default function SignupForm() {
           onChange={onChange}
           placeholder="우편번호"
           autoComplete="postal-code"
+          required
         />
         <label htmlFor="maddr">주소</label>
         <div style={{ display: "flex", gap: 8 }}>
@@ -244,6 +305,8 @@ export default function SignupForm() {
                   });
                 }}
                 style={{ flex: 1 }}
+                max={todayStr()}
+                min="2000-01-01"
               />
               <button type="button" onClick={() => removeChild(idx)} style={styles.linkBtn}>
                 삭제
@@ -259,7 +322,7 @@ export default function SignupForm() {
           </button>
         </fieldset>
 
-        {msg && <p style={styles.error}>{msg}</p>}
+        {msg && <p style={styles.error} aria-live="polite" aria-atomic="true">{msg}</p>}
 
         <button
           type="submit"
@@ -309,6 +372,7 @@ const styles = {
     borderRadius: 12,
     background: "#fff",
     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+    color: "#111",            // ← 라벨/제목/안내문 등 폼 내부 텍스트를 항상 어두운색으로
   },
   error: { color: "#c13030", fontSize: 14, marginTop: 4 },
   linkBtn: { background: "transparent", color: "#333", marginTop: 4, cursor: "pointer" },

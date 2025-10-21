@@ -17,12 +17,10 @@ function naverAuthUrl() {
   const clientId = process.env.REACT_APP_NAVER_CLIENT_ID;
   const redirect = `${process.env.REACT_APP_REDIRECT_BASE}/oauth/callback/naver`;
   const state = randomState();
-  sessionStorage.setItem("naver_oauth_state", state); // ✅ state 저장(콜백에서 검증)
+  sessionStorage.setItem("naver_oauth_state", state);
   return `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${encodeURIComponent(
     clientId
-  )}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(
-    state
-  )}`;
+  )}&redirect_uri=${encodeURIComponent(redirect)}&state=${encodeURIComponent(state)}`;
 }
 
 export default function LoginForm() {
@@ -39,38 +37,46 @@ export default function LoginForm() {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-      // ✅ 1) 프론트 유효성 검사: 요청 전
     if (!form.mid.trim() || !form.mpw) {
       setMsg("아이디/비밀번호를 입력하세요.");
-      return; // 여기서 끝내면 네트워크 요청 안 감
+      return;
     }
 
     if (loading) return;
     setLoading(true);
     setMsg("");
     try {
-      await api.post("/member/loginForm", {
-        mid: form.mid.trim(),
-        mpw: form.mpw,
-      },{
-        withCredentials: true //로그인 유지
-      });
+      await api.post(
+        "/member/loginForm",
+        { mid: form.mid.trim(), mpw: form.mpw },
+        { withCredentials: true }
+      );
 
       sessionStorage.setItem("auth_hint", "1");
       window.dispatchEvent(new Event("auth:changed"));
-      navigate("/", { replace: true }); // 로그인 성공 후 메인으로
+      navigate("/", { replace: true });
     } catch (err) {
-      const message =
+      const KOREAN_INVALID = "아이디 혹은 비밀번호가 맞지 않습니다.";
+      const status = err?.response?.status;
+      let message =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
-        "아이디/비밀번호를 확인해 주세요.";
+        "";
+
+      if (!err?.response) {
+        setMsg("로그인 서버와 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
+      if (status === 401 && !message) message = KOREAN_INVALID;
+      if (typeof message === "string" && /invalid id\/pw/i.test(message)) message = KOREAN_INVALID;
+      if (!message) message = KOREAN_INVALID;
+
       setMsg(message);
     } finally {
       setLoading(false);
     }
   };
 
-  // 소셜 버튼 동작
   const goKakao = () => {
     if (loading) return;
     setLoading(true);
@@ -85,7 +91,9 @@ export default function LoginForm() {
   return (
     <div style={styles.wrapper}>
       <form onSubmit={onSubmit} style={styles.form} noValidate>
-        <h2>로그인</h2>
+        {/* 전역 h2 다크 컬러를 덮어쓸 수 있도록 인라인 색 지정 */}
+        <h2 style={{ color: "#111", margin: 0 }}>로그인</h2>
+
         <label htmlFor="mid">아이디</label>
         <input id="mid" name="mid" value={form.mid} onChange={onChange} />
 
@@ -111,9 +119,7 @@ export default function LoginForm() {
           </button>
           <button
             type="button"
-            onClick={() =>
-              window.open("/member/findIdModal", "_blank", "width=500,height=600")
-            }
+            onClick={() => window.open("/member/findIdModal", "_blank", "width=500,height=600")}
             disabled={loading}
             style={styles.linkBtn}
           >
@@ -121,9 +127,7 @@ export default function LoginForm() {
           </button>
           <button
             type="button"
-            onClick={() =>
-              window.open("/member/findPw", "_blank", "width=500,height=600")
-            }
+            onClick={() => window.open("/member/findPw", "_blank", "width=500,height=600")}
             disabled={loading}
             style={styles.linkBtn}
           >
@@ -178,6 +182,8 @@ const styles = {
     borderRadius: 12,
     background: "#fff",
     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
+    // 폼 내부 텍스트(라벨/문구)가 다크에서도 보이도록 고정
+    color: "#111",
   },
   error: { color: "#c13030", fontSize: 14, marginTop: 4 },
   primaryBtn: {
