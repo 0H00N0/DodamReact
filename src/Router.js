@@ -44,6 +44,7 @@ import DeleteAccount from "./pages/member/DeleteAccount";
 import Membership from "./pages/member/Membership";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
+import ReviewList from "./pages/member/ReviewList";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
