@@ -156,7 +156,7 @@ const Search = () => {
   const activeAge = `${ageMin ?? ""}-${ageMax ?? ""}`;
   const activePrice = `${priceMin ?? ""}-${priceMax ?? ""}`;
 
-  const handleProductClick = (id) => navigate(`/product/${id}`);
+  const handleProductClick = (id) => navigate(`/products/${id}`);
 
   return (
     <div className={styles.searchPage}>
