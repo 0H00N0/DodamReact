@@ -100,7 +100,14 @@ export default function ProductCard({ item, onClick }) {
           alt={item.proname || "product"}
           onError={handleImgError}
           onLoad={handleImgLoad}
-          style={{ pointerEvents: "auto" }}
+          style={{
+            pointerEvents: "auto",
+            width: "100%",           
+            height: "200px",         
+            objectFit: "contain",    // 깨짐 없이 맞춤
+            backgroundColor: "#eee",
+            border: "2px dashed red" 
+          }}
         />
       </div>
 

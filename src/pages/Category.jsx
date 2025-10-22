@@ -100,7 +100,7 @@ const Category = () => {
   // 상품 카드 클릭 핸들러
   const handleProductClick = (productId) => {
     console.log("handleProductClick called:", productId);
-    navigate(`/product/${productId}`);
+    navigate(`/products/${productId}`);
   };
 
   // 장바구니 추가 핸들러
