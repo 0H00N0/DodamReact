@@ -190,10 +190,24 @@ const deleteProduct = async (id) => {
     addNotification('카테고리가 성공적으로 수정되었습니다.', 'success');
     return updatedCategory;
   };
-  const deleteCategory = async (id) => {
-    await request(`${API_BASE_URL}/admin/categories/${id}`, { method: 'DELETE' });
+const deleteCategory = async (id) => {
+  try {
+    await request(`${API_BASE_URL}/admin/categories/${id}`, { 
+      method: 'DELETE' 
+    });
     addNotification('카테고리가 성공적으로 삭제되었습니다.', 'success');
-  };
+  } catch (error) {
+    // ✅ 전체 response.data를 콘솔에 출력
+    console.error('DELETE 실패 - 전체 응답:', JSON.stringify(error.response?.data, null, 2));
+    
+    const errorMsg = error.response?.data?.message 
+      || error.response?.data?.error 
+      || '카테고리를 삭제할 수 없습니다. 연결된 데이터가 있을 수 있습니다.';
+    
+    addNotification(errorMsg, 'error');
+    throw error;
+  }
+};
 
   // --- Orders ---
   const getAllOrders = async () => {
