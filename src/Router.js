@@ -45,6 +45,7 @@ import Membership from "./pages/member/Membership";
 import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
 import ReviewList from "./pages/member/ReviewList";
+import OrderHistory from "./pages/orders/OrderHistory";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
