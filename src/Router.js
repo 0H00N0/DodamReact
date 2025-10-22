@@ -20,7 +20,7 @@ import BulkProductUpload from "./admin/BulkProductUpload";
 /** Plan */
 import CheckoutPage from "./Plan/PlanCheckOut";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
-import CheckoutQueryRedirect from "./Plan/PlanCheckoutQueryRedirect"; // ← 쿼리→REST 변환 가드
+import CheckoutQueryRedirect from "./Plan/PlanCheckoutQueryRedirect";
 import BillingKeyRedirect from "./Plan/PlanBillingKeyRedirect";
 
 /** Home */
@@ -70,9 +70,7 @@ import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
-// ...existing code...
 import SmartBoard from "./Board/SmartBoard";
-// ...existing code...
 import './index.css';
 
 /** Main */
@@ -109,26 +107,26 @@ export const router = createRouter([
 
       /*admin*/
       {
-      path: "admin",
-      element: <Admin />, // ✅ Admin 레이아웃
-      children: [
-        { index: true, element: <Navigate to="dashboard" replace /> },
-        { path: "dashboard", element: <Dashboard /> },
-        { path: "users", element: <UserManagement /> },
-        { path: "products", element: <ProductManagement /> },
-        { path: "plans", element: <PlanManagement /> },
-        { path: "categories", element: <CategoryManagement /> },
-        { path: "deliverymen", element: <DeliverymanManagement /> },
-        { path: "orders", element: <OrderManagement /> },
-        { path: "orders/:orderId", element: <OrderDetail /> },
-        { path: "boards", element: <BoardManagement /> },
-        { path: "voc", element: <VocManagement /> },
-        { path: "events", element: <EventManagement /> },
-        { path: "discounts", element: <DiscountManagement /> },
-        { path: "products/bulk-upload", element: <BulkProductUpload /> },
-        { path: "*", element: <ErrorPage /> }, // or 404 페이지
-      ],
-    },
+        path: "admin",
+        element: <Admin />, // ✅ Admin 레이아웃
+        children: [
+          { index: true, element: <Navigate to="dashboard" replace /> },
+          { path: "dashboard", element: <Dashboard /> },
+          { path: "users/*", element: <UserManagement /> },
+          { path: "products/*", element: <ProductManagement /> },
+          { path: "plans/*", element: <PlanManagement /> }, // ✅ /* 추가
+          { path: "categories", element: <CategoryManagement /> },
+          { path: "deliverymen", element: <DeliverymanManagement /> },
+          { path: "orders", element: <OrderManagement /> },
+          { path: "orders/:orderId", element: <OrderDetail /> },
+          { path: "boards", element: <BoardManagement /> },
+          { path: "voc", element: <VocManagement /> },
+          { path: "events", element: <EventManagement /> },
+          { path: "discounts", element: <DiscountManagement /> },
+          { path: "products/bulk-upload", element: <BulkProductUpload /> },
+          { path: "*", element: <ErrorPage /> },
+        ],
+      },
 
       /** Member */
       { path: "login", element: <LoginForm /> },
@@ -151,9 +149,9 @@ export const router = createRouter([
       { path: "auth/find-id", element: <FindIdModal /> },
       { path: "auth/find-pw",  element: <FindPw /> },
       
-      // ✅ 장바구니 라우트 (두 경로 모두 같은 페이지로)
-      { path: "cart", element: <Cart /> },           // 헤더 카트
-      { path: "member/cart", element: <Cart /> },    // 유저 드롭다운 카트
+      // ✅ 장바구니 라우트
+      { path: "cart", element: <Cart /> },
+      { path: "member/cart", element: <Cart /> },
       { path: "orders", element: <OrderHistory /> },
 
       /** Product */
@@ -166,22 +164,15 @@ export const router = createRouter([
       { path: "plans", element: <PlanSelectPage /> },
       { path: "plans/:planCode", element: <PlanDetailPage /> },
 
-      /** ✅ 체크아웃 (정확히 두 개만! 다른 변종 라우트 금지) */
-      // 예) /plan/checkout/BASIC/1
+      /** ✅ 체크아웃 */
       { path: "plan/checkout/:planCode/:months", element: <CheckoutPage /> },
-
-      // 예) /plan/checkout/result/inv212-xxxx
       { path: "plan/checkout/result/:paymentId", element: <CheckoutResultPage /> },
 
       /** Billing key redirect */
       { path: "billing-keys/redirect", element: <BillingKeyRedirect /> },
 
-      /** ◇ 구 링크 호환: 쿼리 → REST 변환 가드 */
+      /** ◇ 구 링크 호환 */
       { path: "plan/checkout", element: <CheckoutQueryRedirect /> },
-
-      /** 이전 축약 경로는 안전한 곳으로만 보냄 */
-      { path: "plan/checkout/result", element: <Navigate to="/member/membership" replace /> },
-      { path: "plan/checkout", element: <Navigate to="/plans" replace /> },
       { path: "plan/checkout/result", element: <Navigate to="/member/membership" replace /> },
 
       /** Search */
@@ -209,7 +200,6 @@ export const router = createRouter([
           { path: "smartboard", element: <SmartBoard /> },
         ],
       },
-   
 
       /** FAQ 리다이렉트 */
       { path: "customer/faq", element: <Navigate to="/board/faq" replace /> },
