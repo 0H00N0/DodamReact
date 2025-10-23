@@ -46,6 +46,7 @@ import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
 import ReviewList from "./pages/member/ReviewList";
 import OrderHistory from "./pages/orders/OrderHistory";
+import MyInquiries from "./pages/member/MyInquiries";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
@@ -148,6 +149,7 @@ export const router = createRouter([
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
       { path: "member/reviewList", element: <ReviewList /> },
+      { path: "member/inquiries", element: <MyInquiries /> },
       { path: "auth/find-id", element: <FindIdModal /> },
       { path: "auth/find-pw",  element: <FindPw /> },
       
