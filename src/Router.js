@@ -48,11 +48,14 @@ import Cash from "./pages/member/Cash";
 import Cart from "./pages/Cart";
 import ReviewList from "./pages/member/ReviewList";
 import OrderHistory from "./pages/orders/OrderHistory";
+import MyInquiries from "./pages/member/MyInquiries";
 
 /** Product */
 import ProductsPage from "./Product/pages/ProductsPage";
 import ProductDetailPage from "./Product/pages/ProductDetailPage";
 import Category from "./pages/Category";
+import OrderReturns from "./pages/orders/OrderReturns";
+import OrderExchanges from "./pages/orders/OrderExchanges";
 
 /** Plan (목록/상세) */
 import PlanSelectPage from "./Plan/PlanSelectPage";
@@ -145,6 +148,7 @@ export const router = createRouter([
       { path: "member/cash", element: <Cash /> },
       { path: "member/delete", element: <DeleteAccount /> },
       { path: "member/reviewList", element: <ReviewList /> },
+      { path: "member/inquiries", element: <MyInquiries /> },
       { path: "auth/find-id", element: <FindIdModal /> },
       { path: "auth/find-pw", element: <FindPw /> },
 
@@ -152,6 +156,8 @@ export const router = createRouter([
       { path: "cart", element: <Cart /> },
       { path: "member/cart", element: <Cart /> },
       { path: "orders", element: <OrderHistory /> },
+      { path: "orders/returns", element: <OrderReturns /> },
+      { path: "orders/exchanges", element: <OrderExchanges /> },
 
       /** Product */
       { path: "products", element: <ProductsPage /> },
