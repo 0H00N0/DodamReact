@@ -12,7 +12,7 @@ export default function Cash() {
     (async () => {
       try {
         // 백엔드에 이미 있는 엔드포인트 (zip에서 확인)
-        const { data } = await api.get("/billing-keys/list");
+        const { data } = await api.get("/billing-keys");
         setMethods(Array.isArray(data) ? data : []);
       } catch (e) {
         const status = e?.response?.status;
