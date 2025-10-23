@@ -11,6 +11,7 @@ export default function ProductDetailPage() {
   const { addToCart } = useCart();   // ✅ CartContext
   const [product, setProduct] = useState({});
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);       // ✅ 더블클릭 방지용
   const [err, setErr] = useState("");
   const styles = {
     linkBtn: {
@@ -26,6 +27,8 @@ export default function ProductDetailPage() {
       marginRight: "8px",
       boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
       transition: "background 0.2s",
+      opacity: adding ? 0.7 : 1,               // ✅ 상태 표시
+      pointerEvents: adding ? "none" : "auto",  // ✅ 연속 클릭 차단
     },
     buyBtn: {
       padding: "12px 24px",
@@ -82,10 +85,7 @@ export default function ProductDetailPage() {
     catenum
   } = product;
 
-  // 로그인 회원 번호
-  const mnum = user?.mnum;
-
-  // 장바구니 버튼 함수
+  // 장바구니 버튼 함수 (중복 요청 제거)
   const addCart = async () => {
     if (!user) {
       alert("로그인 후 이용 가능합니다.");
@@ -94,49 +94,44 @@ export default function ProductDetailPage() {
     }
     const ok = window.confirm("장바구니에 담으시겠습니까?");
     if (!ok) return;
-    // ✅ 1) 화면 먼저 갱신 (헤더 미니카트/장바구니 페이지 즉시 반영)
-    addToCart(Number(pronum), 1, {}); // 선택 옵션이 있으면 {} 대신 { colors: '레드', ... }
 
-    // ✅ 2) (선택) 서버에도 저장 — 실패해도 UI는 유지
     try {
-      await fetch("http://localhost:8080/cart", {
+      setAdding(true);
+      // ✅ CartContext가 서버 POST(/cart/items) + 재조회까지 모두 수행
+      await addToCart(Number(pronum), 1, {}, { catenum }); // extra에 catenum 전달
+      window.alert("상품이 장바구니에 담겼습니다.");
+    } catch (e) {
+      console.error(e);
+      window.alert("장바구니 담기 중 오류가 발생했습니다.");
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  // 구매하기 버튼 (기존 로직 유지)
+  const goToBuyPage = async () => {
+    if (!user) {
+      alert("로그인 후 이용 가능합니다.");
+      navigate("/login");
+      return;
+    }
+    const ok = window.confirm("구매하시겠습니까?");
+    if (!ok) return;
+
+    try {
+      const res = await fetch("http://localhost:8080/rent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ mnum, pronum: Number(pronum), catenum })
+        body: JSON.stringify({ mnum: user.mnum, pronum: Number(pronum) })
       });
+      if (!res.ok) throw new Error("대여 등록 실패");
+      window.alert("대여신청이 정상적으로 처리되었습니다.");
     } catch (e) {
+      window.alert("대여 처리 중 오류가 발생했습니다.");
       console.error(e);
     }
-    window.alert("상품이 장바구니에 담겼습니다.");
   };
-
-  // 구매하기 버튼
-  const goToBuyPage = async () => {
-  if (!user) {
-    alert("로그인 후 이용 가능합니다.");
-    navigate("/login");
-    return;
-  }
-  const ok = window.confirm("구매하시겠습니까?");
-  if (!ok) return;
-
-  try {
-    const res = await fetch("http://localhost:8080/rent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ mnum, pronum: Number(pronum) })
-    });
-    if (!res.ok) throw new Error("대여 등록 실패");
-    window.alert("대여신청이 정상적으로 처리되었습니다.");
-    // 구매(대여) 페이지로 이동
-    // navigate("/rent/pronum");
-  } catch (e) {
-    window.alert("대여 처리 중 오류가 발생했습니다.");
-    console.error(e);
-  }
-};
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -170,21 +165,23 @@ export default function ProductDetailPage() {
             {proprice !== undefined && proprice !== null && proprice !== ""
               ? Number(proprice).toLocaleString() + "원"
               : "가격정보 없음"}
-</div>
+          </div>
           <div>
             <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>
           </div>
           <div className="text-gray-700 whitespace-pre-line">{prodetail}</div>
 
           {/* 장바구니 버튼 */}
-          <button 
+          <button
             style={styles.linkBtn}
             onClick={addCart}
+            disabled={adding}
             onMouseOver={e => e.currentTarget.style.background = "#1d4ed8"}
             onMouseOut={e => e.currentTarget.style.background = "#2563eb"}
           >
-            장바구니에 담기
+            {adding ? "담는 중…" : "장바구니에 담기"}
           </button>
+
           <button
             style={styles.buyBtn}
             onClick={goToBuyPage}
