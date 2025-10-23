@@ -51,6 +51,8 @@ import OrderHistory from "./pages/orders/OrderHistory";
 import ProductsPage from "./Product/pages/ProductsPage";
 import ProductDetailPage from "./Product/pages/ProductDetailPage";
 import Category from "./pages/Category";
+import OrderReturns from "./pages/orders/OrderReturns";
+import OrderExchanges from "./pages/orders/OrderExchanges";
 
 /** Plan (목록/상세) */
 import PlanSelectPage from "./Plan/PlanSelectPage";
@@ -153,6 +155,8 @@ export const router = createRouter([
       { path: "cart", element: <Cart /> },
       { path: "member/cart", element: <Cart /> },
       { path: "orders", element: <OrderHistory /> },
+      { path: "orders/returns", element: <OrderReturns /> },
+      { path: "orders/exchanges", element: <OrderExchanges /> },
 
       /** Product */
       { path: "products", element: <ProductsPage /> },
