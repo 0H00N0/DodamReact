@@ -42,7 +42,7 @@ export default function SignupForm() {
     }
   }, []);
 
-  // 주소검색 → 우편번호만 세팅
+  // 주소검색 
   const handleAddressSearch = () => {
     if (!window.daum?.Postcode) {
       alert("주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.");
