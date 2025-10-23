@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
 
@@ -20,7 +20,7 @@ export default function SignupForm() {
     mbirth: "",
     mtel: "",
     memail: "",
-    maddr: "",
+    maddr: "",   // 서버에 보낼 최종 주소(초기엔 비워둠)
     mpost: "",
     mnic: "",
     children: [],
@@ -28,6 +28,12 @@ export default function SignupForm() {
   const [child, setChild] = useState({ chname: "", chbirth: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // ✅ 추가: UI용 상태 (기본주소/상세주소/토글)
+  const [maddrBase, setMaddrBase] = useState("");     // 카카오 검색으로 채우는 기본주소
+  const [maddrDetail, setMaddrDetail] = useState(""); // 사용자가 적는 상세주소
+  const [showDetail, setShowDetail] = useState(false);
+  const detailRef = useRef(null);
 
   // 숫자만 남기고 최대 13자리 제한
   const digitsOnly = (s = "") => s.replace(/\D/g, "").slice(0, 13);
@@ -50,11 +56,16 @@ export default function SignupForm() {
     }
     new window.daum.Postcode({
       oncomplete: function (data) {
+        // ✅ 기본주소/우편번호 채우기
+        setMaddrBase(data.address);
         setForm((f) => ({
           ...f,
-          maddr: data.address,  
-          mpost: data.zonecode,    
+          maddr: data.address,   // 기존 검증 로직 호환 유지
+          mpost: data.zonecode,
         }));
+        // ✅ 상세주소 입력칸 자동 펼치기 + 포커스
+        setShowDetail(true);
+        setTimeout(() => detailRef.current?.focus(), 0);
       },
     }).open();
   };
@@ -130,8 +141,13 @@ export default function SignupForm() {
       setMsg("우편번호는 주소검색으로 입력한 5자리 숫자여야 합니다.");
       return;
     }
-    const addr = (form.maddr || "").trim();
-    if (!addr) {
+
+    // ✅ 최종 주소: 기본주소 + 상세주소(있으면)
+    const base = (maddrBase || form.maddr || "").trim();
+    const detail = (maddrDetail || "").trim();
+    const addr = detail ? `${base} ${detail}` : base;
+
+    if (!base) {
       setMsg("주소를 입력해주세요.");
       return;
     }
@@ -150,7 +166,7 @@ export default function SignupForm() {
         mname: form.mname.trim(),
         mtel: mtelDigits,
         memail: form.memail.trim(),
-        maddr: addr,           // 트림된 주소
+        maddr: addr,           // ✅ 합쳐진 주소 전송
         mpost: mpostDigits,    // 숫자 5자리 보장
         children: cleanChildren,
       };
@@ -281,20 +297,42 @@ export default function SignupForm() {
           </button>
         </div>
 
-        {/* 주소(사용자 직접 입력) */}
+        {/* 주소: 기본주소(readOnly) + 상세주소 토글/입력 */}
         <label htmlFor="maddr">
           주소<span style={{ color: "red" }}>*</span>
         </label>
-        <input
-          id="maddr"
-          name="maddr"
-          value={form.maddr}
-          onChange={onChange}
-          placeholder="주소"
-          style={{ flex: 1 }}
-          autoComplete="address-line1"
-          required
-        />
+        <div style={{ display: "flex", gap: 8 }}>
+          <input
+            id="maddr"
+            name="maddr"
+            value={maddrBase || form.maddr}
+            readOnly
+            placeholder="주소검색으로 기본주소 자동 입력"
+            style={{ flex: 1 }}
+            autoComplete="address-line1"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowDetail((v) => !v)}
+            style={styles.linkBtn}
+            aria-expanded={showDetail}
+            aria-controls="addrDetail"
+          >
+            상세주소
+          </button>
+        </div>
+        {showDetail && (
+          <input
+            id="addrDetail"
+            ref={detailRef}
+            value={maddrDetail}
+            onChange={(e) => setMaddrDetail(e.target.value)}
+            placeholder="상세주소 (동/호수 등)"
+            style={{ marginTop: 8 }}
+            autoComplete="address-line2"
+          />
+        )}
 
         <label htmlFor="mnic">닉네임</label>
         <div style={{ display: "flex", gap: 8 }}>
