@@ -1,79 +1,88 @@
-// src/pages/CommunityPage/CommunityBoardForm.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { boardsApi } from "../../api/communityApi";
+import { ensureCsrfCookie } from "../../utils/api"; // ✅ 추가
+import styles from "./CommunityPage.module.css";
 
-const CommunityBoardForm = () => {
-  const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("익명");
-  const [content, setContent] = useState("");
-  const [error, setError] = useState("");
+export default function CommunityBoardEdit({ currentUser }) {
+  const { bnum } = useParams();
+  const nav = useNavigate();
 
-  const handleSubmit = () => {
-    if (!title || !content) {
-      setError("제목과 내용을 모두 입력해주세요.");
-      return;
+  const loc = useLocation();
+  const initial = loc.state?.post;
+
+  const [cats, setCats] = useState([]);
+  const [form, setForm] = useState({ bcanum: "", bsub: "", bcontent: "" });
+  const [busy, setBusy] = useState(false);
+
+  // 카테고리 API가 없다면 이 useEffect는 제거하거나 고정 리스트로 대체하세요.
+  useEffect(() => { boardsApi.categories?.().then?.(setCats); }, []);
+  useEffect(() => {
+    (initial ? Promise.resolve(initial) : boardsApi.get(bnum))
+      .then((p) => setForm({ bcanum: p.bcanum, bsub: p.bsub, bcontent: p.bcontent }))
+      .catch((e) => alert(e.message));
+    // eslint-disable-next-line
+  }, [bnum]);
+
+  const submit = async (e) => {
+    e.preventDefault();
+    try {
+      setBusy(true);
+      // ✅ 상태 변경 전 CSRF 쿠키 확보
+      await ensureCsrfCookie();
+
+      await boardsApi.update(
+        bnum,
+        {
+          bcanum: Number(form.bcanum),
+          bsub: form.bsub,
+          bcontent: form.bcontent,
+        }
+      );
+      nav(`/board/community/${bnum}`);
+    } catch (e2) {
+      alert(`수정 실패: ${e2.message}`);
+    } finally {
+      setBusy(false);
     }
-
-    axios
-      .post("/api/boards", { title, writer: author, content })  // writer로 맞춤
-      .then(() => {
-        navigate("/board/community");
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("글 작성에 실패했습니다.");
-      });
-
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-8 bg-pink-50 rounded-3xl shadow-lg">
-      <h2 className="text-2xl font-bold text-center text-pink-600 mb-6">게시글 작성</h2>
+    <div className="max-w-3xl mx-auto p-4">
+      <h2 className="text-xl font-bold mb-4">글 수정</h2>
+      <form onSubmit={submit} className="flex flex-col gap-3">
+        <select
+          value={form.bcanum}
+          onChange={(e) => setForm((f) => ({ ...f, bcanum: e.target.value }))}
+          required
+          className="border p-2 rounded"
+        >
+          {cats.map((c) => (
+            <option key={c.bcanum} value={c.bcanum}>{c.bcaname}</option>
+          ))}
+        </select>
 
-      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
-      <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">제목</label>
         <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full rounded-2xl border border-pink-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 placeholder-pink-300"
-          placeholder="제목을 입력해주세요"
+          value={form.bsub}
+          onChange={(e) => setForm((f) => ({ ...f, bsub: e.target.value }))}
+          className="border p-2 rounded"
+          required
         />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-gray-700 font-medium mb-2">작성자</label>
-        <input
-          type="text"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          className="w-full rounded-2xl border border-pink-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 placeholder-pink-300"
-        />
-      </div>
-
-      <div className="mb-6">
-        <label className="block text-gray-700 font-medium mb-2">내용</label>
         <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={8}
-          className="w-full rounded-2xl border border-pink-200 p-3 bg-white focus:outline-none focus:ring-2 focus:ring-pink-300 placeholder-pink-300"
-          placeholder="내용을 입력해주세요"
+          value={form.bcontent}
+          onChange={(e) => setForm((f) => ({ ...f, bcontent: e.target.value }))}
+          rows={10}
+          className="border p-2 rounded"
+          required
         />
-      </div>
 
-      <button
-        onClick={handleSubmit}
-        className="w-full bg-pink-400 text-white py-3 rounded-2xl font-semibold shadow-md hover:bg-pink-500 transition"
-      >
-        등록
-      </button>
+        <div className="flex gap-2 justify-end">
+          <button type="button" onClick={() => nav(-1)} className="px-3 py-2 border rounded">취소</button>
+          <button disabled={busy} className="px-3 py-2 bg-pink-500 text-white rounded">
+            {busy ? "저장 중..." : "저장"}
+          </button>
+        </div>
+      </form>
     </div>
   );
-};
-
-export default CommunityBoardForm;
+}

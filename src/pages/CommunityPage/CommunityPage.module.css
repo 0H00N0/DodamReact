@@ -63,3 +63,49 @@
   text-align: left; /* 내용 왼쪽 정렬 */
   margin-top: 20px;
 }
+
+.comm-wrap { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+.comm-title { font-size: 22px; font-weight: 700; margin: 0 0 16px; }
+.comm-subtitle { margin-top: 28px; font-size: 18px; }
+.muted { color: #808089; }
+.dot::before { content: "·"; margin: 0 6px; color: #b0b0b6; }
+.pill { margin-left: 8px; padding: 0 8px; border-radius: 999px; background: #fee; border: 1px solid #fcc; font-size: 12px; }
+.flex-1 { flex: 1; }
+.empty { padding: 32px; text-align: center; color: #a0a0a9; }
+
+.comm-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+.comm-input { flex: 0 0 220px; }
+.comm-btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+.comm-btn.primary { background: #ffebf2; border-color: #ffc7da; }
+.comm-btn.danger { background: #ffe9e9; border-color: #ffbcbc; color: #b60000; }
+.link { border: 0; background: none; padding: 0; cursor: pointer; }
+.link.danger { color: #c70000; }
+
+.comm-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid #eee; }
+.comm-item { border-bottom: 1px solid #eee; }
+.comm-link { display: block; padding: 14px 6px; text-decoration: none; color: inherit; }
+.comm-item-title { font-weight: 600; }
+.comm-item-sub { margin-top: 4px; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+
+.pagination { display: flex; gap: 6px; justify-content: center; align-items: center; margin-top: 16px; }
+.pagination > * { padding: 6px 10px; border: 1px solid #eee; border-radius: 8px; background: #fff; }
+
+.breadcrumbs { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.breadcrumbs a { color: #777; }
+
+.comm-form .row, .comm-form .col { display: flex; gap: 12px; margin-bottom: 12px; }
+.comm-form .row > span, .comm-form .col > span { width: 90px; padding-top: 8px; color: #666; }
+.comm-form input, .comm-form select, .comm-form textarea { flex: 1; padding: 10px; border: 1px solid #e3e3e7; border-radius: 10px; }
+.form-actions { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+.comm-content { border: 1px solid #f1f1f4; border-radius: 10px; padding: 16px; white-space: pre-wrap; background: #fff; }
+.detail-sub { margin-bottom: 10px; }
+
+.detail-actions { display: flex; gap: 8px; align-items: center; margin: 14px 0 24px; }
+
+.comment-list { list-style: none; padding: 0; margin: 0; border-top: 1px solid #eee; }
+.comment-item { border-bottom: 1px solid #eee; padding: 10px 4px; }
+.comment-head { display: flex; gap: 10px; align-items: center; font-size: 13px; }
+.comment-body { margin-top: 4px; white-space: pre-wrap; }
+.comment-form textarea { width: 100%; padding: 10px; border: 1px solid #e3e3e7; border-radius: 10px; }
+.comment-form .right { display: flex; justify-content: flex-end; margin-top: 8px; }

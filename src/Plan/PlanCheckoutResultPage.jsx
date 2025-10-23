@@ -338,7 +338,7 @@ export default function PlanCheckoutResultPage() {
 
         {/* ===== 추천 상품 ===== */}
         <div style={S.sectionCard}>
-          <div style={S.sectionH}>{plan.planName} 플랜 고객 인기상품</div>
+          <div style={S.sectionH}>{plan.planName} 플랜 고객 최신상품</div>
           <div style={{ position: "relative" }}>
             {!isMobile && (
               <>

@@ -10,14 +10,107 @@ export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 90000,
+  xsrfCookieName: "XSRF-TOKEN",   // Spring Security 기본 쿠키명
+  xsrfHeaderName: "X-XSRF-TOKEN", // 이 헤더로 전송
 });
 
-/** 에러 인터셉터: 메시지 표준화(원본 보존) */
+/* -------------------------------------------------
+ * CSRF: 상태 변경 전 쿠키 보장 & 403 시 자동 재시도
+ * ------------------------------------------------*/
+let _csrfPromise = null;
+let _csrfStamp = 0;
+
+/** ✅ CSRF 토큰 쿠키(XSRF-TOKEN) 보장 */
+export async function ensureCsrfCookie(force = false) {
+  const hasCookie =
+    typeof document !== "undefined" && document.cookie.includes("XSRF-TOKEN=");
+  const now = Date.now();
+
+  if (!force && hasCookie) return;
+
+  if (_csrfPromise && now - _csrfStamp < 1000) {
+    return _csrfPromise;
+  }
+
+  _csrfStamp = now;
+  _csrfPromise = (async () => {
+    try {
+      // ✔️ 토큰 강제 생성/쿠키 발급 전용 엔드포인트
+      await api.get("/csrf", { params: { u: Date.now() } });
+    } catch {
+      // 무시(목적: 쿠키 발급 유도)
+    }
+  })();
+
+  return _csrfPromise.finally(() => {
+    _csrfPromise = null;
+  });
+}
+
+/** 쿠키에서 XSRF-TOKEN 추출 */
+function readCsrfFromCookie() {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/* ---------- 요청 인터셉터 ----------
+ * - 상태변경(POST/PUT/PATCH/DELETE)인데 헤더가 없으면 토큰 확보 → 헤더 주입
+ */
+api.interceptors.request.use(async (cfg) => {
+  cfg.withCredentials = true;
+
+  const method = (cfg.method || "get").toUpperCase();
+  const isStateChanging = !["GET", "HEAD", "OPTIONS"].includes(method);
+
+  // 헤더가 없으면 토큰 확보 시도
+  if (isStateChanging && !cfg.headers?.["X-XSRF-TOKEN"]) {
+    await ensureCsrfCookie(); // 필요하면 발급
+    const token = readCsrfFromCookie();
+    if (token) {
+      cfg.headers = cfg.headers || {};
+      cfg.headers["X-XSRF-TOKEN"] = token;
+    }
+  } else {
+    // 토큰이 이미 있다면 유지, 없으면(읽기요청 등) 그냥 진행
+    const token = readCsrfFromCookie();
+    if (token && !cfg.headers?.["X-XSRF-TOKEN"]) {
+      cfg.headers = cfg.headers || {};
+      cfg.headers["X-XSRF-TOKEN"] = token;
+    }
+  }
+
+  return cfg;
+});
+
+/** 에러 인터셉터: 메시지 표준화 + CSRF 403 자동 재시도(1회) */
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
     const status = err?.response?.status;
     const data = err?.response?.data;
+    const cfg = err?.config || {};
+
+    const maybeInvalidCsrf =
+      status === 403 &&
+      !cfg.__retriedForCsrf &&
+      (String(data?.message || data?.error || "").toLowerCase().includes("csrf") ||
+        String(data).toLowerCase().includes("csrf"));
+
+    if (maybeInvalidCsrf) {
+      try {
+        await ensureCsrfCookie(true);
+        cfg.__retriedForCsrf = true;
+        const token = readCsrfFromCookie();
+        if (token) {
+          cfg.headers = cfg.headers || {};
+          cfg.headers["X-XSRF-TOKEN"] = token;
+        }
+        return api.request(cfg);
+      } catch {
+        // 재시도 실패 → 그대로 떨어뜨림
+      }
+    }
 
     const serverMsg =
       (typeof data === "string" && data) ||
@@ -30,60 +123,71 @@ api.interceptors.response.use(
     err.message =
       serverMsg || (status ? `HTTP ${status}` : "") || err.message || "Request error";
     err.status = status;
-    err.path = err?.config?.url;
+    err.path = cfg?.url;
 
     return Promise.reject(err);
   }
 );
 
+export default api;
+
+/* =========================
+ * 공용 호출
+ * ======================= */
+export async function postWithSession(path, data, config) {
+  const { data: json } = await api.post(path, data, config);
+  return json;
+}
+
+export async function getWithSession(path, config) {
+  if (path === "/member/me") {
+    const hint =
+      typeof sessionStorage !== "undefined" && sessionStorage.getItem("auth_hint");
+    if (!hint) {
+      return { login: false };
+    }
+  }
+
+  try {
+    const { data: json } = await api.get(path, config);
+    return json;
+  } catch (err) {
+    if (path === "/member/me" && (err.status === 401 || String(err.message).includes("401"))) {
+      return { login: false };
+    }
+    throw err;
+  }
+}
+
 /* =========================
  * Billing Keys API
  * ======================= */
 export const billingKeysApi = {
-  /** ✅ 카드 목록: 표준 경로 사용 (cache bust) */
   list() {
     return api.get(`/billing-keys?u=${Date.now()}`);
   },
-
-  /** 등록 시작 전에 payId 하나 미리 발급 (선택 사항 / 서버가 제공하는 경우만) */
   prepare() {
     return api.post("/billing-keys/prepare", {});
   },
-
-  /** PortOne 리다이렉트 확정 (선택 사항 / 서버가 제공하는 경우만) */
   confirm(billingIssueToken, payId) {
     const payload = { billingIssueToken };
     if (payId) payload.payId = payId;
     return api.post("/billing-keys/confirm", payload);
   },
-
-  /** 서버에 빌링키 저장 */
   register({ billingKey, rawJson }) {
     return api.post("/billing-keys/register", { billingKey, rawJson });
   },
-
-  /** ✅ 카드 삭제(비활성화) — payId 기반 */
   deleteById(payId) {
-    if (payId == null) {
-      return Promise.reject(new Error("payId is required"));
-    }
+    if (payId == null) return Promise.reject(new Error("payId is required"));
     return api.delete(`/billing-keys/by-id/${encodeURIComponent(payId)}`);
   },
-
-  /** ✅ 카드 삭제(비활성화) — billingKey 기반 */
   deleteByKey(billingKey) {
-    if (!billingKey) {
-      return Promise.reject(new Error("billingKey is required"));
-    }
+    if (!billingKey) return Promise.reject(new Error("billingKey is required"));
     return api.delete(`/billing-keys/${encodeURIComponent(billingKey)}`);
   },
-
-  /** ✅ 과거 호환용 (billingKey 기반) */
   delete(billingKey) {
     return this.deleteByKey(billingKey);
   },
-
-  /** ✅ 편의 함수: payId 우선, 없으면 billingKey로 삭제 */
   remove({ payId, billingKey }) {
     if (payId != null) return this.deleteById(payId);
     if (billingKey) return this.deleteByKey(billingKey);
@@ -105,8 +209,6 @@ export const subscriptionApi = {
 
 export const paymentsApi = {
   confirm: (payload) => api.post("/payments/confirm", payload),
-
-  // ✅ 서버가 제공하는 두 엔드포인트 모두 호환 (/payments/{paymentId} or /payments/{paymentId}/status)
   lookup: (paymentId) => {
     if (!paymentId) return Promise.reject(new Error("paymentId is required"));
     return api.get(`/payments/${encodeURIComponent(paymentId)}`);
@@ -117,43 +219,11 @@ export const paymentsApi = {
   },
 };
 
-/** ✅ 결제 취소(부분/전액 가능) */
 export const cancelPayment = (paymentId, reason = "사용자 요청") =>
   api.post(`/payments/${encodeURIComponent(paymentId)}/cancel`, { reason });
 
-/** ✅ 다음 결제 예약 해지(구독 해지) */
 export const cancelNextRenewal = (reason = "사용자 해지 요청") =>
   api.post("/subscriptions/cancel-renewal", { reason });
-
-export default api;
-
-/* =========================
- * 공용 호출
- * ======================= */
-export async function postWithSession(path, data, config) {
-  const { data: json } = await api.post(path, data, config);
-  return json;
-}
-
-export async function getWithSession(path, config) {
-  // 비로그인 초기 화면에서 /member/me 401 콘솔 노이즈 방지
-  if (path === "/member/me") {
-    const hint = sessionStorage.getItem("auth_hint");
-    if (!hint) {
-      return { login: false };
-    }
-  }
-
-  try {
-    const { data: json } = await api.get(path, config);
-    return json;
-  } catch (err) {
-    if (path === "/member/me" && (err.status === 401 || String(err.message).includes("401"))) {
-      return { login: false };
-    }
-    throw err;
-  }
-}
 
 /* =========================
  * 편의 함수
@@ -161,8 +231,10 @@ export async function getWithSession(path, config) {
 export async function loginWithOAuth(provider, payload) {
   const json = await postWithSession(`/oauth/${provider}/token`, payload);
   try {
-    sessionStorage.setItem("auth_hint", "1");
-    window.dispatchEvent(new Event("auth:changed"));
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem("auth_hint", "1");
+      window.dispatchEvent(new Event("auth:changed"));
+    }
   } catch {}
   return json;
 }
@@ -170,8 +242,10 @@ export async function loginWithOAuth(provider, payload) {
 export async function logout() {
   const json = await postWithSession("/member/logout", {});
   try {
-    sessionStorage.removeItem("auth_hint");
-    window.dispatchEvent(new Event("auth:changed"));
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.removeItem("auth_hint");
+      window.dispatchEvent(new Event("auth:changed"));
+    }
   } catch {}
   return json;
 }

@@ -2,8 +2,9 @@ import React from "react";
 import { createBrowserRouter as createRouter } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import App from "./App";
+
 /** Admin */
-import Admin from "./admin/Admin"; // 레이아웃
+import Admin from "./admin/Admin";
 import Dashboard from "./admin/Dashboard";
 import UserManagement from "./admin/UserManagement";
 import ProductManagement from "./admin/ProductManagement";
@@ -17,6 +18,7 @@ import VocManagement from "./admin/VocManagement";
 import EventManagement from "./admin/EventManagement";
 import DiscountManagement from "./admin/DiscountManagement";
 import BulkProductUpload from "./admin/BulkProductUpload";
+
 /** Plan */
 import CheckoutPage from "./Plan/PlanCheckOut";
 import CheckoutResultPage from "./Plan/PlanCheckoutResultPage";
@@ -62,16 +64,13 @@ import Notice from "./pages/CommunityPage/Notice";
 import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
 import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
-import CommunityBoard from "./pages/CommunityPage/CommunityBoard";
-import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
-import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";
-import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";
-import CommunityBoardDelete from "./pages/CommunityPage/CommunityBoardDelete";
+import CommunityRoutes from "./pages/CommunityPage/CommunityIndex";   // ✅ 새 구조 (index.jsx)
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
 import SmartBoard from "./Board/SmartBoard";
-import './index.css';
+
+import "./index.css";
 
 /** Main */
 import Search from "./pages/Search";
@@ -105,16 +104,16 @@ export const router = createRouter([
       /** Home */
       { index: true, element: <Home /> },
 
-      /*admin*/
+      /** Admin */
       {
         path: "admin",
-        element: <Admin />, // ✅ Admin 레이아웃
+        element: <Admin />,
         children: [
           { index: true, element: <Navigate to="dashboard" replace /> },
           { path: "dashboard", element: <Dashboard /> },
           { path: "users/*", element: <UserManagement /> },
           { path: "products/*", element: <ProductManagement /> },
-          { path: "plans/*", element: <PlanManagement /> }, // ✅ /* 추가
+          { path: "plans/*", element: <PlanManagement /> },
           { path: "categories", element: <CategoryManagement /> },
           { path: "deliverymen", element: <DeliverymanManagement /> },
           { path: "orders", element: <OrderManagement /> },
@@ -147,9 +146,9 @@ export const router = createRouter([
       { path: "member/delete", element: <DeleteAccount /> },
       { path: "member/reviewList", element: <ReviewList /> },
       { path: "auth/find-id", element: <FindIdModal /> },
-      { path: "auth/find-pw",  element: <FindPw /> },
-      
-      // ✅ 장바구니 라우트
+      { path: "auth/find-pw", element: <FindPw /> },
+
+      /** Cart & Orders */
       { path: "cart", element: <Cart /> },
       { path: "member/cart", element: <Cart /> },
       { path: "orders", element: <OrderHistory /> },
@@ -160,18 +159,14 @@ export const router = createRouter([
       { path: "products/:pronum", element: <ProductDetailPage /> },
       { path: "category/:categoryName", element: <Category /> },
 
-      /** Plan (목록/상세) */
+      /** Plan */
       { path: "plans", element: <PlanSelectPage /> },
       { path: "plans/:planCode", element: <PlanDetailPage /> },
 
-      /** ✅ 체크아웃 */
+      /** Checkout */
       { path: "plan/checkout/:planCode/:months", element: <CheckoutPage /> },
       { path: "plan/checkout/result/:paymentId", element: <CheckoutResultPage /> },
-
-      /** Billing key redirect */
       { path: "billing-keys/redirect", element: <BillingKeyRedirect /> },
-
-      /** ◇ 구 링크 호환 */
       { path: "plan/checkout", element: <CheckoutQueryRedirect /> },
       { path: "plan/checkout/result", element: <Navigate to="/member/membership" replace /> },
 
@@ -189,11 +184,10 @@ export const router = createRouter([
           { path: "notice/:noticeId", element: <NoticeDetail /> },
           { path: "event", element: <Event /> },
           { path: "event/:eventId", element: <EventDetail /> },
-          { path: "community", element: <CommunityBoard /> },
-          { path: "community/:postId", element: <CommunityBoardDetail /> },
-          { path: "community/write", element: <CommunityBoardForm /> },
-          { path: "community/edit/:postId", element: <CommunityBoardEdit /> },
-          { path: "community/delete/:postId", element: <CommunityBoardDelete /> },
+
+          // ✅ 새 커뮤니티 구조
+          { path: "community/*", element: <CommunityRoutes /> },
+
           { path: "inquiry", element: <Inquiry /> },
           { path: "faq", element: <FAQ /> },
           { path: "company", element: <Company /> },
