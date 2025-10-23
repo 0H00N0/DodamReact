@@ -78,7 +78,7 @@ function Dashboard() {
         try {
           await new Promise(resolve => setTimeout(resolve, 1000));
           const mockData = {
-            totalOrders: 1234, totalProducts: 567, totalUsers: 8901, totalRevenue: 23456789,
+            totalOrders: 1234, totalProducts: 3301, totalUsers: 8901, totalRevenue: 23456789,
             recentOrders: [
               { id: '#ORD-001', customer: '김철수', amount: 29900, status: 'completed', date: new Date(Date.now() - 1000 * 60 * 30) },
               { id: '#ORD-002', customer: '이영희', amount: 49900, status: 'processing', date: new Date(Date.now() - 1000 * 60 * 60 * 2) },
