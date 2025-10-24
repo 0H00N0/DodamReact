@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import styles from "./CommunityPage.module.css"
 
 const CommunityPage = () => {
+  useScrollTopOnMount(true);
   const location = useLocation();
   const currentTab = location.pathname.split("/").pop();
 

@@ -62,12 +62,15 @@ import PlanSelectPage from "./Plan/PlanSelectPage";
 import PlanDetailPage from "./Plan/PlanDetailPage";
 
 /** Community */
-import CommunityPage from "./pages/CommunityPage/CommunityPage";
 import Notice from "./pages/CommunityPage/Notice";
 import NoticeDetail from "./pages/CommunityPage/NoticeDetail";
 import Event from "./pages/CommunityPage/Event";
 import EventDetail from "./pages/CommunityPage/EventDetail";
-import CommunityRoutes from "./pages/CommunityPage/CommunityIndex";   // ✅ 새 구조 (index.jsx)
+import CommunityRoutes from "./pages/CommunityPage/CommunityIndex";   // 새 레이아웃(테마+모달+Outlet)
+import CommunityBoardList from "./pages/CommunityPage/CommunityBoardList";
+import CommunityBoardDetail from "./pages/CommunityPage/CommunityBoardDetail";
+import CommunityBoardForm from "./pages/CommunityPage/CommunityBoardForm";
+import CommunityBoardEdit from "./pages/CommunityPage/CommunityBoardEdit";
 import Inquiry from "./pages/CommunityPage/Inquiry";
 import FAQ from "./pages/CommunityPage/FAQ";
 import Company from "./pages/CommunityPage/Company";
@@ -180,19 +183,22 @@ export const router = createRouter([
       { path: "search/:keyword", element: <Search /> },
       { path: "search", element: <Search /> },
 
-      /** Community */
+      /** Community (새 레이아웃을 /board 루트에 적용) */
       {
         path: "board",
-        element: <CommunityPage />,
+        element: <CommunityRoutes />, // CommunityIndex: 핑크 테마 + 모달 Provider + 공용 레이아웃(사이드바/콘텐츠)
         children: [
-          { index: true, element: <Notice /> },
-          { path: "notice", element: <Notice /> },
+          { index: true, element: <Notice /> },                // /board
+          { path: "notice", element: <Notice /> },             // /board/notice
           { path: "notice/:noticeId", element: <NoticeDetail /> },
           { path: "event", element: <Event /> },
           { path: "event/:eventId", element: <EventDetail /> },
 
-          // ✅ 새 커뮤니티 구조
-          { path: "community/*", element: <CommunityRoutes /> },
+          // 커뮤니티 게시판
+          { path: "community", element: <CommunityBoardList /> },          // 목록
+          { path: "community/new", element: <CommunityBoardForm /> },      // 글쓰기
+          { path: "community/:bnum", element: <CommunityBoardDetail /> },  // 상세
+          { path: "community/:bnum/edit", element: <CommunityBoardEdit /> }, // 수정
 
           { path: "inquiry", element: <Inquiry /> },
           { path: "faq", element: <FAQ /> },

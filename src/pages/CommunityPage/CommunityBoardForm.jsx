@@ -1,9 +1,9 @@
-// src/pages/community/CommunityBoardForm.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { boardsApi } from "../../api/communityApi";
 import { useAuth } from "../../contexts/AuthContext";
-import { ensureCsrfCookie } from "../../utils/api"; // ✅ 유지
+import { ensureCsrfCookie } from "../../utils/api";
+import styles from "./CommunityPage.module.css";
 
 export default function CommunityBoardForm() {
   const { bnum } = useParams();
@@ -25,8 +25,7 @@ export default function CommunityBoardForm() {
     );
   }, [isEdit, id]);
 
-  const onChange = (e) =>
-    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+  const onChange = (e) => setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
 
   const submit = async (e) => {
     e.preventDefault();
@@ -38,8 +37,6 @@ export default function CommunityBoardForm() {
 
     try {
       setBusy(true);
-
-      // ✅ 상태 변경 전 쿠키/헤더 보장
       await ensureCsrfCookie();
 
       const payload = {
@@ -53,62 +50,59 @@ export default function CommunityBoardForm() {
       };
 
       if (isEdit) {
-        await boardsApi.update(id, payload);   // 세션 인증으로 서버가 판별
+        await boardsApi.update(id, payload);
         nav(`/board/community/${id}`);
       } else {
-        const created = await boardsApi.create(payload); // Long or {bnum}
+        const created = await boardsApi.create(payload);
         const newId = created?.bnum ?? created?.id ?? created;
         nav(`/board/community/${newId}`);
       }
     } catch (e2) {
       alert(`저장 실패: ${e2.message}`);
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <div className="mb-2 text-sm">
-        <Link to="/board/community" className="underline">목록</Link> / {isEdit ? "수정" : "작성"}
+    <section>
+      <div className={styles.detailSub}>
+        <Link to="/board/community" className={styles.titleLink}>← 목록</Link> / {isEdit ? "수정" : "작성"}
       </div>
-      <h2 className="text-xl font-bold mb-4">{isEdit ? "게시글 수정" : "게시글 작성"}</h2>
 
-      <form onSubmit={submit} className="flex flex-col gap-3">
-        <label className="flex items-center gap-2">
-          <span className="w-24 text-sm text-gray-600">제목</span>
+      <h2 className={styles.panelTitle}>{isEdit ? "게시글 수정" : "게시글 작성"}</h2>
+
+      <form onSubmit={submit} className={styles.commForm}>
+        <div className="row">
+          <label className={styles.pinkSubtle} style={{ width: 80 }}>제목</label>
           <input
             name="btitle"
             value={form.btitle}
             onChange={onChange}
             placeholder="제목"
-            className="border p-2 rounded flex-1"
+            className="input"
             required
           />
-        </label>
+        </div>
 
-        <label className="flex gap-2">
-          <span className="w-24 text-sm text-gray-600">내용</span>
+        <div className="row">
+          <label className={styles.pinkSubtle} style={{ width: 80 }}>내용</label>
           <textarea
             name="bcontent"
             value={form.bcontent}
             onChange={onChange}
             placeholder="내용"
             rows={12}
-            className="border p-2 rounded flex-1"
+            className="textarea"
             required
           />
-        </label>
+        </div>
 
-        <div className="flex gap-2 justify-end">
-          <button type="button" onClick={() => nav(-1)} className="px-3 py-2 border rounded">
-            취소
-          </button>
-          <button disabled={busy} className="px-3 py-2 bg-pink-500 text-white rounded">
+        <div className="form-actions">
+          <button type="button" onClick={() => nav(-1)} className="btn">취소</button>
+          <button disabled={busy} className="btn primary">
             {busy ? "저장 중..." : (isEdit ? "수정 저장" : "등록")}
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 }

@@ -14,6 +14,11 @@ export const api = axios.create({
   xsrfHeaderName: "X-XSRF-TOKEN", // 이 헤더로 전송
 });
 
+// ✅ JSON 기본 헤더 고정
+api.defaults.headers.post["Content-Type"]  = "application/json;charset=UTF-8";
+api.defaults.headers.put["Content-Type"]   = "application/json;charset=UTF-8";
+api.defaults.headers.patch["Content-Type"] = "application/json;charset=UTF-8";
+
 /* -------------------------------------------------
  * CSRF: 상태 변경 전 쿠키 보장 & 403 시 자동 재시도
  * ------------------------------------------------*/

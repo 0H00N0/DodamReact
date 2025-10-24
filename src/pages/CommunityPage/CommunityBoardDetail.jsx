@@ -1,11 +1,14 @@
-// src/pages/community/CommunityBoardDetail.jsx
+// src/pages/CommunityPage/CommunityBoardDetail.jsx
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { boardsApi, commentsApi } from "../../api/communityApi";
 import { useAuth } from "../../contexts/AuthContext";
-import { ensureCsrfCookie } from "../../utils/api"; // ✅ 유지
+import { ensureCsrfCookie } from "../../utils/api";
+import styles from "./CommunityPage.module.css";
 
-// 날짜 파싱/포맷 유틸
+/* ---------------------------
+ * 날짜 유틸
+ * --------------------------*/
 const parseDate = (v) => {
   if (!v) return null;
   if (Array.isArray(v)) {
@@ -21,6 +24,7 @@ const parseDate = (v) => {
   const d = new Date(v);
   return isNaN(d) ? null : d;
 };
+
 const fmt = (value) => {
   const d = parseDate(value);
   if (!d) return "-";
@@ -31,12 +35,18 @@ const fmt = (value) => {
   const mm = String(d.getMinutes()).padStart(2, "0");
   return `${yy}-${m}-${dd} ${hh}:${mm}`;
 };
+
 const buildDateLabel = (created, edited) => {
   const c = parseDate(created);
   const e = parseDate(edited);
   const isEdited = !!e && (!c || e.getTime() !== c.getTime());
   return isEdited ? `${fmt(e)} (수정됨)` : fmt(c);
 };
+
+/* ---------------------------
+ * 안전 문자열 유틸
+ * --------------------------*/
+const toTrimmedString = (v) => (typeof v === "string" ? v : String(v ?? "")).trim();
 
 export default function CommunityBoardDetail() {
   const { bnum } = useParams();
@@ -62,23 +72,30 @@ export default function CommunityBoardDetail() {
     } catch (e) {
       const code = e?.status;
       if (code === 404 || /not\s*found/i.test(e.message)) {
-        nav(`/error?code=404&reason=${encodeURIComponent("게시글을 찾을 수 없습니다.")}`, { replace: true });
+        nav(
+          `/error?code=404&reason=${encodeURIComponent("게시글을 찾을 수 없습니다.")}`,
+          { replace: true }
+        );
       } else {
-        nav(`/error?code=${code || 400}&reason=${encodeURIComponent(e.message || "요청 오류")}`, { replace: true });
+        nav(
+          `/error?code=${code || 400}&reason=${encodeURIComponent(e.message || "요청 오류")}`,
+          { replace: true }
+        );
       }
     } finally {
       setLoading(false);
     }
   };
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => {
+    load(); // eslint-disable-next-line
+  }, [id]);
 
   const addC = async () => {
     if (!actorMid) return alert("로그인 후 댓글 작성 가능합니다.");
-    const text = cval.trim(); if (!text) return;
+    const text = toTrimmedString(cval);
+    if (!text) return;
 
-    // ✅ 상태 변경 전 쿠키/헤더 보장
     await ensureCsrfCookie();
-
     await commentsApi.create(id, {
       ccontent: text,
       parentConum: replyTo?.conum || null,
@@ -89,136 +106,207 @@ export default function CommunityBoardDetail() {
   };
 
   const editC = async (conum) => {
-    const find = (list) => {
-      for (const c of list) {
-        if (c.conum === conum) return c;
-        if (c.children) {
-          const f = find(c.children);
-          if (f) return f;
-        }
+  const find = (list) => {
+    for (const c of list) {
+      if (c.conum === conum) return c;
+      if (Array.isArray(c.children)) {
+        const f = find(c.children);
+        if (f) return f;
       }
-      return null;
-    };
-    const curr = find(comments)?.ccontent || "";
-    const next = prompt("댓글 수정", curr); if (next == null) return;
-
-    await ensureCsrfCookie();
-
-    await commentsApi.update(id, conum, { ccontent: next });
-    setComments(await commentsApi.list(id));
+    }
+    return null;
   };
+  const curr = find(comments)?.ccontent ?? "";
+  const next = await window.prompt("댓글 수정", curr); // ✅ 비동기 프롬프트는 반드시 await
+  if (next == null) return;
+
+  const text = (typeof next === "string" ? next : String(next ?? "")).trim();
+  if (!text) return;
+
+  await ensureCsrfCookie();
+  await commentsApi.update(id, conum, { ccontent: text });
+  setComments(await commentsApi.list(id));
+};
 
   const delC = async (conum) => {
-    if (!window.confirm("댓글을 삭제할까요?")) return;
+  const ok = await window.confirm("댓글을 삭제할까요?");
+  if (!ok) return;
 
-    await ensureCsrfCookie();
-
+  await ensureCsrfCookie();
+  try {
     await commentsApi.remove(id, conum);
-    setComments(await commentsApi.list(id));
-  };
+  } catch (err) {
+    const raw = String(err?.message || "");
+    const msg = /삭제할 수 없습니다|constraint|foreign|child|children|integrity/i.test(raw)
+      ? "답글이 있어 삭제할 수 없습니다."
+      : raw || "삭제 중 오류가 발생했습니다.";
+    alert(msg);
+  }
+  setComments(await commentsApi.list(id));
+};
 
-  if (loading) return <div className="max-w-3xl mx-auto p-4">로딩중…</div>;
-  if (!post) return <div className="max-w-3xl mx-auto p-4">게시글을 찾을 수 없습니다.</div>;
+  if (loading) return <div className={styles.loading}>로딩중…</div>;
+  if (!post) return <div className={styles.empty}>게시글을 찾을 수 없습니다.</div>;
 
   const author = post.mnic ?? post.nickname ?? post.mid ?? "익명";
   const dateLabel = buildDateLabel(post.bdate, post.bedate);
 
   const CommentItem = ({ c, depth = 0 }) => (
-    <li className={`border rounded p-3 ${depth > 0 ? "ml-6" : ""}`}>
-      <div className="text-xs text-gray-500 mb-2">
-        {(c.mnic ?? c.mid) || "익명"} · {buildDateLabel(c.cdate, c.cedate)}
+    <li
+      className={styles.commentItem}
+      style={{ marginLeft: depth > 0 ? 12 : 0 }}
+    >
+      <div className={styles.commentHead}>
+        <span className="badge">{(c.mnic ?? c.mid) || "익명"}</span>
+        <span className={styles.pinkSubtle}>
+          {buildDateLabel(c.cdate, c.cedate)}
+        </span>
       </div>
-      <div className="whitespace-pre-wrap">{c.ccontent}</div>
-      <div className="flex gap-2 mt-2">
+      <div className="comment-body">{c.ccontent}</div>
+      <div className={styles.detailActions}>
         <button
-          className="px-2 py-1 border rounded text-sm"
+          type="button"
+          className="btn"
           onClick={() => setReplyTo({ conum: c.conum, mnic: c.mnic ?? c.mid })}
         >
           답글
         </button>
-
         {(c?.mine || actorMid === c?.mid) && (
           <>
-            <button onClick={() => editC(c.conum)} className="px-2 py-1 border rounded text-sm">수정</button>
-            <button onClick={() => delC(c.conum)} className="px-2 py-1 border rounded text-sm">삭제</button>
-          </>
-        )}
-      </div>
-
-      {Array.isArray(c.children) && c.children.length > 0 && (
-        <ul className="space-y-3 mt-3">
-          {c.children.map((ch) => <CommentItem key={ch.conum} c={ch} depth={depth + 1} />)}
-        </ul>
-      )}
-    </li>
-  );
-
-  return (
-    <div className="max-w-3xl mx-auto p-4">
-      <div className="mb-2 text-sm text-gray-500">
-        <Link to="/board/community" className="underline">목록</Link> / 상세
-      </div>
-
-      <h2 className="text-xl font-bold">{post.bsub ?? "(제목 없음)"}</h2>
-      <div className="text-xs text-gray-500 mt-1">{author} · {dateLabel}</div>
-
-      <article className="mt-4 whitespace-pre-wrap border rounded p-4 bg-white">
-        {post.bcontent}
-      </article>
-
-      <div className="flex gap-2 justify-end mt-4">
-        {(post?.mine || actorMid === post?.mid) && (
-          <>
-            <Link to={`/board/community/${id}/edit`} className="px-3 py-1 border rounded">수정</Link>
             <button
-              className="px-3 py-1 border rounded"
-              onClick={async () => {
-                if (window.confirm("삭제할까요?")) {
-                  await ensureCsrfCookie();
-                  await boardsApi.remove(id);
-                  nav("/board/community");
-                }
-              }}
+              type="button"
+              className="btn"
+              onClick={() => editC(c.conum)}
+            >
+              수정
+            </button>
+            <button
+              type="button"
+              className="btn danger"
+              onClick={() => delC(c.conum)}
             >
               삭제
             </button>
           </>
         )}
       </div>
+      {Array.isArray(c.children) && c.children.length > 0 && (
+        <ul className="space-y-3 mt-3">
+          {c.children.map((ch) => (
+            <CommentItem key={ch.conum} c={ch} depth={depth + 1} />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
 
-      <hr className="my-6" />
+  return (
+    <section>
+      <div className={styles.detailSub}>
+        <Link to="/board/community" className={styles.titleLink}>
+          ← 목록
+        </Link>
+      </div>
 
-      <h3 className="font-semibold mb-2">댓글 {comments.length}</h3>
-      <ul className="space-y-3">
-        {comments.map((c) => <CommentItem key={c.conum} c={c} />)}
-        {comments.length === 0 && <li className="text-gray-500">첫 댓글을 남겨보세요.</li>}
+      <h2 className={styles.panelTitle}>
+        {post.bsub ?? post.btitle ?? "(제목 없음)"}
+      </h2>
+      <div className={styles.pinkSubtle}>
+        {author} · {dateLabel}
+      </div>
+
+      <article
+        className={`${styles.commContent} ${styles.pinkCard}`}
+        style={{ marginTop: 12 }}
+      >
+        {post.bcontent}
+      </article>
+
+      {(post?.mine || actorMid === post?.mid) && (
+        <div className={styles.detailActions}>
+          <Link to={`/board/community/${id}/edit`} className="btn">
+            수정
+          </Link>
+          <button
+            type="button"
+            className="btn danger"
+            onClick={async () => {
+              const ok = await window.confirm("삭제할까요?");
+              if (!ok) return;
+              await ensureCsrfCookie();
+              try {
+                await boardsApi.remove(id);
+                nav("/board/community");
+              } catch (err) {
+                alert(err?.message || "삭제 실패");
+              }
+            }}
+          >
+            삭제
+          </button>
+        </div>
+      )}
+
+      <h3 className="pink-title" style={{ marginTop: 20 }}>
+        댓글 {comments.length}
+      </h3>
+      <ul className={styles.commentList}>
+        {comments.map((c) => (
+          <CommentItem key={c.conum} c={c} />
+        ))}
+        {comments.length === 0 && (
+          <li className={styles.empty}>첫 댓글을 남겨보세요.</li>
+        )}
       </ul>
 
       {actorMid ? (
         <div className="mt-3">
           {replyTo && (
-            <div className="mb-2 text-xs text-gray-600">
+            <div
+              className={styles.pinkSubtle}
+              style={{ marginBottom: 8 }}
+            >
               @{replyTo.mnic || "익명"}님께 답글 작성중
-              <button className="ml-2 text-blue-600 underline" onClick={() => setReplyTo(null)}>취소</button>
+              <button
+                type="button"
+                className="titleLink"
+                style={{ marginLeft: 8 }}
+                onClick={() => setReplyTo(null)}
+              >
+                취소
+              </button>
             </div>
           )}
-          <div className="flex gap-2">
+          <div className={styles.commentForm}>
             <textarea
               value={cval}
               onChange={(e) => setCval(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); addC(); } }}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  await addC();
+                }
+              }}
               placeholder={replyTo ? "답글을 입력하세요" : "댓글을 입력하세요"}
-              className="flex-1 border rounded p-2"
               rows={3}
+              className="textarea"
             />
-            <button onClick={addC} className="px-3 py-2 bg-pink-500 text-white rounded">
-              {replyTo ? "답글 등록" : "등록"}
-            </button>
+            <div className="right">
+              <button
+                type="button"
+                onClick={addC}
+                className="btn primary"
+              >
+                {replyTo ? "답글 등록" : "등록"}
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="mt-4 text-sm text-gray-500">로그인 후 댓글을 작성할 수 있습니다.</div>
+        <div className={styles.pinkSubtle} style={{ marginTop: 12 }}>
+          로그인 후 댓글을 작성할 수 있습니다.
+        </div>
       )}
-    </div>
+    </section>
   );
 }

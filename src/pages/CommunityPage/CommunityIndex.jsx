@@ -1,19 +1,19 @@
-// src/pages/CommunityPage/index.jsx
+// src/pages/CommunityPage/CommunityIndex.jsx
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import CommunityBoardList from "./CommunityBoardList";
-import CommunityBoardDetail from "./CommunityBoardDetail";
-import CommunityBoardForm from "./CommunityBoardForm";
+import "./CommunityPink.css";
+import CommunityModalProvider from "./CommunityModalProvider";
+import CommunityLayout from "./CommunityLayout";
 
-/** ✅ 디폴트 export로 "컴포넌트"를 내보냅니다 (객체 X) */
-export default function CommunityRoutes() {
+/**
+ * 커뮤니티 루트: 전역 핑크 테마 + 모달 Provider 적용
+ * 실제 화면 배치는 CommunityLayout에서만 렌더링(중복 방지)
+ */
+export default function CommunityIndex() {
   return (
-    <Routes>
-      <Route index element={<CommunityBoardList />} />
-      <Route path="new" element={<CommunityBoardForm />} />
-      <Route path=":bnum" element={<CommunityBoardDetail />} />
-      <Route path=":bnum/edit" element={<CommunityBoardForm />} />
-      <Route path="*" element={<Navigate to="." replace />} />
-    </Routes>
+    <div className="pinkTheme">
+      <CommunityModalProvider>
+        <CommunityLayout />
+      </CommunityModalProvider>
+    </div>
   );
 }

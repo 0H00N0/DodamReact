@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { boardsApi } from "../../api/communityApi";
 import { useAuth } from "../../contexts/AuthContext";
+import styles from "./CommunityPage.module.css";
 
-// 공백/ISO/배열 모두 파싱
 const parseDate = (v) => {
   if (!v) return null;
   if (Array.isArray(v)) {
@@ -42,17 +42,13 @@ export default function CommunityBoardList() {
       .list({ page, size, bcanum: 3, q: q || undefined })
       .then((data) => {
         if (Array.isArray(data)) {
-          setRows(data);
-          setTotal(data.length);
+          setRows(data); setTotal(data.length);
         } else {
           setRows(data?.content ?? data?.rows ?? []);
           setTotal(data?.totalElements ?? data?.total ?? 0);
         }
       })
-      .catch(() => {
-        setRows([]);
-        setTotal(0);
-      });
+      .catch(() => { setRows([]); setTotal(0); });
   }, [page, size, q]);
 
   const pages = useMemo(() => {
@@ -81,84 +77,58 @@ export default function CommunityBoardList() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-xl font-bold mb-3">커뮤니티 게시판</h2>
+    <section>
+      <h2 className={styles.panelTitle}>커뮤니티 게시판</h2>
 
-      <form className="flex gap-2 mb-3" onSubmit={submit}>
+      <form className={styles.searchWrap} onSubmit={submit}>
         <input
           name="q"
           defaultValue={q}
           placeholder="검색어"
-          className="border rounded px-2 py-1 flex-1"
+          className={styles.input}
         />
-        <button className="px-3 py-1 border rounded">검색</button>
-        <div className="flex-1" />
-        <button
-          type="button"
-          className="px-3 py-1 border rounded bg-pink-50"
-          onClick={onClickWrite}
-        >
-          글쓰기
-        </button>
+        <button className="btn">검색</button>
+        <div className={styles.right} />
+        <button type="button" className="btn primary" onClick={onClickWrite}>글쓰기</button>
       </form>
 
-      <ul className="divide-y">
-        {rows.map((it) => (
-          <li key={it.bnum} className="py-3">
-            <Link to={`/board/community/${it.bnum}`} className="block">
-              <div className="font-medium">
+      <div className={styles.list}>
+        <div className={styles.listHead}>
+          <div>번호</div>
+          <div>제목</div>
+          <div>작성자</div>
+          <div>작성일</div>
+          <div>댓글</div>
+        </div>
+
+        {rows.map((it, idx) => (
+          <div key={it.bnum} className={styles.listItem}>
+            <div>{total - (page * size + idx)}</div>
+            <div>
+              <Link to={`/board/community/${it.bnum}`} className={styles.titleLink}>
                 {it.bsub ?? it.btitle ?? it.title ?? it.subject ?? "(제목 없음)"}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">
-                {(it.mnic ?? it.nickname ?? it.mid) || "익명"} · {fmt(it.bdate ?? it.bcreatedAt ?? it.createdAt ?? it.regDate)}
-                {!!it.commentCount && (
-                  <span className="ml-2 px-2 py-0.5 text-xs rounded-full border">
-                    💬 {it.commentCount}
-                  </span>
-                )}
-              </div>
-            </Link>
-          </li>
+              </Link>
+            </div>
+            <div>{(it.mnic ?? it.nickname ?? it.mid) || "익명"}</div>
+            <div>{fmt(it.bdate ?? it.bcreatedAt ?? it.createdAt ?? it.regDate)}</div>
+            <div>
+              {!!it.commentCount && <span className="badge">💬 {it.commentCount}</span>}
+            </div>
+          </div>
         ))}
 
         {rows.length === 0 && (
-          <li className="py-8 text-center text-gray-500">게시글이 없습니다.</li>
+          <div className={styles.empty}>게시글이 없습니다.</div>
         )}
-      </ul>
-
-      <div className="flex items-center justify-center gap-2 mt-4">
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          disabled={page <= 0}
-          onClick={() => setQs({ page: 0, size, q })}
-        >
-          처음
-        </button>
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          disabled={page <= 0}
-          onClick={() => setQs({ page: page - 1, size, q })}
-        >
-          이전
-        </button>
-        <span className="text-sm">
-          {pages.cur + 1} / {pages.last + 1}
-        </span>
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          disabled={page >= pages.last}
-          onClick={() => setQs({ page: page + 1, size, q })}
-        >
-          다음
-        </button>
-        <button
-          className="px-3 py-1 border rounded disabled:opacity-50"
-          disabled={page >= pages.last}
-          onClick={() => setQs({ page: pages.last, size, q })}
-        >
-          마지막
-        </button>
       </div>
-    </div>
+
+      <div className={styles.pagination}>
+        <button disabled={page <= 0} onClick={() => setQs({ page: 0, size, q })}>처음</button>
+        <button disabled={page <= 0} onClick={() => setQs({ page: page - 1, size, q })}>이전</button>
+        <span className="text-sm">{pages.cur + 1} / {pages.last + 1}</span>
+        <button disabled={page >= pages.last} onClick={() => setQs({ page: page + 1, size, q })}>다음</button>
+        <button disabled={page >= pages.last} onClick={() => setQs({ page: pages.last, size, q })}>마지막</button>
+      </div>
+    </section>
   );
 }

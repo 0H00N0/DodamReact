@@ -1,0 +1,97 @@
+/* src/pages/CommunityPage/CommunityPink.css */
+:root {
+  --pink-40:  #fffafb;
+  --pink-50:  #fff7fa;
+  --pink-75:  #fff2f6;
+  --pink-100: #ffeef4;
+  --pink-150: #ffe7ef;
+  --pink-200: #ffdfe8;
+  --pink-300: #ffc6d9;
+  --pink-400: #ffa9c5;
+  --pink-500: #ff8fb4;
+  --pink-600: #ff6f9f;
+  --pink-700: #ff4f8b;
+  --pink-800: #e63e79;
+  --pink-900: #cc2e68;
+
+  --bg: var(--pink-40);
+  --panel: #fff;
+  --border: #f7eaf0;
+  --muted: #8c6f7b;
+  --text: #2a1c22;
+  --brand: var(--pink-600);
+  --brand-700: var(--pink-700);
+  --shadow: 0 10px 25px rgba(255, 111, 159, 0.10);
+}
+
+/* 배경에 아주 은은한 그라데이션 (옵션성: 싫으면 아래 3줄 지워도 됨) */
+.pinkTheme {
+  background: var(--bg);
+  background-image: linear-gradient(180deg, rgba(255,240,246,.35) 0%, rgba(255,250,251,0) 200px);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* 카드/버튼/입력 */
+.pink-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.pink-title { font-weight: 800; font-size: 1.6rem; letter-spacing: .1px; color: var(--text); }
+.pink-subtle { color: var(--muted); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 38px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  cursor: pointer; transition: all .15s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn.primary { background: var(--brand); color: #fff; border-color: transparent; }
+.btn.primary:hover { background: var(--brand-700); }
+.btn.ghost { background: transparent; border-color: var(--border); }
+.btn.danger { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+.input, .select, .textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 12px;
+  padding: 10px 12px; background: #fff; color: var(--text);
+}
+.textarea { min-height: 120px; resize: vertical; }
+
+/* 배지 */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px; border-radius: 999px; background: var(--pink-100); color: var(--pink-800);
+  border: 1px solid var(--border); font-size: 12px; font-weight: 600;
+}
+
+/* 모달 */
+.cm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 1000; }
+.cm-modal { width: min(92vw, 440px); background: #fff; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+.cm-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--pink-100); }
+.cm-header h3 { margin: 0; font-size: 16px; color: var(--text); }
+.cm-x { background: transparent; border: none; font-size: 20px; cursor: pointer; line-height: 1; }
+.cm-body { padding: 16px; }
+.cm-message { margin: 0 0 8px; white-space: pre-wrap; color: var(--text); }
+.cm-input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; }
+.cm-actions { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 16px; background: #fff; border-top: 1px solid var(--border); }
+.cm-btn { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border); background: #fff; cursor: pointer; }
+.cm-btn.primary { background: var(--brand); color: #fff; border-color: transparent; }
+.cm-btn:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+
+/* ✅ 테마 레벨에서 한 번 더 확실히 덮어쓰기 (모듈 CSS와 충돌 방지) */
+.cm-actions .cm-btn:not(.primary) {
+  background: var(--pink-100) !important;
+  color: #c85a7a !important;
+  border-color: var(--pink-300) !important;
+}
+.cm-actions .cm-btn:not(.primary):hover {
+  background: var(--pink-150) !important;
+}
+.cm-actions .cm-btn:focus-visible {
+  outline: 2px solid var(--pink-400);
+  outline-offset: 2px;
+}
