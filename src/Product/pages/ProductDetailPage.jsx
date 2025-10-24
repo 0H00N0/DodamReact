@@ -139,6 +139,17 @@ export default function ProductDetailPage() {
   const [newReview, setNewReview] = useState({ revtitle: "", revtext: "", revscore: 5 });
   const [editingReview, setEditingReview] = useState(null);
 
+  const [revtitle, setRevtitle] = useState("");
+const [revtext, setRevtext] = useState("");
+const [revscore, setRevscore] = useState(0);
+
+  const dto = {
+    revtitle,
+    revtext,
+    revscore,
+    pronum,           // 상품 번호
+    mnum: user?.mnum, // 로그인한 회원 번호
+  };
   // ✅ 상품 불러오기
   useEffect(() => {
     const load = async () => {
@@ -176,12 +187,13 @@ export default function ProductDetailPage() {
     if (!newReview.revtext.trim()) return alert("내용을 입력해주세요.");
 
     try {
-      await axios.post("http://localhost:8080/reviews", {
+      await axios.post("http://localhost:8080/reviews", dto,{
         pronum,
         mnum: user.mnum,
         revtitle: newReview.revtitle,
         revtext: newReview.revtext,
         revscore: newReview.revscore,
+        withCredentials: true,
       });
       alert("리뷰가 등록되었습니다!");
       setNewReview({ revtitle: "", revtext: "", revscore: 5 });
