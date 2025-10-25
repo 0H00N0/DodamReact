@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchProductById } from "../api/ProductApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { useCart } from "../../contexts/CartContext";
 import axios from "axios";
+import { normalizeImage, onImgError } from "../../utils/image";
+import styles from "./ProductPage.module.css";
 
-// 🔹 리뷰 탭 분리 (커서 튐 방지)
+/* 🎀 리뷰 탭 (핑크 테마) */
 function ReviewTabs({
   tab,
   setTab,
@@ -20,7 +22,6 @@ function ReviewTabs({
   handleDeleteReview,
   user,
 }) {
-  // 🔸 커서 튐 방지 핵심 — 부분 업데이트만 수행
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (editingReview) {
@@ -31,48 +32,47 @@ function ReviewTabs({
   };
 
   return (
-    <div className="mt-10">
-      <div className="flex border-b mb-4">
+    <div className={styles.reviewContainer}>
+      {/* 탭 */}
+      <div className={styles.reviewTabs}>
         <button
-          className={`px-4 py-2 ${tab === "write" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"}`}
+          className={`${styles.reviewTabBtn} ${tab === "write" ? styles.active : ""}`}
           onClick={() => setTab("write")}
         >
-          리뷰 작성
+          ✏️ 리뷰 작성
         </button>
         <button
-          className={`px-4 py-2 ${tab === "view" ? "border-b-2 border-blue-500 font-bold" : "text-gray-500"}`}
+          className={`${styles.reviewTabBtn} ${tab === "view" ? styles.active : ""}`}
           onClick={() => setTab("view")}
         >
-          다른 리뷰 보기
+          💬 리뷰 보기
         </button>
       </div>
 
+      {/* 리뷰 작성 */}
       {tab === "write" && (
         <form
           onSubmit={editingReview ? handleUpdateReview : handleSubmitReview}
-          className="flex flex-col gap-3"
+          className={styles.reviewForm}
         >
           <input
             type="text"
             name="revtitle"
-            placeholder="리뷰 제목"
+            placeholder="리뷰 제목을 입력하세요"
             value={editingReview ? editingReview.revtitle : newReview.revtitle}
             onChange={handleChange}
-            className="w-full border rounded p-2"
+            className={styles.reviewInput}
           />
           <textarea
             name="revtext"
-            placeholder="리뷰 내용을 작성해주세요."
+            placeholder="리뷰 내용을 입력하세요"
             value={editingReview ? editingReview.revtext : newReview.revtext}
             onChange={handleChange}
-            className="w-full p-3 border rounded-lg"
+            className={styles.reviewTextarea}
             rows={4}
           />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            {editingReview ? "수정 완료" : "등록하기"}
+          <button type="submit" className={styles.reviewBtn}>
+            {editingReview ? "✏️ 수정 완료" : "🩷 리뷰 등록"}
           </button>
           {editingReview && (
             <button
@@ -86,29 +86,30 @@ function ReviewTabs({
         </form>
       )}
 
+      {/* 리뷰 보기 */}
       {tab === "view" && (
-        <div className="space-y-3">
+        <div>
           {reviews.length === 0 ? (
-            <div className="text-gray-500">아직 리뷰가 없습니다.</div>
+            <div className={styles.reviewEmpty}>등록된 리뷰가 아직 없습니다 😅</div>
           ) : (
             reviews.map((r) => (
-              <div key={r.revnum} className="border p-3 rounded-lg">
-                <div className="font-semibold text-lg">{r.revtitle}</div>
-                <div className="text-gray-700 mt-1">{r.revtext}</div>
-                <div className="text-xs text-gray-400 mt-1">
+              <div key={r.revnum} className={styles.reviewItem}>
+                <div className={styles.reviewTitle}>{r.revtitle}</div>
+                <div className={styles.reviewText}>{r.revtext}</div>
+                <div className={styles.reviewMeta}>
                   {new Date(r.revcre).toLocaleString()}
                 </div>
                 {user && user.mnum === r.mnum && (
-                  <div className="flex gap-3 mt-2">
+                  <div className={styles.reviewActions}>
                     <button
                       onClick={() => startEdit(r)}
-                      className="text-blue-600 text-sm hover:underline"
+                      className={styles.reviewEditBtn}
                     >
                       수정
                     </button>
                     <button
                       onClick={() => handleDeleteReview(r.revnum)}
-                      className="text-red-600 text-sm hover:underline"
+                      className={styles.reviewDeleteBtn}
                     >
                       삭제
                     </button>
@@ -123,6 +124,7 @@ function ReviewTabs({
   );
 }
 
+/* 🎀 상품 상세 메인 */
 export default function ProductDetailPage() {
   const { user } = useAuth();
   const { pronum } = useParams();
@@ -134,23 +136,11 @@ export default function ProductDetailPage() {
   const [adding, setAdding] = useState(false);
   const [err, setErr] = useState("");
 
-  const [tab, setTab] = useState("write");
+  const [tab, setTab] = useState("view");
   const [reviews, setReviews] = useState([]);
-  const [newReview, setNewReview] = useState({ revtitle: "", revtext: "", revscore: 5 });
+  const [newReview, setNewReview] = useState({ revtitle: "", revtext: "" });
   const [editingReview, setEditingReview] = useState(null);
 
-  const [revtitle, setRevtitle] = useState("");
-const [revtext, setRevtext] = useState("");
-const [revscore, setRevscore] = useState(0);
-
-  const dto = {
-    revtitle,
-    revtext,
-    revscore,
-    pronum,           // 상품 번호
-    mnum: user?.mnum, // 로그인한 회원 번호
-  };
-  // ✅ 상품 불러오기
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -166,7 +156,7 @@ const [revscore, setRevscore] = useState(0);
     if (pronum) load();
   }, [pronum]);
 
-  // ✅ 리뷰 불러오기
+  // 리뷰 불러오기
   const loadReviews = async () => {
     try {
       const res = await axios.get(`http://localhost:8080/reviews/${pronum}`);
@@ -175,28 +165,38 @@ const [revscore, setRevscore] = useState(0);
       console.error("리뷰 불러오기 오류:", e);
     }
   };
+  useEffect(() => { loadReviews(); }, [pronum]);
 
-  useEffect(() => {
-    loadReviews();
-  }, [pronum]);
+  // 대표 이미지
+  const mainImage = useMemo(() => {
+    const cand =
+      product?.prodetailimage ||
+      product?.proimg ||
+      product?.thumbnailUrl ||
+      product?.imageUrl ||
+      product?.image;
+    return normalizeImage(cand);
+  }, [product]);
 
-  // ✅ 리뷰 등록
+  if (loading) return <div className="py-10 text-center text-gray-500">불러오는 중…</div>;
+  if (err) return <div className="py-10 text-center text-red-600">{err}</div>;
+
+  const { proname, proprice, probrand, prodetail } = product;
+
+  // 리뷰 등록/수정/삭제
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!user) return navigate("/login");
     if (!newReview.revtext.trim()) return alert("내용을 입력해주세요.");
-
     try {
-      await axios.post("http://localhost:8080/reviews", dto,{
+      await axios.post("http://localhost:8080/reviews", {
         pronum,
         mnum: user.mnum,
         revtitle: newReview.revtitle,
         revtext: newReview.revtext,
-        revscore: newReview.revscore,
-        withCredentials: true,
       });
       alert("리뷰가 등록되었습니다!");
-      setNewReview({ revtitle: "", revtext: "", revscore: 5 });
+      setNewReview({ revtitle: "", revtext: "" });
       loadReviews();
       setTab("view");
     } catch {
@@ -204,13 +204,11 @@ const [revscore, setRevscore] = useState(0);
     }
   };
 
-  // ✅ 리뷰 수정 시작
-  const startEdit = (review) => {
-    setEditingReview({ ...review });
+  const startEdit = (r) => {
+    setEditingReview({ ...r });
     setTab("write");
   };
 
-  // ✅ 리뷰 수정 완료
   const handleUpdateReview = async (e) => {
     e.preventDefault();
     try {
@@ -227,7 +225,6 @@ const [revscore, setRevscore] = useState(0);
     }
   };
 
-  // ✅ 리뷰 삭제
   const handleDeleteReview = async (revnum) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
@@ -239,11 +236,10 @@ const [revscore, setRevscore] = useState(0);
     }
   };
 
-  // ✅ 장바구니 담기
+  // 장바구니/바로구매
   const addCart = async () => {
     if (!user) return navigate("/login");
     if (!window.confirm("장바구니에 담으시겠습니까?")) return;
-
     try {
       setAdding(true);
       await addToCart(Number(pronum), 1);
@@ -253,11 +249,9 @@ const [revscore, setRevscore] = useState(0);
     }
   };
 
-  // ✅ 구매하기
   const goToBuyPage = async () => {
     if (!user) return navigate("/login");
     if (!window.confirm("구매하시겠습니까?")) return;
-
     try {
       const res = await fetch("http://localhost:8080/rent", {
         method: "POST",
@@ -271,15 +265,8 @@ const [revscore, setRevscore] = useState(0);
     }
   };
 
-  // ✅ 로딩/오류 처리
-  if (loading) return <div className="py-10 text-center text-gray-500">불러오는 중…</div>;
-  if (err) return <div className="py-10 text-center text-red-600">{err}</div>;
-
-  const { proname, proprice, probrand, prodetail, prodetailimage, status, createdAt, updatedAt } =
-    product;
-
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className={styles.detailContainer}>
       <button
         onClick={() => navigate(-1)}
         className="mb-6 px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100"
@@ -287,68 +274,56 @@ const [revscore, setRevscore] = useState(0);
         ← 뒤로가기
       </button>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* 상품 이미지 */}
-        <div className="bg-gray-100 rounded-xl overflow-hidden">
-          {prodetailimage ? (
-            <img src={`/images/${prodetailimage}`} alt={proname} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-64 grid place-items-center text-gray-400">No Image</div>
-          )}
+      {/* 상품 정보 */}
+      <div className={styles.detailWrapper}>
+        <div className={styles.detailImageBox}>
+          <img src={mainImage} alt={proname ?? "상품 이미지"} onError={onImgError} />
         </div>
 
-        {/* 상품 정보 */}
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">{proname}</h1>
-          <div className="text-lg font-semibold">
+        <div className={styles.detailInfo}>
+          <h1 className={styles.detailTitle}>{proname}</h1>
+          <div className={styles.detailPrice}>
             {proprice ? Number(proprice).toLocaleString() + "원" : "가격정보 없음"}
           </div>
-          <div>
-            <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>
+          <p className={styles.detailDesc}>{prodetail}</p>
+
+          <div className={styles.detailBtns}>
+            <button
+              className={`${styles.detailBtn} ${styles.cartBtn}`}
+              onClick={addCart}
+              disabled={adding}
+            >
+              {adding ? "담는 중…" : "장바구니에 담기"}
+            </button>
+            <button
+              className={`${styles.detailBtn} ${styles.buyBtn}`}
+              onClick={goToBuyPage}
+            >
+              바로 구매하기
+            </button>
           </div>
-          <div className="text-gray-700 whitespace-pre-line">{prodetail}</div>
 
-          <button
-            className="bg-blue-600 text-white font-bold py-2 px-4 rounded"
-            onClick={addCart}
-            disabled={adding}
-          >
-            {adding ? "담는 중…" : "장바구니에 담기"}
-          </button>
-
-          <button
-            className="bg-green-600 text-white font-bold py-2 px-4 rounded"
-            onClick={goToBuyPage}
-          >
-            바로 구매하기
-          </button>
-
-          <div className="mt-6 text-sm text-gray-500">
+          <div className={styles.detailMeta}>
             <p>브랜드: {probrand || "-"}</p>
-          </div>
-
-          {/* ✅ 리뷰 영역 */}
-          <ReviewTabs
-            tab={tab}
-            setTab={setTab}
-            newReview={newReview}
-            setNewReview={setNewReview}
-            editingReview={editingReview}
-            setEditingReview={setEditingReview}
-            reviews={reviews}
-            handleSubmitReview={handleSubmitReview}
-            handleUpdateReview={handleUpdateReview}
-            startEdit={startEdit}
-            handleDeleteReview={handleDeleteReview}
-            user={user}
-          />
-
-          <div className="text-xs text-gray-400 mt-4">
-            <p>등록일: {createdAt ? new Date(createdAt).toLocaleDateString() : "-"}</p>
-            <p>수정일: {updatedAt ? new Date(updatedAt).toLocaleDateString() : "-"}</p>
           </div>
         </div>
       </div>
+
+      {/* 🎀 리뷰 섹션 */}
+      <ReviewTabs
+        tab={tab}
+        setTab={setTab}
+        newReview={newReview}
+        setNewReview={setNewReview}
+        editingReview={editingReview}
+        setEditingReview={setEditingReview}
+        reviews={reviews}
+        handleSubmitReview={handleSubmitReview}
+        handleUpdateReview={handleUpdateReview}
+        startEdit={startEdit}
+        handleDeleteReview={handleDeleteReview}
+        user={user}
+      />
     </div>
   );
 }

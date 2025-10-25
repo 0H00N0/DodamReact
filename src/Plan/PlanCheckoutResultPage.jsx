@@ -374,10 +374,9 @@ export default function PlanCheckoutResultPage() {
               )}
             </div>
           </div>
-
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10, marginTop: 10 }}>
             <Link to="/products" style={S.btn}>상품 페이지로</Link>
-            <Link to="/member/subscriptions/my" style={S.btnPrimary}>내 구독 확인</Link>
+            <Link to="/member/membership" style={S.btnPrimary}>내 구독 확인</Link>
           </div>
         </div>
       </div>
