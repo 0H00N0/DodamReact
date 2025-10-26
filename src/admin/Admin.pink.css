@@ -382,3 +382,105 @@
 .admin-pink-theme .admin-sidebar::-webkit-scrollbar-thumb {
   background:var(--ap-border-2); border-radius:8px;
 }
+/* ===================== Sidebar width — compact version ===================== */
+
+/* 사이드바 폭: 190px (기존 260 → 220 → 190으로 축소) */
+.admin-pink-theme .admin-sidebar {
+  width: 190px !important;
+  flex: 0 0 190px !important;
+  transition: width 0.25s ease;
+}
+
+/* 메뉴 안쪽 패딩도 조정 */
+.admin-pink-theme .admin-sidebar .admin-menu,
+.admin-pink-theme .admin-sidebar .sidebar-menu {
+  padding: 6px 4px !important;
+}
+
+/* 각 버튼 크기/폰트 미세 조정 */
+.admin-pink-theme .admin-sidebar .nav-link,
+.admin-pink-theme .admin-sidebar .menu-title {
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 10px;
+}
+
+/* 아이콘 공간 살짝 줄임 */
+.admin-pink-theme .admin-sidebar .nav-link .nav-icon {
+  flex: 0 0 16px;
+}
+
+/* 줄어든 폭에 맞춰 카운트 뱃지도 미세조정 */
+.admin-pink-theme .admin-sidebar .badge,
+.admin-pink-theme .admin-sidebar .count {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.78rem;
+}
+
+/* 반응형 — 작은 화면에서 자동으로 더 좁게 (160px) */
+@media (max-width: 900px) {
+  .admin-pink-theme .admin-sidebar {
+    width: 160px !important;
+    flex: 0 0 160px !important;
+  }
+  .admin-pink-theme .admin-sidebar .nav-link .nav-title {
+    font-size: 0.85rem;
+  }
+}
+/* ===================== Dashboard Layout Expansion ===================== */
+
+/* 메인 콘텐츠(대시보드) 전체 폭 확대 */
+.admin-pink-theme .dashboard,
+.admin-pink-theme .admin-content,
+.admin-pink-theme .page-content,
+.admin-pink-theme main {
+  max-width: 1600px;       /* ← 기본 1200~1280 → 1600으로 확장 */
+  margin: 0 auto;
+  padding: 24px 32px;      /* 좌우 여백도 조금 늘림 */
+}
+
+/* 상단 지표 카드 간격 조정 및 넓이 여유 */
+.admin-pink-theme .dashboard .stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+/* 차트 영역 확장 (ResponsiveContainer는 부모 높이에 의존함) */
+.admin-pink-theme .dashboard .chart-container {
+  min-height: 400px;      /* 기본 300~320 → 400으로 확대 */
+  padding: 20px;
+}
+
+/* 하단 주문/상품 섹션도 넓게 */
+.admin-pink-theme .dashboard .dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 좌우 2열 유지 */
+  gap: 24px;
+}
+@media (max-width: 1280px) {
+  .admin-pink-theme .dashboard .dashboard-bottom-grid {
+    grid-template-columns: 1fr;     /* 반응형일 때 1열 */
+  }
+}
+
+/* 제목·카드 내부 폰트 조금 키워서 넓은 화면에 맞게 */
+.admin-pink-theme .dashboard h1,
+.admin-pink-theme .dashboard h2 {
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+}
+.admin-pink-theme .dashboard .stat-value {
+  font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+  white-space: nowrap;
+}
+/* Recharts가 wrapper에 overflow:hidden을 주어 라벨이 잘리는 경우 방지 */
+.admin-pink-theme .dashboard .chart-container .recharts-wrapper {
+  overflow: visible !important;
+}
+
+/* 좌측 라벨 여유를 조금 더 주고 싶다면(선택) */
+.admin-pink-theme .dashboard .chart-container {
+  padding-left: 20px;
+}

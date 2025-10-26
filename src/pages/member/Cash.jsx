@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 
+import "./MemberTheme.css";
+
 export default function Cash() {
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,7 +13,6 @@ export default function Cash() {
   useEffect(() => {
     (async () => {
       try {
-        // 백엔드에 이미 있는 엔드포인트 (zip에서 확인)
         const { data } = await api.get("/billing-keys");
         setMethods(Array.isArray(data) ? data : []);
       } catch (e) {
@@ -31,6 +32,8 @@ export default function Cash() {
   if (err) return <div style={{ padding: 24, color: "tomato" }}>{err}</div>;
 
   return (
+    <div className="member-page">
+      <div className="m-card">
     <div style={{ padding: 24 }}>
       <h2 style={{ marginBottom: 16 }}>내 결제수단</h2>
 
@@ -46,6 +49,8 @@ export default function Cash() {
           ))}
         </ul>
       )}
+    </div>
+      </div>
     </div>
   );
 }

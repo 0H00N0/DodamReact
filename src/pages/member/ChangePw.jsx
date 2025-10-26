@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import '../../App.css';
 
+import "./MemberTheme.css";
+
 const ChangePw = () => {
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
@@ -36,9 +38,11 @@ const ChangePw = () => {
   };
 
   return (
+    <div className="member-page">
+      <div className="m-card">
     <div style={{ padding: '2rem' }}>
       <h3>비밀번호 변경</h3>
-      <form onSubmit={handleSubmit}>
+      <form className="m-form" onSubmit={handleSubmit}>
         <label>현재 비밀번호: <input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} required /></label><br />
         <label>새 비밀번호: <input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} required /></label><br />
         <label>새 비밀번호 확인: <input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} required /></label><br />
@@ -54,6 +58,8 @@ const ChangePw = () => {
         }}>변경하기</button>
       </form>
       {message && <p>{message}</p>}
+    </div>
+      </div>
     </div>
   );
 };

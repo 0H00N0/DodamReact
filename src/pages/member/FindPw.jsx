@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+import "./MemberTheme.css";
+
 export default function FindPw() {
   const nav = useNavigate();
 
@@ -12,12 +14,16 @@ export default function FindPw() {
   };
 
   return (
+    <div className="member-page">
+      <div className="m-card">
     <div style={pageWrapperStyle}>
       <div style={cardStyle}>
         <h3>비밀번호 찾기</h3>
         <button onClick={goToEmail}>이메일로 찾기</button>
         <button onClick={goToTel}>전화번호로 찾기</button>
         <button onClick={closeWindow}>닫기</button>
+      </div>
+    </div>
       </div>
     </div>
   );

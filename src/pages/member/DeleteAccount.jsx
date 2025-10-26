@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
+import "./MemberTheme.css";
 
 export default function DeleteAccount() {
   const nav = useNavigate();
@@ -25,7 +26,9 @@ export default function DeleteAccount() {
         setLoading(false);
       }
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, [nav]);
 
   const isLocal = joinWay === "LOCAL";
@@ -68,59 +71,67 @@ export default function DeleteAccount() {
     }
   };
 
-  if (loading) return <div style={{ padding: 24 }}>로딩중...</div>;
+  if (loading) {
+    return (
+      <div className="member-page">
+        <div className="m-card">로딩중...</div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: 560, margin: "40px auto", padding: 24, border: "1px solid #eee", borderRadius: 12 }}>
-      <h2 style={{ marginBottom: 12 }}>회원 탈퇴</h2>
-      <p style={{ color: "#666", marginBottom: 16 }}>
-        탈퇴 시 개인정보는 마스킹 처리되고 계정 상태가 <b>DELETED</b>로 전환됩니다. 동일 아이디/소셜로 재가입이 가능합니다.
-      </p>
+    <div className="member-page">
+      <form onSubmit={onSubmit} className="m-card m-form">
+        <h2 className="m-title">회원 탈퇴</h2>
+        <p className="m-muted">
+          탈퇴 시 개인정보는 마스킹 처리되고 계정 상태가 <b>DELETED</b>로 전환됩니다. 동일 아이디/소셜로 재가입이 가능합니다.
+        </p>
 
-      <form onSubmit={onSubmit}>
         {isLocal && (
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: "block", fontWeight: 600, marginBottom: 6 }}>비밀번호</label>
+          <>
+            <label htmlFor="pw" className="m-label">비밀번호</label>
             <input
+              id="pw"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="현재 비밀번호"
               autoComplete="current-password"
-              style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+              className="m-input"
             />
-          </div>
+          </>
         )}
 
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: "block", fontWeight: 600, marginBottom: 6 }}>탈퇴 사유 (선택)</label>
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={4}
-            placeholder="탈퇴 사유를 입력해 주세요"
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid #ccc", resize: "vertical" }}
-          />
-        </div>
+        <label htmlFor="reason" className="m-label">탈퇴 사유 (선택)</label>
+        <textarea
+          id="reason"
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          rows={4}
+          placeholder="탈퇴 사유를 입력해 주세요"
+          className="m-textarea"
+        />
 
-        <div style={{ margin: "12px 0" }}>
-          <label style={{ userSelect: "none" }}>
-            <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} />{" "}
+        <div>
+          <label className="m-label" style={{ fontWeight: 400 }}>
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              style={{ marginRight: 6 }}
+            />
             탈퇴 시 개인정보 마스킹/로그인 차단에 동의합니다.
           </label>
         </div>
 
-        {error && <div style={{ color: "crimson", marginBottom: 12 }}>{error}</div>}
+        {error && <div className="m-error">{error}</div>}
 
-        <button
-          type="submit"
-          style={{
-            background: "#d32f2f", color: "#fff", border: "none",
-            padding: "10px 16px", borderRadius: 8, cursor: "pointer", fontWeight: 700,
-          }}
-        >
-          회원 탈퇴
-        </button>
+        <div className="m-actions" style={{ marginTop: 6 }}>
+          <button type="submit" className="m-btn">회원 탈퇴</button>
+          <button type="button" className="m-btn ghost" onClick={() => nav(-1)}>
+            뒤로가기
+          </button>
+        </div>
       </form>
     </div>
   );

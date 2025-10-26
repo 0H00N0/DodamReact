@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+import "./MemberTheme.css";
+
 export default function FindPwByMtel() {
   const [mid, setMid] = useState("");
   const [mname, setMname] = useState("");
@@ -44,7 +46,9 @@ export default function FindPwByMtel() {
   };
 
   return (
-    <form onSubmit={handleVerify} style={{ display: "grid", gap: 8, maxWidth: 360 }}>
+    <div className="member-page">
+      <div className="m-card">
+    <form className="m-form" onSubmit={handleVerify} style={{ display: "grid", gap: 8, maxWidth: 360 }}>
       <input
         value={mid}
         onChange={(e) => setMid(e.target.value)}
@@ -68,5 +72,7 @@ export default function FindPwByMtel() {
       </button>
       {!!result && <div style={{ color: "#c13030", fontSize: 14 }}>{result}</div>}
     </form>
+      </div>
+    </div>
   );
 }

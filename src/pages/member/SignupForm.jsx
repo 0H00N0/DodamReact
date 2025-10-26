@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
+import "./MemberTheme.css";
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function SignupForm() {
     mbirth: "",
     mtel: "",
     memail: "",
-    maddr: "",   // 서버에 보낼 최종 주소(초기엔 비워둠)
+    maddr: "",
     mpost: "",
     mnic: "",
     children: [],
@@ -29,13 +30,12 @@ export default function SignupForm() {
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ 추가: UI용 상태 (기본주소/상세주소/토글)
-  const [maddrBase, setMaddrBase] = useState("");     // 카카오 검색으로 채우는 기본주소
-  const [maddrDetail, setMaddrDetail] = useState(""); // 사용자가 적는 상세주소
+  // UI용 상태 (기본주소/상세주소/토글)
+  const [maddrBase, setMaddrBase] = useState("");
+  const [maddrDetail, setMaddrDetail] = useState("");
   const [showDetail, setShowDetail] = useState(false);
   const detailRef = useRef(null);
 
-  // 숫자만 남기고 최대 13자리 제한
   const digitsOnly = (s = "") => s.replace(/\D/g, "").slice(0, 13);
 
   // 카카오 주소검색 스크립트
@@ -48,7 +48,6 @@ export default function SignupForm() {
     }
   }, []);
 
-  // 주소검색 
   const handleAddressSearch = () => {
     if (!window.daum?.Postcode) {
       alert("주소 검색 스크립트가 아직 로드되지 않았습니다. 잠시 후 다시 시도해 주세요.");
@@ -56,14 +55,12 @@ export default function SignupForm() {
     }
     new window.daum.Postcode({
       oncomplete: function (data) {
-        // ✅ 기본주소/우편번호 채우기
         setMaddrBase(data.address);
         setForm((f) => ({
           ...f,
-          maddr: data.address,   // 기존 검증 로직 호환 유지
+          maddr: data.address,
           mpost: data.zonecode,
         }));
-        // ✅ 상세주소 입력칸 자동 펼치기 + 포커스
         setShowDetail(true);
         setTimeout(() => detailRef.current?.focus(), 0);
       },
@@ -73,11 +70,6 @@ export default function SignupForm() {
   const onChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: name === "mtel" ? digitsOnly(value) : value }));
-  };
-
-  const onChildChange = (e) => {
-    const { name, value } = e.target;
-    setChild((c) => ({ ...c, [name]: value }));
   };
 
   const addChild = () => {
@@ -102,7 +94,6 @@ export default function SignupForm() {
     if (loading) return;
     setMsg("");
 
-    // 🔒 미래 생일 금지
     const today = todayStr();
     const MEMBER_MIN = "1900-01-01";
     const childMin = "2000-01-01";
@@ -114,7 +105,6 @@ export default function SignupForm() {
       setMsg("회원 생년월일은 1900-01-01 이후여야 합니다.");
       return;
     }
-    // 🔒 자녀 생일 체크
     if (Array.isArray(form.children)) {
       for (const [idx, ch] of form.children.entries()) {
         if (ch?.chbirth && ch.chbirth > today) {
@@ -128,21 +118,18 @@ export default function SignupForm() {
       }
     }
 
-    // 🔒 전화번호: 9~13자리 숫자만 허용
-    const mtelDigits = digitsOnly(form.mtel);
+    const mtelDigits = String(form.mtel || "").replace(/\D/g, "");
     if (!/^\d{9,13}$/.test(mtelDigits)) {
       setMsg("전화번호는 숫자 9~13자리로 입력하세요.");
       return;
     }
 
-    // 🔒 우편번호/주소 필수 (백엔드 NOT NULL 대응)
     const mpostDigits = String(form.mpost || "").replace(/\D/g, "");
     if (!/^\d{5}$/.test(mpostDigits)) {
       setMsg("우편번호는 주소검색으로 입력한 5자리 숫자여야 합니다.");
       return;
     }
 
-    // ✅ 최종 주소: 기본주소 + 상세주소(있으면)
     const base = (maddrBase || form.maddr || "").trim();
     const detail = (maddrDetail || "").trim();
     const addr = detail ? `${base} ${detail}` : base;
@@ -154,7 +141,6 @@ export default function SignupForm() {
 
     setLoading(true);
     try {
-      // 🔒 빈 자녀 행 제거
       const cleanChildren = (form.children || []).filter(
         (c) => c?.chname?.trim() && c?.chbirth
       );
@@ -166,8 +152,8 @@ export default function SignupForm() {
         mname: form.mname.trim(),
         mtel: mtelDigits,
         memail: form.memail.trim(),
-        maddr: addr,           // ✅ 합쳐진 주소 전송
-        mpost: mpostDigits,    // 숫자 5자리 보장
+        maddr: addr,
+        mpost: mpostDigits,
         children: cleanChildren,
       };
 
@@ -187,14 +173,14 @@ export default function SignupForm() {
   };
 
   return (
-    <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form}>
-        <h2 style={{ color: "#111" }}>회원가입</h2>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+    <div className="member-page">
+      <form onSubmit={onSubmit} className="m-card m-form">
+        <h2 className="m-title">회원가입</h2>
+        <div className="m-muted" aria-hidden="true">
           <span style={{ color: "red" }}>*</span>는 필수 입력사항입니다.
         </div>
 
-        <label htmlFor="mid">
+        <label htmlFor="mid" className="m-label">
           아이디<span style={{ color: "red" }}>*</span>
         </label>
         <input
@@ -205,9 +191,10 @@ export default function SignupForm() {
           placeholder="아이디"
           required
           autoComplete="username"
+          className="m-input"
         />
 
-        <label htmlFor="mpw">
+        <label htmlFor="mpw" className="m-label">
           비밀번호<span style={{ color: "red" }}>*</span>
         </label>
         <input
@@ -219,9 +206,10 @@ export default function SignupForm() {
           placeholder="비밀번호"
           required
           autoComplete="new-password"
+          className="m-input"
         />
 
-        <label htmlFor="mname">
+        <label htmlFor="mname" className="m-label">
           이름<span style={{ color: "red" }}>*</span>
         </label>
         <input
@@ -232,9 +220,10 @@ export default function SignupForm() {
           placeholder="이름"
           required
           autoComplete="name"
+          className="m-input"
         />
 
-        <label htmlFor="mtel">
+        <label htmlFor="mtel" className="m-label">
           전화번호<span style={{ color: "red" }}>*</span>
         </label>
         <input
@@ -249,9 +238,10 @@ export default function SignupForm() {
           placeholder="-없이 숫자만 입력"
           autoComplete="tel"
           required
+          className="m-input"
         />
 
-        <label htmlFor="mbirth">
+        <label htmlFor="mbirth" className="m-label">
           생년월일<span style={{ color: "red" }}>*</span>
         </label>
         <input
@@ -265,24 +255,24 @@ export default function SignupForm() {
           max={todayStr()}
           min="1900-01-01"
           required
+          className="m-input"
         />
 
-        <label htmlFor="memail">이메일 주소</label>
+        <label htmlFor="memail" className="m-label">이메일 주소</label>
         <input
           id="memail"
           name="memail"
-          value={form.memail}
-          onChange={onChange}
-          placeholder="이메일"
+          type="email"
           autoComplete="email"
-          pattern="^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+          placeholder="이메일"
+          pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
         />
 
         {/* 우편번호 + 주소검색 버튼 */}
-        <label htmlFor="mpost">
+        <label htmlFor="mpost" className="m-label">
           우편번호<span style={{ color: "red" }}>*</span>
         </label>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="m-grid-2">
           <input
             id="mpost"
             name="mpost"
@@ -291,31 +281,32 @@ export default function SignupForm() {
             placeholder="우편번호"
             autoComplete="postal-code"
             required
+            className="m-input"
           />
-          <button type="button" onClick={handleAddressSearch} style={styles.linkBtn}>
+          <button type="button" onClick={handleAddressSearch} className="m-btn ghost">
             주소검색
           </button>
         </div>
 
         {/* 주소: 기본주소(readOnly) + 상세주소 토글/입력 */}
-        <label htmlFor="maddr">
+        <label htmlFor="maddr" className="m-label">
           주소<span style={{ color: "red" }}>*</span>
         </label>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="m-grid-2">
           <input
             id="maddr"
             name="maddr"
             value={maddrBase || form.maddr}
             readOnly
             placeholder="주소검색으로 기본주소 자동 입력"
-            style={{ flex: 1 }}
             autoComplete="address-line1"
             required
+            className="m-input"
           />
           <button
             type="button"
             onClick={() => setShowDetail((v) => !v)}
-            style={styles.linkBtn}
+            className="m-btn ghost"
             aria-expanded={showDetail}
             aria-controls="addrDetail"
           >
@@ -329,30 +320,27 @@ export default function SignupForm() {
             value={maddrDetail}
             onChange={(e) => setMaddrDetail(e.target.value)}
             placeholder="상세주소 (동/호수 등)"
-            style={{ marginTop: 8 }}
             autoComplete="address-line2"
+            className="m-input"
           />
         )}
 
-        <label htmlFor="mnic">닉네임</label>
-        <div style={{ display: "flex", gap: 8 }}>
-          <input
-            id="mnic"
-            name="mnic"
-            value={form.mnic}
-            onChange={onChange}
-            placeholder="닉네임"
-          />
-        </div>
+        <label htmlFor="mnic" className="m-label">닉네임</label>
+        <input
+          id="mnic"
+          name="mnic"
+          value={form.mnic}
+          onChange={onChange}
+          placeholder="닉네임"
+          className="m-input"
+        />
 
         {/* 자녀 정보 입력 (선택) */}
-        <fieldset style={{ border: "1px solid #eee", padding: 12, borderRadius: 8 }}>
+        <fieldset className="m-fieldset">
           <legend>자녀 정보 (선택)</legend>
-          {form.children.map((c, idx) => (
-            <div
-              key={idx}
-              style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 8 }}
-            >
+
+          {(form.children || []).map((c, idx) => (
+            <div key={idx} className="m-grid-2" style={{ alignItems: "center" }}>
               <input
                 name="chname"
                 value={c.chname}
@@ -365,94 +353,65 @@ export default function SignupForm() {
                   });
                 }}
                 placeholder="자녀 이름"
-                style={{ flex: 1 }}
+                className="m-input"
               />
-              <input
-                name="chbirth"
-                type="date"
-                value={c.chbirth}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setForm((f) => {
-                    const arr = [...f.children];
-                    arr[idx].chbirth = value;
-                    return { ...f, children: arr };
-                  });
-                }}
-                style={{ flex: 1 }}
-                max={todayStr()}
-                min="2000-01-01"
-              />
-              <button type="button" onClick={() => removeChild(idx)} style={styles.linkBtn}>
-                삭제
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  name="chbirth"
+                  type="date"
+                  value={c.chbirth}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setForm((f) => {
+                      const arr = [...f.children];
+                      arr[idx].chbirth = value;
+                      return { ...f, children: arr };
+                    });
+                  }}
+                  max={todayStr()}
+                  min="2000-01-01"
+                  className="m-input"
+                  style={{ flex: 1 }}
+                />
+                <button type="button" onClick={() => removeChild(idx)} className="m-btn ghost">
+                  삭제
+                </button>
+              </div>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={() =>
-              setForm((f) => ({
-                ...f,
-                children: [...f.children, { chname: "", chbirth: "" }],
-              }))
-            }
-            style={styles.linkBtn}
-          >
-            입력칸 추가
-          </button>
+
+          <div className="m-actions" style={{ marginTop: 8 }}>
+            <button
+              type="button"
+              onClick={() =>
+                setForm((f) => ({
+                  ...f,
+                  children: [...f.children, { chname: "", chbirth: "" }],
+                }))
+              }
+              className="m-btn ghost"
+            >
+              입력칸 추가
+            </button>
+          </div>
         </fieldset>
 
         {msg && (
-          <p style={styles.error} aria-live="polite" aria-atomic="true">
+          <p className="m-error" aria-live="polite" aria-atomic="true">
             {msg}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            display: "block",
-            width: "100%",
-            padding: "12px 14px",
-            border: "none",
-            borderRadius: 8,
-            fontSize: 16,
-            fontWeight: 600,
-            cursor: "pointer",
-            background: "#1f6feb",
-            color: "#fff",
-          }}
-        >
+        <button type="submit" disabled={loading} className="m-btn">
           {loading ? "처리 중..." : "가입하기"}
         </button>
 
-        <button type="button" onClick={() => navigate("/login")} disabled={loading} style={styles.linkBtn}>
-          로그인으로
-        </button>
+        <div className="m-actions">
+          <button type="button" onClick={() => navigate("/login")} disabled={loading} className="m-btn ghost">
+            로그인으로
+          </button>
+        </div>
       </form>
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    minHeight: "100vh",
-    display: "grid",
-    placeItems: "center",
-    background: "#f7f7f7",
-    padding: "40px",
-  },
-  form: {
-    width: 400,
-    display: "grid",
-    gap: 12,
-    padding: 24,
-    borderRadius: 12,
-    background: "#fff",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-    color: "#111",
-  },
-  error: { color: "#c13030", fontSize: 14, marginTop: 4 },
-  linkBtn: { background: "transparent", color: "#333", marginTop: 4, cursor: "pointer" },
-};

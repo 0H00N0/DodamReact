@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { fetchMyProductInquiries } from "../../Product/api/inquiryApi";
 
+import "./MemberTheme.css";
+
 export default function MyInquiries() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,6 +34,8 @@ export default function MyInquiries() {
   if (loading) return <div style={{padding:24}}>불러오는 중...</div>;
 
   return (
+    <div className="member-page">
+      <div className="m-card">
     <div style={{padding:24, maxWidth:900, margin:"0 auto"}}>
       <h2>나의 주문상품 문의</h2>
       <div style={{marginTop:12, display:"grid", gap:12}}>
@@ -57,6 +61,8 @@ export default function MyInquiries() {
             </div>
           </div>
         ))}
+      </div>
+    </div>
       </div>
     </div>
   );

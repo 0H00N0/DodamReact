@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+import "./MemberTheme.css";
+
 export default function FindIdByEmail() {
   const [mname, setMname] = useState('');
   const [memail, setMemail] = useState('');
@@ -19,9 +21,11 @@ export default function FindIdByEmail() {
   };
 
   return (
+    <div className="member-page">
+      <div className="m-card">
     <div>
       <h2>이메일로 ID 찾기</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="m-form" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="이름"
@@ -39,6 +43,8 @@ export default function FindIdByEmail() {
         <button type="submit">찾기</button>
       </form>
       <p>{result}</p>
+    </div>
+      </div>
     </div>
   );
 }

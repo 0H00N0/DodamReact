@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
 
+import "./MemberTheme.css";
+
 export default function ChangePwDirect() {
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -25,7 +27,9 @@ export default function ChangePwDirect() {
   };
 
   return (
-    <form onSubmit={handleChangePw}>
+    <div className="member-page">
+      <div className="m-card">
+    <form className="m-form" onSubmit={handleChangePw}>
       <input
         type="password"
         value={newPw}
@@ -43,5 +47,7 @@ export default function ChangePwDirect() {
       <button type="submit">비밀번호 변경</button>
       <div>{result}</div>
     </form>
+      </div>
+    </div>
   );
 }
