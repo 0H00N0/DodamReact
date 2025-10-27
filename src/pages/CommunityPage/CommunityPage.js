@@ -1,8 +1,7 @@
 // src/pages/CommunityPage/CommunityPage.js
 import React from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
-import styles from "./CommunityPage.module.css"
-import { useScrollTopOnMount } from './CommunityScrollTop';
+import { Routes, Route, Navigate } from "react-router-dom";
+import styles from "./CommunityPage.module.css";
 
 import CommunityBoardList from "./CommunityBoardList";
 import CommunityBoardDetail from "./CommunityBoardDetail";
