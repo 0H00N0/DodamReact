@@ -22,7 +22,7 @@ export default function FindIdByEmail() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <div>
       <h2>이메일로 ID 찾기</h2>
       <form className="m-form" onSubmit={handleSubmit}>

@@ -68,12 +68,14 @@ export default function CommunityBoardList() {
   const onClickWrite = () => {
     if (!actorMid) {
       if (window.confirm("글쓰기는 로그인 후 이용 가능합니다. 로그인하시겠어요?")) {
-        const next = encodeURIComponent(`/board/community/new`);
+        // ✅ 로그인 후 돌아올 경로도 write 로
+        const next = encodeURIComponent(`/board/community/write`);
         nav(`/login?next=${next}`);
       }
       return;
     }
-    nav("/board/community/new");
+    // ✅ 여기! new → write
+    nav("/board/community/write");
   };
 
   return (
@@ -89,6 +91,7 @@ export default function CommunityBoardList() {
         />
         <button className="btn">검색</button>
         <div className={styles.right} />
+        {/* type="button" 유지 OK */}
         <button type="button" className="btn primary" onClick={onClickWrite}>글쓰기</button>
       </form>
 

@@ -1,6 +1,6 @@
+// src/pages/member/FindIdModal.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
 import "./MemberTheme.css";
 
 export default function FindIdModal() {
@@ -15,35 +15,25 @@ export default function FindIdModal() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
-    <div style={pageWrapperStyle}>
-      <div style={cardStyle}>
-        <h3>ID 찾기</h3>
-        <button onClick={goToEmail}>이메일로 찾기</button>
-        <button onClick={goToTel}>전화번호로 찾기</button>
-        <button onClick={closeWindow}>닫기</button>
-      </div>
-    </div>
+      {/* 가운데 정렬된 작은 카드 */}
+      <div className="m-card" style={{ width: "min(420px, 92vw)", margin: "40px auto" }}>
+        <h2 className="m-title" style={{ marginBottom: 14 }}>ID 찾기</h2>
+
+        {/* 2열 버튼(동일 폭) */}
+        <div className="m-row-2" style={{ marginBottom: 10 }}>
+          <button type="button" className="m-btn ghost" onClick={goToEmail}>
+            이메일로 찾기
+          </button>
+          <button type="button" className="m-btn ghost" onClick={goToTel}>
+            전화번호로 찾기
+          </button>
+        </div>
+
+        {/* 닫기: 가득 버튼 */}
+        <button type="button" className="m-btn m-wide" onClick={closeWindow}>
+          닫기
+        </button>
       </div>
     </div>
   );
 }
-
-const pageWrapperStyle = {
-  minHeight: "100vh",
-  background: "#fff",
-  margin: 0,
-  padding: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const cardStyle = {
-  backgroundColor: "#fff",
-  padding: 24,
-  borderRadius: 12,
-  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-  minWidth: 300,
-  textAlign: "center",
-};

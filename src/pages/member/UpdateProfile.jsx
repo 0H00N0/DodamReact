@@ -228,7 +228,7 @@ export default function UpdateProfile() {
 
   return (
     <div className="member-page">
-      <form onSubmit={handleSubmit} className="m-card m-form">
+      <form onSubmit={handleSubmit} className="m-card wide m-form">
         <h2 className="m-title">회원정보 수정</h2>
 
         <label htmlFor="mname" className="m-label">이름</label>

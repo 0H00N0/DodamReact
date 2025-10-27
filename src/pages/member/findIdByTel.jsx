@@ -22,7 +22,7 @@ export default function FindIdByTel() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <div>
       <h2>전화번호로 ID 찾기</h2>
       <form className="m-form" onSubmit={handleSubmit}>
