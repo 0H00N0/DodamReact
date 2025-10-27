@@ -81,7 +81,7 @@ export default function DeleteAccount() {
 
   return (
     <div className="member-page">
-      <form onSubmit={onSubmit} className="m-card m-form">
+      <form onSubmit={onSubmit} className="m-card wide m-form">
         <h2 className="m-title">회원 탈퇴</h2>
         <p className="m-muted">
           탈퇴 시 개인정보는 마스킹 처리되고 계정 상태가 <b>DELETED</b>로 전환됩니다. 동일 아이디/소셜로 재가입이 가능합니다.

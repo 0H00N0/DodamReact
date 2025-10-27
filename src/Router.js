@@ -98,6 +98,7 @@ import FooterYouthPolicyPage from "./pages/FooterPage/FooterYouthPolicyPage";
 import FooterEcommercePage from "./pages/FooterPage/FooterEcommercePage";
 
 import ErrorPage from "./pages/ErrorPage";
+import CommunityLayout from "./pages/CommunityPage/CommunityLayout";
 
 export const router = createRouter([
   {
@@ -184,7 +185,7 @@ export const router = createRouter([
       /** Community */
       {
         path: "board",
-        element: <CommunityPage />,
+        element: <CommunityRoutes />,
         children: [
           { index: true, element: <Notice /> },
           { path: "notice", element: <Notice /> },
@@ -193,7 +194,7 @@ export const router = createRouter([
           { path: "event/:eventId", element: <EventDetail /> },
 
           // ✅ 새 커뮤니티 구조
-          { path: "community/*", element: <CommunityRoutes /> },
+          { path: "community/*", element: <CommunityPage /> },
 
           { path: "inquiry", element: <Inquiry /> },
           { path: "faq", element: <FAQ /> },

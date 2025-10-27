@@ -33,7 +33,7 @@ export default function ReviewList() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <div style={{ padding: 24 }}>
       <h2 style={{ marginBottom: 16 }}>내 리뷰</h2>
 

@@ -31,33 +31,38 @@ export default function OrderReturns() {
     }
   };
 
-  if (loading) return <div style={{padding:24}}>불러오는 중...</div>;
-  if (err) return <div style={{padding:24, color:'crimson'}}>{err}</div>;
+  if (loading) return <div className="member-page"><div className="m-card">불러오는 중...</div></div>;
+  if (err) return <div className="member-page"><div className="m-card m-error">{err}</div></div>;
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>반품 가능 목록</h2>
-      <table style={{ width:'100%', borderCollapse:'collapse' }}>
-        <thead>
-          <tr><th>주문번호</th><th>상품명</th><th>상태</th><th>주문일</th><th>반품</th></tr>
-        </thead>
-        <tbody>
-          {rows.map(r => (
-            <tr key={r.rentNum}>
-              <td style={{padding:8}}>{r.rentNum}</td>
-              <td style={{padding:8}}>{r.productName}</td>
-              <td style={{padding:8}}>{shipStatusLabel(r.status)}</td>
-              <td style={{padding:8}}>{r.rentDate?.replace("T"," ").slice(0,19)}</td>
-              <td style={{padding:8}}>
-                <button onClick={()=>onReturn(r)}>반품</button>
-              </td>
-            </tr>
-          ))}
-          {!rows.length && (
-            <tr><td colSpan={5} style={{padding:16, textAlign:'center'}}>반품 가능한 주문이 없습니다.</td></tr>
-          )}
-        </tbody>
-      </table>
+    <div className="member-page">
+      <div className="m-card wide">
+        <h2 className="m-title">반품 가능 목록</h2>
+
+        <div style={{overflowX:"auto"}}>
+          <table className="m-table">
+            <thead>
+              <tr><th>주문번호</th><th>상품명</th><th>상태</th><th>주문일</th><th>반품</th></tr>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.rentNum}>
+                  <td>{r.rentNum}</td>
+                  <td>{r.productName}</td>
+                  <td>{shipStatusLabel(r.status)}</td>
+                  <td>{r.rentDate?.replace("T"," ").slice(0,19)}</td>
+                  <td>
+                    <button className="m-btn" onClick={()=>onReturn(r)}>반품</button>
+                  </td>
+                </tr>
+              ))}
+              {!rows.length && (
+                <tr><td colSpan={5} style={{textAlign:'center'}}>반품 가능한 주문이 없습니다.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
