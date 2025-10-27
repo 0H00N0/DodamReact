@@ -59,6 +59,7 @@ export default function OAuthCallback() {
           setUser({
             isAuthenticated: true,
             mid: data.mid || '',
+            mnum: data.mnum || '',
             // name: data.name || '',
             mname: data.name || '',
             email: data.email || '',

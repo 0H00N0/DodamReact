@@ -47,14 +47,20 @@ export default function LoginForm() {
     setLoading(true);
     setMsg("");
     try {
-      await api.post(
-        "/member/loginForm",
-        { mid: form.mid.trim(), mpw: form.mpw },
-        { withCredentials: true }
-      );
-      sessionStorage.setItem("auth_hint", "1");
-      window.dispatchEvent(new Event("auth:changed"));
-      navigate("/", { replace: true });
+      const res = await api.post(
+  "/member/loginForm",
+  { mid: form.mid.trim(), mpw: form.mpw },
+  { withCredentials: true }
+);
+
+sessionStorage.setItem("user", JSON.stringify(res.data));
+
+console.log("로그인 응답:", res.data); 
+
+sessionStorage.setItem("auth_hint", "1");
+window.dispatchEvent(new Event("auth:changed"));
+navigate("/", { replace: true });
+      
     } catch (err) {
       const KOREAN_INVALID = "아이디 혹은 비밀번호가 맞지 않습니다.";
       const status = err?.response?.status;

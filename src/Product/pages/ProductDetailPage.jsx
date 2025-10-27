@@ -181,20 +181,29 @@ export default function ProductDetailPage() {
   if (loading) return <div className="py-10 text-center text-gray-500">불러오는 중…</div>;
   if (err) return <div className="py-10 text-center text-red-600">{err}</div>;
 
-  const { proname, proprice, probrand, prodetail } = product;
+  const { proname, probrand, prodetail, proborrow } = product;
 
   // 리뷰 등록/수정/삭제
+  console.log("리뷰 전송 데이터:", {
+  pronum: Number(pronum),
+  mnum: Number(user.mnum),
+  revtitle: newReview.revtitle.trim(),
+  revtext: newReview.revtext.trim(),
+  revscore: 5,
+});
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!user) return navigate("/login");
     if (!newReview.revtext.trim()) return alert("내용을 입력해주세요.");
     try {
       await axios.post("http://localhost:8080/reviews", {
-        pronum,
-        mnum: user.mnum,
-        revtitle: newReview.revtitle,
-        revtext: newReview.revtext,
-      });
+  pronum: Number(pronum),
+  mnum: Number(user.mnum),
+  revtitle: newReview.revtitle.trim(),
+  revtext: newReview.revtext.trim(),
+  revscore: 5,
+});
+
       alert("리뷰가 등록되었습니다!");
       setNewReview({ revtitle: "", revtext: "" });
       loadReviews();
@@ -203,6 +212,7 @@ export default function ProductDetailPage() {
       alert("리뷰 등록 실패");
     }
   };
+  
 
   const startEdit = (r) => {
     setEditingReview({ ...r });
@@ -283,7 +293,7 @@ export default function ProductDetailPage() {
         <div className={styles.detailInfo}>
           <h1 className={styles.detailTitle}>{proname}</h1>
           <div className={styles.detailPrice}>
-            {proprice ? Number(proprice).toLocaleString() + "원" : "가격정보 없음"}
+            {proborrow ? Number(proborrow).toLocaleString() + "원" : "가격정보 없음"}
           </div>
           <p className={styles.detailDesc}>{prodetail}</p>
 
