@@ -184,13 +184,6 @@ export default function ProductDetailPage() {
   const { proname, probrand, prodetail, proborrow } = product;
 
   // 리뷰 등록/수정/삭제
-  console.log("리뷰 전송 데이터:", {
-  pronum: Number(pronum),
-  mnum: Number(user.mnum),
-  revtitle: newReview.revtitle.trim(),
-  revtext: newReview.revtext.trim(),
-  revscore: 5,
-});
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!user) return navigate("/login");
