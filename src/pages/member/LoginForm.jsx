@@ -1,8 +1,10 @@
+// src/pages/member/LoginForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
+import "./MemberTheme.css";
 
-// --- 소셜 로그인 유틸 ---
+// --- 소셜 로그인 유틸 --- //
 function randomState() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -36,25 +38,29 @@ export default function LoginForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.mid.trim() || !form.mpw) {
       setMsg("아이디/비밀번호를 입력하세요.");
       return;
     }
-
     if (loading) return;
+
     setLoading(true);
     setMsg("");
     try {
-      await api.post(
-        "/member/loginForm",
-        { mid: form.mid.trim(), mpw: form.mpw },
-        { withCredentials: true }
-      );
+      const res = await api.post(
+  "/member/loginForm",
+  { mid: form.mid.trim(), mpw: form.mpw },
+  { withCredentials: true }
+);
 
-      sessionStorage.setItem("auth_hint", "1");
-      window.dispatchEvent(new Event("auth:changed"));
-      navigate("/", { replace: true });
+sessionStorage.setItem("user", JSON.stringify(res.data));
+
+console.log("로그인 응답:", res.data); 
+
+sessionStorage.setItem("auth_hint", "1");
+window.dispatchEvent(new Event("auth:changed"));
+navigate("/", { replace: true });
+      
     } catch (err) {
       const KOREAN_INVALID = "아이디 혹은 비밀번호가 맞지 않습니다.";
       const status = err?.response?.status;
@@ -62,7 +68,6 @@ export default function LoginForm() {
         err?.response?.data?.error ||
         err?.response?.data?.message ||
         "";
-
       if (!err?.response) {
         setMsg("로그인 서버와 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.");
         return;
@@ -70,7 +75,6 @@ export default function LoginForm() {
       if (status === 401 && !message) message = KOREAN_INVALID;
       if (typeof message === "string" && /invalid id\/pw/i.test(message)) message = KOREAN_INVALID;
       if (!message) message = KOREAN_INVALID;
-
       setMsg(message);
     } finally {
       setLoading(false);
@@ -89,40 +93,55 @@ export default function LoginForm() {
   };
 
   return (
-    <div style={styles.wrapper}>
-      <form onSubmit={onSubmit} style={styles.form} noValidate>
-        {/* 전역 h2 다크 컬러를 덮어쓸 수 있도록 인라인 색 지정 */}
-        <h2 style={{ color: "#111", margin: 0 }}>로그인</h2>
+    <div className="member-page">
+      <form onSubmit={onSubmit} className="m-card m-form" noValidate>
+        <h2 className="m-title">로그인</h2>
 
-        <label htmlFor="mid">아이디</label>
-        <input id="mid" name="mid" value={form.mid} onChange={onChange} />
+        <label htmlFor="mid" className="m-label">아이디</label>
+        <input
+          id="mid"
+          name="mid"
+          value={form.mid}
+          onChange={onChange}
+          className="m-input"
+          autoComplete="username"
+        />
 
-        <label htmlFor="mpw">비밀번호</label>
-        <input id="mpw" name="mpw" type="password" value={form.mpw} onChange={onChange} />
+        <label htmlFor="mpw" className="m-label">비밀번호</label>
+        <input
+          id="mpw"
+          name="mpw"
+          type="password"
+          value={form.mpw}
+          onChange={onChange}
+          className="m-input"
+          autoComplete="current-password"
+        />
 
-        {msg && <div style={styles.error}>{msg}</div>}
+        {msg && <div className="m-error" role="alert">{msg}</div>}
 
-        {/* 로컬 로그인 */}
-        <button type="submit" disabled={loading} style={styles.primaryBtn}>
+        {/* 1) 로그인(가득) */}
+        <button type="submit" disabled={loading} className="m-btn m-wide">
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
-        {/* 보조 액션 */}
-        <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
-          <button
-            type="button"
-            onClick={() => navigate("/signup")}
-            disabled={loading}
-            style={styles.linkBtn}
-          >
-            회원가입으로
-          </button>
-          
+        {/* 2) 회원가입(가득) - 로그인 바로 하단 */}
+        <button
+          type="button"
+          onClick={() => navigate("/signup")}
+          disabled={loading}
+          className="m-btn ghost m-wide"
+        >
+          회원가입
+        </button>
+
+        {/* 3) 아이디/비밀번호 찾기 - 좌우 배치 */}
+        <div className="m-row-2 m-find-wide">
           <button
             type="button"
             onClick={() => window.open("/auth/find-id", "_blank", "width=500,height=600")}
             disabled={loading}
-            style={styles.linkBtn}
+            className="m-btn ghost"
           >
             아이디 찾기
           </button>
@@ -130,116 +149,27 @@ export default function LoginForm() {
             type="button"
             onClick={() => window.open("/auth/find-pw", "_blank", "width=500,height=600")}
             disabled={loading}
-            style={styles.linkBtn}
+            className="m-btn ghost"
           >
             비밀번호 찾기
           </button>
-        
         </div>
 
         {/* 구분선 */}
-        <div style={styles.divider}>
-          <span style={styles.dividerLine} />
-          <span style={styles.dividerText}>또는 소셜로 계속</span>
-          <span style={styles.dividerLine} />
+        <div className="m-divider" aria-hidden="true">
+          <span className="m-divider-line" />
+          <span className="m-divider-text">또는 소셜로 계속</span>
+          <span className="m-divider-line" />
         </div>
 
         {/* 소셜 로그인 */}
-        <button
-          type="button"
-          onClick={goKakao}
-          disabled={loading}
-          style={styles.kakaoBtn}
-          aria-label="카카오로 로그인"
-        >
+        <button type="button" onClick={goKakao} disabled={loading} className="m-btn kakao">
           카카오로 로그인
         </button>
-        <button
-          type="button"
-          onClick={goNaver}
-          disabled={loading}
-          style={styles.naverBtn}
-          aria-label="네이버로 로그인"
-        >
+        <button type="button" onClick={goNaver} disabled={loading} className="m-btn naver">
           네이버로 로그인
         </button>
       </form>
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    minHeight: "100vh",
-    display: "grid",
-    placeItems: "center",
-    background: "#f7f7f7",
-    padding: "40px",
-  },
-  form: {
-    width: 400,
-    display: "grid",
-    gap: 12,
-    padding: 24,
-    borderRadius: 12,
-    background: "#fff",
-    boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-    // 폼 내부 텍스트(라벨/문구)가 다크에서도 보이도록 고정
-    color: "#111",
-  },
-  error: { color: "#c13030", fontSize: 14, marginTop: 4 },
-  primaryBtn: {
-    display: "block",
-    width: "100%",
-    padding: "12px 14px",
-    border: "none",
-    borderRadius: 8,
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: "pointer",
-    background: "#1f6feb",
-    color: "#fff",
-  },
-  linkBtn: {
-    background: "transparent",
-    color: "#333",
-    marginTop: 4,
-    border: "1px solid #ddd",
-    borderRadius: 8,
-    padding: "10px 12px",
-    cursor: "pointer",
-  },
-  divider: {
-    display: "grid",
-    gridTemplateColumns: "1fr auto 1fr",
-    alignItems: "center",
-    gap: 8,
-    margin: "8px 0 4px",
-  },
-  dividerLine: { height: 1, background: "#e5e7eb" },
-  dividerText: { fontSize: 12, color: "#666" },
-  kakaoBtn: {
-    display: "block",
-    width: "100%",
-    padding: "12px 14px",
-    border: "none",
-    borderRadius: 8,
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: "pointer",
-    background: "#FEE500",
-    color: "#000",
-  },
-  naverBtn: {
-    display: "block",
-    width: "100%",
-    padding: "12px 14px",
-    border: "none",
-    borderRadius: 8,
-    fontSize: 16,
-    fontWeight: 600,
-    cursor: "pointer",
-    background: "#03C75A",
-    color: "#fff",
-  },
-};

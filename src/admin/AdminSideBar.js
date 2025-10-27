@@ -188,11 +188,11 @@ function AdminSidebar() {
       <nav className="sidebar-nav">
         <ul className="nav-list">
           {menuItems.map(item => (
-            <li key={item.key} className="nav-item">
+            <li key={item.key} className={`nav-item ${expandedMenus.has(item.key) ? 'is-open' : ''}`}>
               {item.submenu ? (
                 <>
                   <button 
-                    className={`nav-link expandable ${isMenuActive(item) ? 'active' : ''}`}
+                    className={`nav-link expandable ${isMenuActive(item) ? 'active' : ''} ${expandedMenus.has(item.key) ? 'is-open' : ''}`}
                     onClick={() => toggleSubmenu(item.key)}
                     aria-expanded={expandedMenus.has(item.key)}
                   >
@@ -222,9 +222,10 @@ function AdminSidebar() {
                     <ul className="submenu">
                       {item.submenu.map(subItem => (
                         <li key={subItem.path}>
-                          <NavLink 
+                          <NavLink
                             to={subItem.path}
-                            className={({ isActive }) => 
+                            end={subItem.path === item.path}  // ← "목록" 같은 베이스 경로만 exact 매칭
+                            className={({ isActive }) =>
                               `submenu-link ${isActive ? 'active' : ''}`
                             }
                           >

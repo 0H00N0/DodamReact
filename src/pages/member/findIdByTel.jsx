@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+import "./MemberTheme.css";
+
 export default function FindIdByTel() {
   const [mname, setMname] = useState('');
   const [mtel, setMtel] = useState('');
@@ -19,9 +21,11 @@ export default function FindIdByTel() {
   };
 
   return (
+    <div className="member-page">
+      <div className="m-card wide">
     <div>
       <h2>전화번호로 ID 찾기</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="m-form" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="이름"
@@ -39,6 +43,8 @@ export default function FindIdByTel() {
         <button type="submit">찾기</button>
       </form>
       <p>{result}</p>
+    </div>
+      </div>
     </div>
   );
 }

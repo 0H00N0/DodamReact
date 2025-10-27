@@ -1,4 +1,3 @@
-// src/contexts/AuthContext.js
 import React, {
   createContext,
   useContext,
@@ -16,23 +15,35 @@ export function AuthProvider({ children }) {
   const [booted, setBooted] = useState(false);
   const bootOnceRef = useRef(false);        // StrictMode 중복 실행 방지
 
-  // ✅ /member/me 응답 정규화: {login:false} => 비로그인, 그 외(회원객체) => 로그인
+  // ✅ /oauth/me 응답 정규화
   const fetchMe = useCallback(async () => {
     try {
       const me = await getWithSession('/oauth/me');
       if (!me || me.login === false) {
         setUser(null);
       } else {
-        // ✅ 정규화해서 저장 (UI는 user.name, user.mid만 보면 됨)
+        // ✅ 여기서 mnum 포함하도록 수정
         setUser({
           isAuthenticated: true,
-          mid: me.sid || '',
-          // name: me.name || '',     // 유지(다른 화면 대비)
-          mname: me.name || '',    // ✅ 드롭다운 호환용으로 채워줌
+          mid: me.sid || me.mid || '',
+          mnum: Number(me.mnum) || 0,     // ✅ 추가 (NaN 방지)
+          mname: me.name || me.mname || '',
           email: me.email || '',
+          role: me.role || 'ROLE_USER',
         });
+
+        // ✅ sessionStorage에도 저장해서 새로고침 유지
+        sessionStorage.setItem('user', JSON.stringify({
+          isAuthenticated: true,
+          mid: me.sid || me.mid || '',
+          mnum: Number(me.mnum) || 0,
+          mname: me.name || me.mname || '',
+          email: me.email || '',
+          role: me.role || 'ROLE_USER',
+        }));
       }
-    } catch {
+    } catch (err) {
+      console.error('AuthContext: fetchMe 오류', err);
       setUser(null);
     }
   }, []);
@@ -44,15 +55,14 @@ export function AuthProvider({ children }) {
 
     (async () => {
       try {
-        await fetchMe();          // <— 힌트 체크 없이 항상 호출
+        await fetchMe();
       } finally {
         setBooted(true);
       }
     })();
   }, [fetchMe]);
 
-
-  // ✅ 콜백/로그아웃 등에서 auth:changed 이벤트를 쏘면 상태 재로드
+  // ✅ 로그인/로그아웃 이벤트 시 재로딩
   useEffect(() => {
     const refetch = () => fetchMe();
     window.addEventListener('auth:changed', refetch);

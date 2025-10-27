@@ -1,0 +1,486 @@
+/* Admin.pink.all.v3.css */
+/* ───────────────── 팔레트(톤 더 연함 & 버튼은 연한배경+진한테두리) ───────────────── */
+.admin-pink-theme{
+  --ap-bg:#fffbfd; --ap-bg-2:#fff7fb;
+  --ap-surface:#fff; --ap-surface-2:#fffafd;
+  --ap-border:#f3dbe7; --ap-border-2:#ecc7da;
+
+  --ap-ink:#372a32; --ap-ink-2:#46313e; --ap-muted:#846b78;
+
+  --ap-brand-50:#fff5f9; --ap-brand-100:#ffeff7; --ap-brand-200:#ffddeb; --ap-brand-300:#ffc7df;
+  --ap-brand-400:#ffa7cc; /* 포커스/강조 */
+  --ap-brand-500:#ff95c3; --ap-brand-600:#ef7fb1;
+
+  /* 버튼 전용(요청사항: 연한 배경 + 조금 진한 테두리) */
+  --btn-bg:#fff6fa;              /* 평상시 배경 */
+  --btn-bg-hover:#ffeeF6;        /* hover */
+  --btn-border:#ff9ec8;          /* 테두리 */
+  --btn-text:#43323c;            /* 글자 */
+
+  --ap-focus:rgba(255,167,204,.26);
+  --ap-shadow:0 4px 12px rgba(255,149,195,.10),0 1px 3px rgba(60,20,40,.05);
+  --ap-shadow-strong:0 10px 26px rgba(255,149,195,.12),0 4px 10px rgba(60,20,40,.06);
+
+  --ap-radius:14px; --ap-radius-sm:10px; --ap-radius-lg:18px;
+
+  color:var(--ap-ink);
+  background:
+    radial-gradient(900px 420px at -10% -10%, var(--ap-brand-50), transparent 55%),
+    radial-gradient(700px 420px at 110% 0%, #fff0f6, transparent 50%),
+    var(--ap-bg);
+  min-height:100%;
+}
+.admin-pink-theme a{color:var(--ap-ink-2);text-decoration:none}
+.admin-pink-theme a:hover{color:var(--ap-brand-600)}
+
+/* ───────────────── 레이아웃/헤더/툴바 정렬 ───────────────── */
+.admin-pink-theme .admin-header, .admin-pink-theme header{
+  background:linear-gradient(180deg,var(--ap-brand-50),#fff);
+  border-bottom:1px solid var(--ap-border);
+  color:var(--ap-ink-2);
+}
+.admin-pink-theme .admin-header .toolbar,
+.admin-pink-theme .search-bar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.admin-pink-theme main, .admin-pink-theme .content,
+.admin-pink-theme .admin-content, .admin-pink-theme .page-content{
+  padding:clamp(12px,1.6vw,18px);
+}
+
+/* ───────────────── 전역 카드화(간격/그림자 가볍게) ───────────────── */
+.admin-pink-theme :where(main,.content,.admin-content,.page-content)
+  > :where(section,article,.panel,.box,.widget,.card,.table-container,.filter-bar,.stats,.list,form){
+  background:var(--ap-surface);
+  border:1px solid var(--ap-border);
+  border-radius:var(--ap-radius);
+  box-shadow:var(--ap-shadow);
+  padding:clamp(14px,1.8vw,20px);
+  margin:clamp(8px,1.2vw,14px) 0;
+}
+.admin-pink-theme :where(h1,h2,h3).page-title,
+.admin-pink-theme :where(section,article) > :where(h1,h2,h3):first-child{
+  color:var(--ap-ink-2); font-weight:700; letter-spacing:.1px;
+  margin:2px 0 12px; line-height:1.25; display:flex; align-items:center; gap:.55rem;
+}
+.admin-pink-theme :where(h1,h2,h3).page-title::before,
+.admin-pink-theme :where(section,article) > :where(h1,h2,h3):first-child::before{
+  content:"★"; font-size:.9em; opacity:.5; color:var(--ap-brand-500);
+}
+
+/* ───────────────── 폼/입력 ───────────────── */
+.admin-pink-theme .form-row,.admin-pink-theme .field,.admin-pink-theme .filter-item{margin-bottom:10px}
+.admin-pink-theme label{color:var(--ap-muted);font-weight:600}
+.admin-pink-theme input[type="text"], .admin-pink-theme input[type="number"],
+.admin-pink-theme input[type="email"], .admin-pink-theme input[type="password"],
+.admin-pink-theme input[type="date"], .admin-pink-theme select, .admin-pink-theme textarea{
+  width:100%; background:#fff; border:1px solid var(--ap-border); border-radius:10px;
+  padding:10px 12px; min-height:38px; color:var(--ap-ink); outline:none;
+  transition:box-shadow .15s ease, border-color .15s ease, background-color .15s ease;
+}
+.admin-pink-theme :where(input,select,textarea):focus{
+  border-color:var(--ap-brand-400); box-shadow:0 0 0 3px var(--ap-focus);
+}
+
+/* ───────────────── 버튼(연한 배경+진한 테두리, 정렬/크기 통일) ───────────────── */
+.admin-pink-theme .page-actions, .admin-pink-theme .actions{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.admin-pink-theme .btn, .admin-pink-theme button,
+.admin-pink-theme input[type="submit"], .admin-pink-theme [role="button"]{
+  background:var(--btn-bg);
+  border:1.5px solid var(--btn-border);
+  color:var(--btn-text);
+  height:36px; padding:0 12px; border-radius:12px;
+  font-weight:700; letter-spacing:.1px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px;
+  box-shadow:0 2px 6px rgba(255,158,200,.12);
+  transition:transform .05s ease, box-shadow .2s ease, background-color .15s ease, border-color .15s ease;
+}
+.admin-pink-theme .btn:hover, .admin-pink-theme button:hover{
+  background:var(--btn-bg-hover); border-color:var(--ap-brand-500);
+  box-shadow:var(--ap-shadow-strong);
+}
+.admin-pink-theme .btn:active, .admin-pink-theme button:active{ transform:translateY(1px) }
+
+/* 보조 버튼(화이트 배경에 핑크 테두리 가벼움) */
+.admin-pink-theme .btn.ghost, .admin-pink-theme button.ghost{
+  background:#fff; border:1.5px solid var(--btn-border); color:var(--ap-ink-2); box-shadow:none;
+}
+
+/* 드롭다운/셀렉트가 버튼처럼 보이는 경우 높이 맞춤 */
+.admin-pink-theme .toolbar select, .admin-pink-theme .filter-bar select{
+  height:36px; padding:0 10px;
+}
+
+/* ───────────────── 사이드바 카테고리/메뉴 정렬 ───────────────── */
+.admin-pink-theme .admin-sidebar{
+  background:linear-gradient(180deg,#fff,var(--ap-brand-50));
+  border-right:1px solid var(--ap-border);
+}
+.admin-pink-theme .admin-menu, .admin-pink-theme .sidebar-menu{ 
+  display:flex; flex-direction:column; gap:8px; padding:10px; 
+}
+
+/* 1차 메뉴(핑크 라이트 버튼 스타일) */
+.admin-pink-theme .admin-menu .menu-group > .menu-title,
+.admin-pink-theme .sidebar-menu .menu-group > .menu-title,
+.admin-pink-theme .admin-sidebar .menu-item.root{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:var(--btn-bg);
+  border:1.5px solid var(--btn-border);
+  color:var(--btn-text);
+  border-radius:12px; padding:8px 12px;
+  font-weight:800;
+}
+.admin-pink-theme .admin-sidebar .menu-item.root:hover{ background:var(--btn-bg-hover) }
+
+/* 2차/3차 메뉴 */
+.admin-pink-theme .admin-menu .submenu, .admin-pink-theme .sidebar-menu .submenu{ 
+  display:flex; flex-direction:column; gap:6px; padding:6px 4px 2px 8px;
+}
+.admin-pink-theme .admin-menu .submenu a, .admin-pink-theme .sidebar-menu .submenu a{
+  display:flex; align-items:center; gap:8px;
+  padding:8px 10px 8px 14px; border-radius:10px;
+  color:var(--ap-ink); border:1px dashed transparent;
+}
+.admin-pink-theme .admin-menu .submenu a:hover{ background:var(--ap-brand-100); border-color:var(--ap-border) }
+
+/* 아이콘/배지 정렬 */
+.admin-pink-theme .admin-sidebar .menu-item i, 
+.admin-pink-theme .admin-menu .menu-title i{ font-size:16px; opacity:.9 }
+.admin-pink-theme .admin-sidebar .badge, .admin-pink-theme .admin-sidebar .count{
+  margin-left:auto; background:var(--ap-brand-100); border:1px solid var(--ap-border);
+  height:22px; padding:0 8px; display:inline-flex; align-items:center; border-radius:999px; font-weight:700;
+}
+
+/* ───────────────── 지표 카드(오버플로/정렬 깨짐 방지) ───────────────── */
+.admin-pink-theme .dashboard :where(.cards,.grid,.stats,.metrics){
+  display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+}
+.admin-pink-theme .stat-card, .admin-pink-theme .metric{
+  display:grid; grid-template-columns:1fr auto; align-items:center; gap:8px;
+  padding:14px; background:var(--ap-surface); border:1px solid var(--ap-border);
+  border-radius:var(--ap-radius); box-shadow:var(--ap-shadow); min-width:0; /* 긴 숫자 줄바꿈 */
+}
+.admin-pink-theme .metric .value{
+  font-size:clamp(1.05rem,1.8vw,1.35rem); font-weight:800; color:var(--ap-ink-2);
+  line-height:1.1; min-width:0; word-break:keep-all; overflow:hidden; text-overflow:ellipsis;
+}
+.admin-pink-theme .metric .label{ color:var(--ap-muted); font-weight:600; margin-top:2px }
+.admin-pink-theme .metric .icon{
+  width:32px;height:32px;border-radius:10px;display:grid;place-items:center;
+  background:var(--ap-brand-100);color:var(--ap-brand-600);
+}
+
+/* ───────────────── 테이블 ───────────────── */
+.admin-pink-theme :where(.table-container,.table,table){
+  width:100%; background:var(--ap-surface); border:1px solid var(--ap-border);
+  border-radius:var(--ap-radius); box-shadow:var(--ap-shadow); overflow:hidden;
+}
+.admin-pink-theme table{ border-collapse:separate; border-spacing:0; width:100% }
+.admin-pink-theme thead th{
+  background:var(--ap-brand-50); color:var(--ap-ink-2); font-weight:800;
+  padding:10px 12px; border-bottom:1px solid var(--ap-border);
+}
+.admin-pink-theme tbody td{ padding:10px 12px; border-bottom:1px dashed var(--ap-border) }
+.admin-pink-theme tbody tr:last-child td{ border-bottom:0 }
+.admin-pink-theme tbody tr:hover{ background:var(--ap-bg-2) }
+.admin-pink-theme td .actions{ display:inline-flex; gap:6px; align-items:center }
+
+/* ───────────────── 페이지네이션 ───────────────── */
+.admin-pink-theme .pagination{ display:flex; gap:6px; align-items:center }
+.admin-pink-theme .pagination button, .admin-pink-theme .pagination a{
+  background:#fff; border:1px solid var(--ap-border); color:var(--ap-ink-2);
+  border-radius:10px; height:30px; padding:0 10px;
+}
+.admin-pink-theme .pagination .active{
+  background:var(--btn-bg); border-color:var(--btn-border); color:var(--ap-ink-2);
+}
+
+/* ───────────────── 알림/노트 ───────────────── */
+.admin-pink-theme .note, .admin-pink-theme .alert{
+  background:var(--ap-brand-50); border:1px solid var(--ap-border);
+  border-radius:var(--ap-radius-sm); padding:10px 12px; color:var(--ap-ink-2);
+}
+.admin-pink-theme .alert.error{ background:#ffedf2; border-color:#f6ccd8; color:#6b1d2d }
+.admin-pink-theme .alert.success{ background:#ecfaf3; border-color:#d6efe2; color:#25563d }
+
+/* ───────────────── 접근성/반응형 ───────────────── */
+.admin-pink-theme :where(a,button,[role="button"],input,select,textarea):focus-visible{
+  outline:0; box-shadow:0 0 0 3px var(--ap-focus); border-color:var(--ap-brand-400);
+}
+@media (max-width:640px){
+  .admin-pink-theme .toolbar,.admin-pink-theme .filter-bar,
+  .admin-pink-theme .page-actions,.admin-pink-theme .actions{ gap:6px }
+  .admin-pink-theme .btn, .admin-pink-theme button{ height:34px; padding:0 10px }
+}
+/* ========== Sidebar dropdown: parent ↔ child 연결 비주얼 ========== */
+.admin-pink-theme .admin-sidebar .menu-group { position: relative; }
+
+/* 1) 부모 행(타이틀) – 접힘/펼침 caret */
+.admin-pink-theme .admin-sidebar .menu-group > .menu-title {
+  position: relative;
+  user-select: none;
+}
+.admin-pink-theme .admin-sidebar .menu-group > .menu-title::after{
+  content: "";
+  width: 8px; height: 8px;
+  border-right: 2px solid var(--btn-border);
+  border-bottom: 2px solid var(--btn-border);
+  transform: rotate(-45deg);
+  transition: transform .18s ease;
+  margin-left: auto;
+}
+.admin-pink-theme .admin-sidebar .menu-group.is-open  > .menu-title::after,
+.admin-pink-theme .admin-sidebar .menu-group[aria-expanded="true"] > .menu-title::after,
+.admin-pink-theme .admin-sidebar .menu-group > .menu-title[aria-expanded="true"]::after{
+  transform: rotate(45deg); /* 펼침 상태 */
+}
+
+/* 2) 자식 컨테이너 – 부모와 '이어진' 라인 + 슬라이드 오픈 */
+.admin-pink-theme .admin-sidebar .menu-group > .submenu{
+  position: relative;
+  margin-left: 0; padding-left: 0;
+  max-height: 0; overflow: hidden;
+  opacity: .0;
+  transition: max-height .25s ease, opacity .2s ease, margin .2s ease, padding .2s ease;
+}
+
+/* 펼친 상태: 왼쪽에 수직 라인(부모와 연결), 두께는 연한 핑크 */
+.admin-pink-theme .admin-sidebar .menu-group.is-open  > .submenu,
+.admin-pink-theme .admin-sidebar .menu-group[aria-expanded="true"] > .submenu,
+.admin-pink-theme .admin-sidebar .menu-group > .menu-title[aria-expanded="true"] + .submenu{
+  max-height: 700px; /* 충분히 크게 */
+  opacity: 1;
+  margin-left: 12px;            /* 부모 pill과 자연스럽게 이어짐 */
+  padding-left: 14px;           /* 라인 안쪽 여백 */
+}
+.admin-pink-theme .admin-sidebar .menu-group > .submenu::before{
+  content: "";
+  position: absolute;
+  left: 6px; top: 6px; bottom: 6px;
+  width: 2px; border-radius: 2px;
+  background: var(--btn-border);
+  opacity: .7;                  /* 은은한 연결감 */
+}
+
+/* 3) 자식 항목 – 'ㄴ' 모양 elbow로 부모 라인과 연결 */
+.admin-pink-theme .admin-sidebar .menu-group > .submenu a{
+  position: relative;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px 8px 14px;
+  border-radius: 10px;
+  color: var(--ap-ink);
+  border: 1px dashed transparent;
+}
+.admin-pink-theme .admin-sidebar .menu-group > .submenu a::before{
+  content: "";
+  position: absolute;
+  left: -8px; top: 50%;
+  width: 10px; height: 2px;
+  background: var(--btn-border);
+  transform: translateY(-50%);
+  opacity: .7;
+}
+.admin-pink-theme .admin-sidebar .menu-group > .submenu a:hover{
+  background: var(--ap-brand-100);
+  border-color: var(--ap-border);
+}
+
+/* 4) 현재 위치(활성) 표시 – 더 진한 테두리와 연한 배경 */
+.admin-pink-theme .admin-sidebar .menu-group > .submenu a.active{
+  background: var(--btn-bg-hover);
+  border-color: var(--btn-border);
+  font-weight: 800;
+}
+
+/* 5) 아이콘/카운트뱃지 높이 맞춤 (좌측 트리 라인과 간섭 방지) */
+.admin-pink-theme .admin-sidebar .menu-group > .submenu .count,
+.admin-pink-theme .admin-sidebar .menu-group > .submenu .badge{
+  height: 20px; padding: 0 8px; margin-left: auto;
+  background: var(--ap-brand-100); border: 1px solid var(--ap-border);
+  border-radius: 999px; display: inline-flex; align-items: center;
+}
+/* ───────────────── Sidebar: 폭/정렬/버튼 크기 통일 ───────────────── */
+.admin-pink-theme .admin-sidebar { width: 260px; flex: 0 0 260px; }
+.admin-pink-theme .sidebar-nav .nav-list {
+  list-style:none; margin:0; padding:12px; display:flex; flex-direction:column; gap:10px;
+}
+
+/* 1차(부모) 버튼 — 가로 100%, 높이/폰트 통일 (알림 버튼 제외) */
+.admin-pink-theme .sidebar-nav .nav-link:not(.alert-button):not([data-role="alert"]) {
+  width:100%;
+  min-height:40px; padding:10px 12px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:var(--btn-bg);
+  border:1.5px solid var(--btn-border);
+  color:var(--btn-text);
+  border-radius:12px;
+  font-weight:800; line-height:1.2;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.admin-pink-theme .sidebar-nav .nav-link:hover { background: var(--btn-bg-hover); }
+.admin-pink-theme .sidebar-nav .nav-link.active { border-color: var(--ap-brand-500); }
+
+/* 아이콘/타이틀 정렬 및 간격 통일 */
+.admin-pink-theme .sidebar-nav .nav-link .nav-icon { flex:0 0 20px; display:grid; place-items:center; }
+.admin-pink-theme .sidebar-nav .nav-link .nav-title { flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; }
+
+/* 펼침 화살표 회전 */
+.admin-pink-theme .sidebar-nav .expand-icon { transition: transform .18s ease; }
+.admin-pink-theme .sidebar-nav .expand-icon.expanded { transform: rotate(180deg); }
+
+/* 2차(자식) 컨테이너 — 슬라이드 & 부모와 '이어진' 수직 라인 */
+.admin-pink-theme .sidebar-nav .nav-item .submenu {
+  list-style:none; margin:0; padding:0;
+  max-height:0; overflow:hidden; opacity:0;
+  transition: max-height .25s ease, opacity .2s ease, margin .2s ease, padding .2s ease;
+  position:relative;
+}
+.admin-pink-theme .sidebar-nav .nav-item.is-open > .submenu {
+  max-height:700px; opacity:1;
+  margin-left:12px; padding-left:14px;
+}
+.admin-pink-theme .sidebar-nav .nav-item.is-open > .submenu::before {
+  content:""; position:absolute; left:7px; top:6px; bottom:6px;
+  width:2px; border-radius:2px; background:var(--btn-border); opacity:.7;
+}
+
+/* 2차(자식) 항목 — ㄴ elbow로 연결, 크기 통일 */
+.admin-pink-theme .sidebar-nav .submenu li { position:relative; }
+.admin-pink-theme .sidebar-nav .submenu li .submenu-link {
+  display:flex; align-items:center; gap:8px;
+  min-height:36px; padding:8px 10px 8px 16px;
+  color:var(--ap-ink);
+  border-radius:10px;
+  border:1px dashed transparent;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.admin-pink-theme .sidebar-nav .submenu li .submenu-link::before {
+  content:""; position:absolute; left:-9px; top:50%;
+  width:12px; height:2px; background:var(--btn-border);
+  transform: translateY(-50%); opacity:.7;
+}
+.admin-pink-theme .sidebar-nav .submenu li .submenu-link:hover {
+  background:var(--ap-brand-100); border-color:var(--ap-border);
+}
+.admin-pink-theme .sidebar-nav .submenu li .submenu-link.active {
+  background:var(--btn-bg-hover); border-color:var(--btn-border); font-weight:800;
+}
+
+/* 뱃지/카운트 높이 맞춤 */
+.admin-pink-theme .sidebar-nav .nav-link .badge,
+.admin-pink-theme .sidebar-nav .nav-link .count {
+  height:22px; padding:0 8px; display:inline-flex; align-items:center; border-radius:999px;
+  background:var(--ap-brand-100); border:1px solid var(--ap-border);
+}
+
+/* 스크롤이 생겨도 보기 좋게 */
+.admin-pink-theme .admin-sidebar { overflow-y:auto; scrollbar-width:thin; }
+.admin-pink-theme .admin-sidebar::-webkit-scrollbar { width:8px; }
+.admin-pink-theme .admin-sidebar::-webkit-scrollbar-thumb {
+  background:var(--ap-border-2); border-radius:8px;
+}
+/* ===================== Sidebar width — compact version ===================== */
+
+/* 사이드바 폭: 190px (기존 260 → 220 → 190으로 축소) */
+.admin-pink-theme .admin-sidebar {
+  width: 190px !important;
+  flex: 0 0 190px !important;
+  transition: width 0.25s ease;
+}
+
+/* 메뉴 안쪽 패딩도 조정 */
+.admin-pink-theme .admin-sidebar .admin-menu,
+.admin-pink-theme .admin-sidebar .sidebar-menu {
+  padding: 6px 4px !important;
+}
+
+/* 각 버튼 크기/폰트 미세 조정 */
+.admin-pink-theme .admin-sidebar .nav-link,
+.admin-pink-theme .admin-sidebar .menu-title {
+  font-size: 0.88rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px 10px;
+}
+
+/* 아이콘 공간 살짝 줄임 */
+.admin-pink-theme .admin-sidebar .nav-link .nav-icon {
+  flex: 0 0 16px;
+}
+
+/* 줄어든 폭에 맞춰 카운트 뱃지도 미세조정 */
+.admin-pink-theme .admin-sidebar .badge,
+.admin-pink-theme .admin-sidebar .count {
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.78rem;
+}
+
+/* 반응형 — 작은 화면에서 자동으로 더 좁게 (160px) */
+@media (max-width: 900px) {
+  .admin-pink-theme .admin-sidebar {
+    width: 160px !important;
+    flex: 0 0 160px !important;
+  }
+  .admin-pink-theme .admin-sidebar .nav-link .nav-title {
+    font-size: 0.85rem;
+  }
+}
+/* ===================== Dashboard Layout Expansion ===================== */
+
+/* 메인 콘텐츠(대시보드) 전체 폭 확대 */
+.admin-pink-theme .dashboard,
+.admin-pink-theme .admin-content,
+.admin-pink-theme .page-content,
+.admin-pink-theme main {
+  max-width: 1600px;       /* ← 기본 1200~1280 → 1600으로 확장 */
+  margin: 0 auto;
+  padding: 24px 32px;      /* 좌우 여백도 조금 늘림 */
+}
+
+/* 상단 지표 카드 간격 조정 및 넓이 여유 */
+.admin-pink-theme .dashboard .stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+/* 차트 영역 확장 (ResponsiveContainer는 부모 높이에 의존함) */
+.admin-pink-theme .dashboard .chart-container {
+  min-height: 400px;      /* 기본 300~320 → 400으로 확대 */
+  padding: 20px;
+}
+
+/* 하단 주문/상품 섹션도 넓게 */
+.admin-pink-theme .dashboard .dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;   /* 좌우 2열 유지 */
+  gap: 24px;
+}
+@media (max-width: 1280px) {
+  .admin-pink-theme .dashboard .dashboard-bottom-grid {
+    grid-template-columns: 1fr;     /* 반응형일 때 1열 */
+  }
+}
+
+/* 제목·카드 내부 폰트 조금 키워서 넓은 화면에 맞게 */
+.admin-pink-theme .dashboard h1,
+.admin-pink-theme .dashboard h2 {
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+}
+.admin-pink-theme .dashboard .stat-value {
+  font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+  white-space: nowrap;
+}
+/* Recharts가 wrapper에 overflow:hidden을 주어 라벨이 잘리는 경우 방지 */
+.admin-pink-theme .dashboard .chart-container .recharts-wrapper {
+  overflow: visible !important;
+}
+
+/* 좌측 라벨 여유를 조금 더 주고 싶다면(선택) */
+.admin-pink-theme .dashboard .chart-container {
+  padding-left: 20px;
+}
