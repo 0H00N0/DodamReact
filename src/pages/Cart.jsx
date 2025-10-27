@@ -1,3 +1,4 @@
+// src/pages/Cart.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -20,7 +21,9 @@ export default function Cart() {
     if (window.confirm('장바구니를 모두 비우시겠습니까?')) clearCart();
   };
   const handleContinueShopping = () => navigate('/');
-  const handleProductClick = (item) => navigate(`/products/${item.id}`);
+
+  // ✅ FIX: ID를 인자로 받고, /products/:id로 이동
+  const handleProductClick = (productId) => navigate(`/products/${productId}`);
 
   const handleCheckout = async () => {
     if (!totalItems) return;
@@ -90,14 +93,22 @@ export default function Cart() {
                     title="상품 보기"
                   >
                     {item.image ? (
-                      <img src={item.image} alt={item.name} />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        onError={(e)=>{ e.currentTarget.style.visibility='hidden'; }}
+                      />
                     ) : (
                       <div className={styles.imagePlaceholder} />
                     )}
                   </div>
 
                   <div className={styles.itemInfo}>
-                    <h3 className={styles.itemName} onClick={() => handleProductClick(item.id)}>
+                    <h3
+                      className={styles.itemName}
+                      onClick={() => handleProductClick(item.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       {item.name}
                     </h3>
                     {getOptionsText(item.selectedOptions) && (
