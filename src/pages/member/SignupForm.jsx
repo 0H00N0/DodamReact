@@ -158,7 +158,7 @@ export default function SignupForm() {
       };
 
       await api.post("/member/signup", payload);
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     } catch (err) {
       const message =
         err?.response?.data?.error ??
@@ -406,11 +406,6 @@ export default function SignupForm() {
           {loading ? "처리 중..." : "가입하기"}
         </button>
 
-        <div className="m-actions">
-          <button type="button" onClick={() => navigate("/login")} disabled={loading} className="m-btn ghost">
-            로그인으로
-          </button>
-        </div>
       </form>
     </div>
   );
