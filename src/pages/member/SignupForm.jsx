@@ -263,6 +263,8 @@ export default function SignupForm() {
           id="memail"
           name="memail"
           type="email"
+          value={form.memail}
+          onChange={onChange}
           autoComplete="email"
           placeholder="이메일"
           pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
