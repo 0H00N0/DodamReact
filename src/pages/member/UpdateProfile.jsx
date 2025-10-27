@@ -1,4 +1,3 @@
-// src/pages/member/UpdateProfile.jsx
 import React, { useEffect, useState, useRef } from "react";
 import { api } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
@@ -24,14 +23,12 @@ const isPartialChild = (c) => {
   return (name !== "" || birth !== "") && !(name !== "" && birth !== "");
 };
 
-// ▶ maddr 분리 유틸: 기본주소/상세주소 추정 분리
+// maddr 분리(기본/상세 추정)
 const splitAddress = (maddr = "") => {
   const s = (maddr || "").trim();
   if (!s) return { base: "", detail: "" };
-  // 괄호형 (아파트 101동 1001호)
   const m1 = s.match(/^(.+?)\s*\((.+)\)\s*$/);
   if (m1) return { base: m1[1].trim(), detail: m1[2].trim() };
-  // 뒤쪽 상세 시그널
   const tokens = s.split(/\s+/);
   const idx = tokens.findIndex((t) => /(동|층|호|호수|호실|번지|상가|아파트|빌라|타워|오피스텔)/.test(t));
   if (idx > 0) {
@@ -39,7 +36,6 @@ const splitAddress = (maddr = "") => {
     const detail = tokens.slice(idx).join(" ").trim();
     if (base && detail) return { base, detail };
   }
-  // 기본값
   return { base: s, detail: "" };
 };
 
@@ -55,9 +51,10 @@ export default function UpdateProfile() {
     children: [],
   });
 
-  // ✅ UI용 주소 분리 상태
+  // UI용 주소 상태
   const [addrBase, setAddrBase] = useState("");
   const [addrDetail, setAddrDetail] = useState("");
+  const [showDetail, setShowDetail] = useState(false); // 상세주소 토글
   const detailRef = useRef(null);
 
   const [loading, setLoading] = useState(true);
@@ -65,7 +62,7 @@ export default function UpdateProfile() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // 카카오 주소검색 스크립트 로드(한 번만)
+  // 다음 우편번호 스크립트 로드
   useEffect(() => {
     if (!window.daum?.Postcode) {
       const script = document.createElement("script");
@@ -84,12 +81,13 @@ export default function UpdateProfile() {
       oncomplete: function (data) {
         setAddrBase(data.address || "");
         setForm((f) => ({ ...f, mpost: data.zonecode || "" }));
+        setShowDetail(true);                    // 검색 후 상세칸 자동 표시
         setTimeout(() => detailRef.current?.focus(), 0);
       },
     }).open();
   };
 
-  // /member/me
+  // /member/me 로드
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -120,9 +118,9 @@ export default function UpdateProfile() {
           })),
         });
 
-        // ✅ 분리값을 입력칸에 반영
         setAddrBase(base);
         setAddrDetail(detail);
+        setShowDetail(!!detail);                // 상세주소 있으면 기본 표시
       } catch (err) {
         console.error("회원 정보 로딩 실패:", err);
         alert("회원 정보를 불러오지 못했습니다.");
@@ -149,13 +147,8 @@ export default function UpdateProfile() {
     setMessage("");
   };
 
-  const addChild = () => {
-    setForm((prev) => ({ ...prev, children: [...prev.children, { chname: "", chbirth: "" }] }));
-  };
-
-  const removeChild = (idx) => {
-    setForm((prev) => ({ ...prev, children: prev.children.filter((_, i) => i !== idx) }));
-  };
+  const addChild = () => setForm((prev) => ({ ...prev, children: [...prev.children, { chname: "", chbirth: "" }] }));
+  const removeChild = (idx) => setForm((prev) => ({ ...prev, children: prev.children.filter((_, i) => i !== idx) }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -194,7 +187,7 @@ export default function UpdateProfile() {
         .filter(isFilledChild)
         .map((c) => ({ chname: (c.chname || "").trim(), chbirth: toYYYYMMDD(c.chbirth) }));
 
-      // ✅ 제출용 주소 결합
+      // 제출용 주소 결합
       const mergedAddr = [addrBase, addrDetail].filter(Boolean).join(" ").trim();
 
       const payload = {
@@ -202,7 +195,7 @@ export default function UpdateProfile() {
         mname: (form.mname || "").trim(),
         memail: (form.memail || "").trim(),
         mtel: (form.mtel || "").replace(/\D/g, ""),
-        maddr: mergedAddr,                 // ★ 여기!
+        maddr: mergedAddr,
         mnic: (form.mnic || "").trim(),
         mbirth: nullIfBlank(toYYYYMMDD(form.mbirth)),
         mpost: numOrNull(form.mpost),
@@ -250,29 +243,59 @@ export default function UpdateProfile() {
         <label htmlFor="mtel" className="m-label">전화번호</label>
         <input id="mtel" type="text" name="mtel" value={form.mtel} onChange={handleChange} inputMode="numeric" placeholder="-없이 숫자만" className="m-input" />
 
-        {/* ▶ 주소: 기본주소 + 주소검색 버튼 */}
+        {/* 1) 우편번호 + 주소검색 버튼 */}
+        <label htmlFor="mpost" className="m-label">우편번호</label>
+        <div className="m-grid-2">
+          <input
+            id="mpost"
+            type="text"
+            name="mpost"
+            value={form.mpost}
+            readOnly
+            autoComplete="postal-code"
+            className="m-input"
+          />
+          <button type="button" onClick={handleAddressSearch} className="m-btn ghost">
+            주소검색
+          </button>
+        </div>
+
+        {/* 2) 기본주소(readOnly) + 상세주소 토글 버튼(같은 줄) */}
         <label className="m-label">주소</label>
         <div className="m-grid-2">
           <input
-            type="text" value={addrBase} readOnly placeholder="주소검색으로 기본주소 입력"
-            autoComplete="address-line1" className="m-input"
+            id="maddr"
+            type="text"
+            value={addrBase}
+            readOnly
+            placeholder="주소검색으로 기본주소 입력"
+            autoComplete="address-line1"
+            className="m-input"
           />
-          <button type="button" onClick={handleAddressSearch} className="m-btn ghost">주소검색</button>
+          <button
+            type="button"
+            onClick={() => { setShowDetail(v => !v); if (!showDetail) setTimeout(() => detailRef.current?.focus(), 0); }}
+            className="m-btn ghost"
+            aria-expanded={showDetail}
+            aria-controls="addrDetail"
+          >
+            {showDetail ? "상세주소 숨기기" : "상세주소 추가"}
+          </button>
         </div>
 
-        {/* ▶ 상세주소 입력칸 (가입과 동일) */}
-        <label className="m-label">상세주소</label>
-        <input
-          ref={detailRef}
-          type="text" value={addrDetail}
-          onChange={(e) => setAddrDetail(e.target.value)}
-          placeholder="동/호수 등 상세주소"
-          autoComplete="address-line2"
-          className="m-input"
-        />
-
-        <label htmlFor="mpost" className="m-label">우편번호</label>
-        <input id="mpost" type="text" name="mpost" value={form.mpost} onChange={handleChange} className="m-input" />
+        {/* 3) 상세주소 입력칸: 토글 시에만 노출 */}
+        {showDetail && (
+          <input
+            id="addrDetail"
+            ref={detailRef}
+            type="text"
+            value={addrDetail}
+            onChange={(e) => setAddrDetail(e.target.value)}
+            placeholder="동/호수 등 상세주소"
+            autoComplete="address-line2"
+            className="m-input"
+          />
+        )}
 
         <label htmlFor="mnic" className="m-label">닉네임</label>
         <input id="mnic" type="text" name="mnic" value={form.mnic} onChange={handleChange} className="m-input" />
