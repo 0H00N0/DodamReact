@@ -67,9 +67,18 @@ export default function SignupForm() {
     }).open();
   };
 
+  // ✅ onChange: memail은 ASCII만 허용(한글 제거), mtel은 숫자만
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: name === "mtel" ? digitsOnly(value) : value }));
+    setForm((f) => ({
+      ...f,
+      [name]:
+        name === "memail"
+          ? value.replace(/[^\x00-\x7F]/g, "") // ASCII만 허용 (한글 제거)
+          : name === "mtel"
+          ? digitsOnly(value)
+          : value,
+    }));
   };
 
   // 자녀 입력칸 추가/삭제
@@ -138,6 +147,13 @@ export default function SignupForm() {
       return;
     }
 
+    // ✅ 이메일 형식/한글 방지 검증 (브라우저 검증 외에 JS 가드 추가)
+    const email = (form.memail || "").trim().toLowerCase();
+    if (email && !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+      setMsg("이메일 형식이 올바르지 않습니다. (한글 불가)");
+      return;
+    }
+
     setLoading(true);
     try {
       const cleanChildren = (form.children || []).filter(
@@ -150,14 +166,14 @@ export default function SignupForm() {
         mpw: form.mpw,
         mname: form.mname.trim(),
         mtel: mtelDigits,
-        memail: form.memail?.trim(),
+        memail: email,       // ← 정리된 이메일 사용
         maddr: addr,
         mpost: mpostDigits,
         children: cleanChildren,
       };
 
       await api.post("/member/signup", payload);
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     } catch (err) {
       const message =
         err?.response?.data?.error ??
@@ -262,6 +278,8 @@ export default function SignupForm() {
           id="memail"
           name="memail"
           type="email"
+          value={form.memail}
+          onChange={onChange}
           autoComplete="email"
           placeholder="이메일"
           className="m-input"
