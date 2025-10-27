@@ -1,50 +1,39 @@
+// src/pages/member/FindPw.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
 import "./MemberTheme.css";
 
 export default function FindPw() {
   const nav = useNavigate();
 
   const goToEmail = () => nav("/member/findPwByMemail");
-  const goToTel   = () => nav("/member/findPwByMtel");
+  const goToTel = () => nav("/member/findPwByMtel");
   const closeWindow = () => {
-    if (window.opener) window.close();  // 팝업이면 닫기
-    else nav(-1);                        // 같은 탭이면 뒤로가기
+    if (window.opener) window.close();
+    else nav(-1);
   };
 
   return (
     <div className="member-page">
-      <div className="m-card">
-    <div style={pageWrapperStyle}>
-      <div style={cardStyle}>
-        <h3>비밀번호 찾기</h3>
-        <button onClick={goToEmail}>이메일로 찾기</button>
-        <button onClick={goToTel}>전화번호로 찾기</button>
-        <button onClick={closeWindow}>닫기</button>
-      </div>
-    </div>
+      {/* 가운데 정렬된 카드 */}
+      <div className="m-card" style={{ width: "min(420px, 92vw)", margin: "40px auto" }}>
+        <h2 className="m-title" style={{ marginBottom: 14 }}>비밀번호 찾기</h2>
+
+        {/* 2열 버튼 */}
+        <div className="m-row-2" style={{ marginBottom: 10 }}>
+          <button type="button" className="m-btn ghost" onClick={goToEmail}>
+            이메일로 찾기
+          </button>
+          <button type="button" className="m-btn ghost" onClick={goToTel}>
+            전화번호로 찾기
+          </button>
+        </div>
+
+        {/* 닫기 버튼 (가득) */}
+        <button type="button" className="m-btn m-wide" onClick={closeWindow}>
+          닫기
+        </button>
       </div>
     </div>
   );
 }
-
-/** 페이지 전체를 흰색으로 채워 뒤 배경이 보이지 않게 */
-const pageWrapperStyle = {
-  minHeight: "100vh",
-  background: "#fff",
-  margin: 0,
-  padding: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-};
-
-const cardStyle = {
-  backgroundColor: "#fff",
-  padding: 24,
-  borderRadius: 12,
-  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-  minWidth: 300,
-  textAlign: "center",
-};

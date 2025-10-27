@@ -51,7 +51,7 @@ export default function Profile() {
   if (!member) {
     return (
       <div className="member-page">
-        <div className="m-card">로그인이 필요합니다.</div>
+        <div className="m-card wide">로그인이 필요합니다.</div>
       </div>
     );
   }
@@ -60,7 +60,7 @@ export default function Profile() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
         <h2 className="m-title">마이페이지</h2>
 
         <div className="m-kv" style={{ marginTop: 12 }}>

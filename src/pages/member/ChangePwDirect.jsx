@@ -28,7 +28,7 @@ export default function ChangePwDirect() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <form className="m-form" onSubmit={handleChangePw}>
       <input
         type="password"

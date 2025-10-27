@@ -46,7 +46,7 @@ export default function FindPwByMemail() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <form className="m-form" onSubmit={handleVerify} style={{ display: "grid", gap: 8, maxWidth: 360 }}>
       <input
         value={mid}

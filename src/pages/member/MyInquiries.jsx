@@ -35,7 +35,7 @@ export default function MyInquiries() {
 
   return (
     <div className="member-page">
-      <div className="m-card">
+      <div className="m-card wide">
     <div style={{padding:24, maxWidth:900, margin:"0 auto"}}>
       <h2>나의 주문상품 문의</h2>
       <div style={{marginTop:12, display:"grid", gap:12}}>

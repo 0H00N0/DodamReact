@@ -1,3 +1,4 @@
+// src/pages/member/SignupForm.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
@@ -26,11 +27,10 @@ export default function SignupForm() {
     mnic: "",
     children: [],
   });
-  const [child, setChild] = useState({ chname: "", chbirth: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // UI용 상태 (기본주소/상세주소/토글)
+  // 주소 UI용 상태
   const [maddrBase, setMaddrBase] = useState("");
   const [maddrDetail, setMaddrDetail] = useState("");
   const [showDetail, setShowDetail] = useState(false);
@@ -38,7 +38,7 @@ export default function SignupForm() {
 
   const digitsOnly = (s = "") => s.replace(/\D/g, "").slice(0, 13);
 
-  // 카카오 주소검색 스크립트
+  // 카카오 주소검색 스크립트 로드
   useEffect(() => {
     if (!window.daum?.Postcode) {
       const script = document.createElement("script");
@@ -54,7 +54,7 @@ export default function SignupForm() {
       return;
     }
     new window.daum.Postcode({
-      oncomplete: function (data) {
+      oncomplete: (data) => {
         setMaddrBase(data.address);
         setForm((f) => ({
           ...f,
@@ -81,16 +81,13 @@ export default function SignupForm() {
     }));
   };
 
+  // 자녀 입력칸 추가/삭제
   const addChild = () => {
-    if (child.chname && child.chbirth) {
-      setForm((f) => ({
-        ...f,
-        children: [...f.children, { ...child }],
-      }));
-      setChild({ chname: "", chbirth: "" });
-    }
+    setForm((f) => ({
+      ...f,
+      children: [...(f.children || []), { chname: "", chbirth: "" }],
+    }));
   };
-
   const removeChild = (idx) => {
     setForm((f) => ({
       ...f,
@@ -106,6 +103,7 @@ export default function SignupForm() {
     const today = todayStr();
     const MEMBER_MIN = "1900-01-01";
     const childMin = "2000-01-01";
+
     if (form.mbirth && form.mbirth > today) {
       setMsg("생년월일은 오늘 이후(미래)로 설정할 수 없습니다.");
       return;
@@ -114,6 +112,7 @@ export default function SignupForm() {
       setMsg("회원 생년월일은 1900-01-01 이후여야 합니다.");
       return;
     }
+
     if (Array.isArray(form.children)) {
       for (const [idx, ch] of form.children.entries()) {
         if (ch?.chbirth && ch.chbirth > today) {
@@ -283,14 +282,14 @@ export default function SignupForm() {
           onChange={onChange}
           autoComplete="email"
           placeholder="이메일"
-          pattern="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$"
+          className="m-input"
         />
 
-        {/* 우편번호 + 주소검색 버튼 */}
+        {/* 우편번호 + 주소검색(짧은 버튼) */}
         <label htmlFor="mpost" className="m-label">
           우편번호<span style={{ color: "red" }}>*</span>
         </label>
-        <div className="m-grid-2">
+        <div className="m-input-row">
           <input
             id="mpost"
             name="mpost"
@@ -301,16 +300,16 @@ export default function SignupForm() {
             required
             className="m-input"
           />
-          <button type="button" onClick={handleAddressSearch} className="m-btn ghost">
+          <button type="button" onClick={handleAddressSearch} className="m-btn ghost sm">
             주소검색
           </button>
         </div>
 
-        {/* 주소: 기본주소(readOnly) + 상세주소 토글/입력 */}
+        {/* 주소 + 상세주소 토글(짧은 버튼) */}
         <label htmlFor="maddr" className="m-label">
           주소<span style={{ color: "red" }}>*</span>
         </label>
-        <div className="m-grid-2">
+        <div className="m-input-row">
           <input
             id="maddr"
             name="maddr"
@@ -324,7 +323,7 @@ export default function SignupForm() {
           <button
             type="button"
             onClick={() => setShowDetail((v) => !v)}
-            className="m-btn ghost"
+            className="m-btn ghost sm"
             aria-expanded={showDetail}
             aria-controls="addrDetail"
           >
@@ -353,12 +352,12 @@ export default function SignupForm() {
           className="m-input"
         />
 
-        {/* 자녀 정보 입력 (선택) */}
+        {/* 자녀 정보 (선택) */}
         <fieldset className="m-fieldset">
           <legend>자녀 정보 (선택)</legend>
 
           {(form.children || []).map((c, idx) => (
-            <div key={idx} className="m-grid-2" style={{ alignItems: "center" }}>
+            <div key={idx} className="m-input-row" style={{ alignItems: "center" }}>
               <input
                 name="chname"
                 value={c.chname}
@@ -366,7 +365,7 @@ export default function SignupForm() {
                   const value = e.target.value;
                   setForm((f) => {
                     const arr = [...f.children];
-                    arr[idx].chname = value;
+                    arr[idx] = { ...arr[idx], chname: value };
                     return { ...f, children: arr };
                   });
                 }}
@@ -382,7 +381,7 @@ export default function SignupForm() {
                     const value = e.target.value;
                     setForm((f) => {
                       const arr = [...f.children];
-                      arr[idx].chbirth = value;
+                      arr[idx] = { ...arr[idx], chbirth: value };
                       return { ...f, children: arr };
                     });
                   }}
@@ -391,24 +390,15 @@ export default function SignupForm() {
                   className="m-input"
                   style={{ flex: 1 }}
                 />
-                <button type="button" onClick={() => removeChild(idx)} className="m-btn ghost">
+                <button type="button" onClick={() => removeChild(idx)} className="m-btn ghost sm">
                   삭제
                 </button>
               </div>
             </div>
           ))}
 
-          <div className="m-actions" style={{ marginTop: 8 }}>
-            <button
-              type="button"
-              onClick={() =>
-                setForm((f) => ({
-                  ...f,
-                  children: [...f.children, { chname: "", chbirth: "" }],
-                }))
-              }
-              className="m-btn ghost"
-            >
+          <div className="m-inline-actions" style={{ marginTop: 8 }}>
+            <button type="button" onClick={addChild} className="m-btn ghost sm">
               입력칸 추가
             </button>
           </div>
@@ -420,9 +410,20 @@ export default function SignupForm() {
           </p>
         )}
 
-        <button type="submit" disabled={loading} className="m-btn">
-          {loading ? "처리 중..." : "가입하기"}
-        </button>
+        {/* 하단 버튼: 50:50 가로 배치 */}
+        <div className="m-actions split">
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            disabled={loading}
+            className="m-btn ghost"
+          >
+            로그인으로
+          </button>
+          <button type="submit" disabled={loading} className="m-btn">
+            {loading ? "처리 중..." : "가입하기"}
+          </button>
+        </div>
       </form>
     </div>
   );

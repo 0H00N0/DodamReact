@@ -1,9 +1,10 @@
+// src/pages/member/LoginForm.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../../utils/api";
 import "./MemberTheme.css";
 
-// --- 소셜 로그인 유틸 ---
+// --- 소셜 로그인 유틸 --- //
 function randomState() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -37,16 +38,16 @@ export default function LoginForm() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
     if (!form.mid.trim() || !form.mpw) {
       setMsg("아이디/비밀번호를 입력하세요.");
       return;
     }
-
     if (loading) return;
+
     setLoading(true);
     setMsg("");
     try {
+<<<<<<< HEAD
       const res = await api.post(
   "/member/loginForm",
   { mid: form.mid.trim(), mpw: form.mpw },
@@ -60,6 +61,16 @@ console.log("로그인 응답:", res.data);
 sessionStorage.setItem("auth_hint", "1");
 window.dispatchEvent(new Event("auth:changed"));
 navigate("/", { replace: true });
+=======
+      await api.post(
+        "/member/loginForm",
+        { mid: form.mid.trim(), mpw: form.mpw },
+        { withCredentials: true }
+      );
+      sessionStorage.setItem("auth_hint", "1");
+      window.dispatchEvent(new Event("auth:changed"));
+      navigate("/", { replace: true });
+>>>>>>> 3cafd0372f63c08114c61a33d2f7fddef282c6a5
     } catch (err) {
       const KOREAN_INVALID = "아이디 혹은 비밀번호가 맞지 않습니다.";
       const status = err?.response?.status;
@@ -67,7 +78,6 @@ navigate("/", { replace: true });
         err?.response?.data?.error ||
         err?.response?.data?.message ||
         "";
-
       if (!err?.response) {
         setMsg("로그인 서버와 통신에 실패했습니다. 잠시 후 다시 시도해 주세요.");
         return;
@@ -75,7 +85,6 @@ navigate("/", { replace: true });
       if (status === 401 && !message) message = KOREAN_INVALID;
       if (typeof message === "string" && /invalid id\/pw/i.test(message)) message = KOREAN_INVALID;
       if (!message) message = KOREAN_INVALID;
-
       setMsg(message);
     } finally {
       setLoading(false);
@@ -99,28 +108,45 @@ navigate("/", { replace: true });
         <h2 className="m-title">로그인</h2>
 
         <label htmlFor="mid" className="m-label">아이디</label>
-        <input id="mid" name="mid" value={form.mid} onChange={onChange} className="m-input" />
+        <input
+          id="mid"
+          name="mid"
+          value={form.mid}
+          onChange={onChange}
+          className="m-input"
+          autoComplete="username"
+        />
 
         <label htmlFor="mpw" className="m-label">비밀번호</label>
-        <input id="mpw" name="mpw" type="password" value={form.mpw} onChange={onChange} className="m-input" />
+        <input
+          id="mpw"
+          name="mpw"
+          type="password"
+          value={form.mpw}
+          onChange={onChange}
+          className="m-input"
+          autoComplete="current-password"
+        />
 
         {msg && <div className="m-error" role="alert">{msg}</div>}
 
-        {/* 로컬 로그인 */}
-        <button type="submit" disabled={loading} className="m-btn">
+        {/* 1) 로그인(가득) */}
+        <button type="submit" disabled={loading} className="m-btn m-wide">
           {loading ? "로그인 중..." : "로그인"}
         </button>
 
-        {/* 보조 액션 */}
-        <div className="m-actions">
-          <button
-            type="button"
-            onClick={() => navigate("/signup")}
-            disabled={loading}
-            className="m-btn ghost"
-          >
-            회원가입으로
-          </button>
+        {/* 2) 회원가입(가득) - 로그인 바로 하단 */}
+        <button
+          type="button"
+          onClick={() => navigate("/signup")}
+          disabled={loading}
+          className="m-btn ghost m-wide"
+        >
+          회원가입
+        </button>
+
+        {/* 3) 아이디/비밀번호 찾기 - 좌우 배치 */}
+        <div className="m-row-2 m-find-wide">
           <button
             type="button"
             onClick={() => window.open("/auth/find-id", "_blank", "width=500,height=600")}
@@ -147,22 +173,10 @@ navigate("/", { replace: true });
         </div>
 
         {/* 소셜 로그인 */}
-        <button
-          type="button"
-          onClick={goKakao}
-          disabled={loading}
-          className="m-btn kakao"
-          aria-label="카카오로 로그인"
-        >
+        <button type="button" onClick={goKakao} disabled={loading} className="m-btn kakao">
           카카오로 로그인
         </button>
-        <button
-          type="button"
-          onClick={goNaver}
-          disabled={loading}
-          className="m-btn naver"
-          aria-label="네이버로 로그인"
-        >
+        <button type="button" onClick={goNaver} disabled={loading} className="m-btn naver">
           네이버로 로그인
         </button>
       </form>

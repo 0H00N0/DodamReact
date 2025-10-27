@@ -198,3 +198,82 @@
   border: 1px solid var(--m-brand-200);
 }
 .m-card button:disabled { opacity: .6; cursor: not-allowed; }
+/* =========================
+   확장형 카드(큰 페이지용)
+   ========================= */
+.m-card.wide {
+  width: min(1100px, 95%);
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.m-card.xwide {
+  width: min(1280px, 96%);
+  margin: 0 auto;
+  padding: 32px;
+}
+/* ====== 로그인/회원가입 보조 유틸 ====== */
+
+/* 작은 버튼 사이즈 */
+.m-btn.sm {
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: .9rem;
+}
+
+/* 인라인(가로 나열) 보조 액션 영역 */
+.m-inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+/* 입력 + 버튼 조합 (좌:입력 1fr, 우:버튼 auto) */
+.m-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+/* 하단 50:50 버튼 */
+.m-actions.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* 가득 너비 버튼 */
+.m-wide { width: 100%; }
+
+/* 1:1 그리드 */
+.m-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* 로그인 - 찾기 버튼 길이 살짝 더 길어 보이도록(가로 패딩 증가) */
+.m-find-wide .m-btn { padding: 10px 14px; }
+
+/* 입력행: 입력 + 짧은 버튼(주소검색/상세주소 등) */
+.m-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+/* 작은(짧은) 버튼 */
+.m-btn.sm { min-width: 88px; padding: 8px 10px; }
+
+/* 인라인 액션(우측 정렬용) */
+.m-inline-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* 하단 액션: 50:50 분할 */
+.m-actions.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+/* 공용 레이아웃 유틸 */
+.m-wide { width: 100%; }
+.m-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
