@@ -1,55 +1,32 @@
+// src/pages/CommunityPage/CommunityPage.js
 import React from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
-import styles from "./CommunityPage.module.css"
+import { Routes, Route, Navigate } from "react-router-dom";
+import styles from "./CommunityPage.module.css";
 
-const CommunityPage = () => {
-  useScrollTopOnMount(true);
-  const location = useLocation();
-  const currentTab = location.pathname.split("/").pop();
+import CommunityBoardList from "./CommunityBoardList";
+import CommunityBoardDetail from "./CommunityBoardDetail";
+import CommunityBoardForm from "./CommunityBoardForm";
+import CommunityBoardEdit from "./CommunityBoardEdit";
 
-  const tabs = [
-    { title: "공지사항", path: "notice" },
-    { title: "이벤트", path: "event" },
-    { title: "커뮤니티", path: "community" },
-    { title: "문의", path: "inquiry" },
-    { title: "FAQ", path: "faq" },
-    { title: "회사소개", path: "company" },
-    { title: "스마트 보드", path: "smartboard" },
-  ];
-
+export default function CommunityPage() {
   return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>소통 페이지</h2>
+    <section className={styles.container}>
+      <Routes>
+        {/* /board/community */}
+        <Route index element={<CommunityBoardList />} />
 
-      {/* 전체 레이아웃: 왼쪽 메뉴 + 오른쪽 내용 */}
-      <div className={styles.layout}>
+        {/* /board/community/write */}
+        <Route path="write" element={<CommunityBoardForm />} />
 
+        {/* /board/community/:bnum */}
+        <Route path=":bnum" element={<CommunityBoardDetail />} />
 
-      {/* 왼쪽 세로 메뉴 */}
-        <nav className={styles.sidebar}>
-          <ul className={styles.menuList}>
-          {tabs.map((tab) => (
-            <li key={tab.path}>
-              <Link
-                to={`/board/${tab.path}`}
-                className={`${styles.menuLink} ${
-                    currentTab === tab.path ? styles.active : ""
-                  }`}
-                >
-                  {tab.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
+        {/* /board/community/:bnum/edit */}
+        <Route path=":bnum/edit" element={<CommunityBoardEdit />} />
 
-        {/* 오른쪽 내용 영역 */}
-        <div className={styles.content}>
-          <Outlet /> {/* Notice, Event, Community 각각 렌더링 */}
-        </div>
-      </div>
-    </div>
+        {/* 알 수 없는 경로 → 목록 */}
+        <Route path="*" element={<Navigate to="." replace />} />
+      </Routes>
+    </section>
   );
-};
-
-export default CommunityPage;
+}

@@ -2,12 +2,13 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import "./Admin.css";
+import "./Admin.pink.css";
 import AdminHeader from "./AdminHeader";
 import AdminSidebar from "./AdminSideBar";
 
 function Admin() {
   return (
-    <div className="admin-container">
+     <div className="admin-pink-theme">
       <AdminHeader />
       <div className="admin-main-wrapper">
         <AdminSidebar />

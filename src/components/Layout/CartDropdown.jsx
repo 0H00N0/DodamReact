@@ -8,6 +8,10 @@ const CartDropdown = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { items, totalItems, totalAmount, removeFromCart, clearCart } = useCart(); // ✅ clearCart 추가
   const dropdownRef = useRef(null);
+  const goDetail = (id) => {
+        navigate(`/products/${id}`);   // ✅ 복수형 라우트로 통일
+        onClose();
+   };
 
   // 장바구니 페이지로 이동
   const handleGoToCart = () => {
@@ -90,12 +94,24 @@ const CartDropdown = ({ isOpen, onClose }) => {
             <div className={styles.itemList}>
               {items.slice(0, 3).map((item, index) => (
                 <div key={`${item.id}-${index}`} className={styles.cartItem}>
-                  <div className={styles.itemImage}>
-                    <img src={item.image} alt={item.name} />
+                  <div className={styles.itemImage} onClick={() => goDetail(item.id)} style={{cursor:'pointer'}}>
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        onError={(e)=>{ e.currentTarget.style.visibility='hidden'; }}
+                      />
+                    ) : <div className={styles.imagePlaceholder} /> }
                   </div>
                   
                   <div className={styles.itemInfo}>
-                    <h4 className={styles.itemName}>{item.name}</h4>
+                    <h4
+                      className={styles.itemName}
+                      onClick={() => goDetail(item.id)}
+                      style={{cursor:'pointer'}}
+                    >
+                      {item.name}
+                    </h4>
                     <p className={styles.itemPrice}>
                       ₩{item.price.toLocaleString()}
                     </p>

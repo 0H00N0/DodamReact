@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 
+import "./MemberTheme.css";
+
 export default function ReviewList() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +32,8 @@ export default function ReviewList() {
   const stars = (n) => (n ? "★".repeat(Math.max(0, Math.min(5, n))) : "-");
 
   return (
+    <div className="member-page">
+      <div className="m-card wide">
     <div style={{ padding: 24 }}>
       <h2 style={{ marginBottom: 16 }}>내 리뷰</h2>
 
@@ -67,6 +71,8 @@ export default function ReviewList() {
           </div>
         </div>
       ))}
+    </div>
+      </div>
     </div>
   );
 }
