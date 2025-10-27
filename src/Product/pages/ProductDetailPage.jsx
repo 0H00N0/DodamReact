@@ -190,12 +190,12 @@ export default function ProductDetailPage() {
     if (!newReview.revtext.trim()) return alert("내용을 입력해주세요.");
     try {
       await axios.post("http://localhost:8080/reviews", {
-  pronum: Number(pronum),
-  mnum: Number(user.mnum),
-  revtitle: newReview.revtitle.trim(),
-  revtext: newReview.revtext.trim(),
-  revscore: 5,
-});
+        pronum: Number(pronum),
+        mnum: Number(user.mnum),
+        revtitle: newReview.revtitle.trim(),
+        revtext: newReview.revtext.trim(),
+        revscore: 5,
+      });
 
       alert("리뷰가 등록되었습니다!");
       setNewReview({ revtitle: "", revtext: "" });
@@ -205,7 +205,6 @@ export default function ProductDetailPage() {
       alert("리뷰 등록 실패");
     }
   };
-  
 
   const startEdit = (r) => {
     setEditingReview({ ...r });
@@ -270,12 +269,13 @@ export default function ProductDetailPage() {
 
   return (
     <div className={styles.detailContainer}>
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100"
-      >
-        ← 뒤로가기
-      </button>
+      {/* ✅ Tailwind 대신 모듈 스타일로 가시성 확보 */}
+      <div className={styles.backRow}>
+        <button onClick={() => navigate(-1)} className={styles.backBtn}>
+          <span className={styles.backIcon}>←</span>
+          뒤로가기
+        </button>
+      </div>
 
       {/* 상품 정보 */}
       <div className={styles.detailWrapper}>

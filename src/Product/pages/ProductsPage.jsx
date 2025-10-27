@@ -80,7 +80,13 @@ export default function ProductsPage() {
         <div className="py-10 text-center text-gray-500">등록된 상품이 없습니다.</div>
       )}
 
-      <Pagination page={page} totalPages={totalPages} onChange={onPageChange} />
+      {/* ✅ 가시성 보장되는 페이지네이션 */}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        onChange={onPageChange}
+        className={styles.pager}
+      />
     </div>
   );
 }

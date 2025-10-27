@@ -76,3 +76,97 @@
   font-weight: 700;
   color: var(--ink-700);
 }
+/* ===== 뒤로가기 버튼 ===== */
+.backRow {
+  margin-bottom: 16px;
+}
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--pink-200);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink-700);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  user-select: none;
+}
+.backBtn:hover {
+  background: var(--pink-25);
+  border-color: var(--pink-300);
+}
+.backIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+.detailContainer {
+  /* 기존 규칙이 있다면 아래 두 줄만 추가/보강 */
+  padding-top: 8px;
+}
+/* ===== 페이지네이션 ===== */
+.pager {
+  margin: 24px 0 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 공통 Pagination 컴포넌트가 어떤 태그를 쓰든 강제 가독성 확보 */
+.pager :where(button, a, span) {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+/* 버튼/링크 형태(이전/다음) 가시성 강화 */
+.pager :where(button, a) {
+  min-width: 64px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--pink-200);
+  border-radius: 10px;
+  background: #fff;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 6px;
+}
+.pager :where(button, a):hover {
+  background: var(--pink-25);
+  border-color: var(--pink-300);
+}
+
+/* 현재 페이지 강조 */
+.pager .current,
+.pager .active {
+  color: var(--pink-500);
+  font-weight: 800;
+}
+
+/* 비활성 상태 처리 */
+.pager :where(button[disabled], a.disabled) {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* 만약 공통 컴포넌트가 .pagination 클래스를 갖는다면 그것도 같이 커버 */
+:where(.pagination) :where(button, a, span) {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+:where(.pagination) :where(button, a) {
+  min-width: 64px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--pink-200);
+  border-radius: 10px;
+  background: #fff;
+  margin: 0 6px;
+}
+:where(.pagination) :where(button, a):hover {
+  background: var(--pink-25);
+  border-color: var(--pink-300);
+}
