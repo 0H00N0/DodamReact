@@ -166,43 +166,66 @@ const [revscore, setRevscore] = useState(0);
     if (pronum) load();
   }, [pronum]);
 
-  // ✅ 리뷰 불러오기
-  const loadReviews = async () => {
-    try {
-      const res = await axios.get(`http://localhost:8080/reviews/${pronum}`);
-      setReviews(res.data);
-    } catch (e) {
-      console.error("리뷰 불러오기 오류:", e);
-    }
-  };
+ //  리뷰 불러오기
+const productId = Number(pronum);  // 숫자 변환 확실히
 
-  useEffect(() => {
-    loadReviews();
-  }, [pronum]);
+const loadReviews = async (id) => {
+  try {
+    const res = await axios.get(`http://localhost:8080/reviews/${id}`, {
+      withCredentials: true,
+    });
+    console.log("리뷰 목록:", res.data);
+    return res.data;
+  } catch (err) {
+    console.error("리뷰 불러오기 오류:", err);
+  }
+};
+
+useEffect(() => {
+  if (!productId) return; // pronum이 없으면 호출하지 않음
+  loadReviews(productId).then((data) => {
+    if (data) setReviews(data); // state에 저장
+  });
+}, [productId]);
 
   // ✅ 리뷰 등록
   const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!user) return navigate("/login");
-    if (!newReview.revtext.trim()) return alert("내용을 입력해주세요.");
+  e.preventDefault();
 
-    try {
-      await axios.post("http://localhost:8080/reviews", dto,{
-        pronum,
-        mnum: user.mnum,
-        revtitle: newReview.revtitle,
-        revtext: newReview.revtext,
-        revscore: newReview.revscore,
-        withCredentials: true,
-      });
-      alert("리뷰가 등록되었습니다!");
-      setNewReview({ revtitle: "", revtext: "", revscore: 5 });
-      loadReviews();
-      setTab("view");
-    } catch {
-      alert("리뷰 등록 실패");
-    }
+  if (!user || !user.mnum) {
+    console.log("user 정보 확인:", user);
+    alert("로그인 후 작성 가능합니다.");
+    return;
+  }
+
+  // 숫자 타입 변환
+  const reviewPayload = {
+    revtitle: revtitle || "",
+    revtext: revtext || "",
+    revscore: Number(revscore),      // 반드시 숫자
+    pronum: Number(pronum),          // 상품 번호
+    mnum: Number(user.mnum),         // 로그인한 회원 번호
   };
+
+  console.log("POST payload:", reviewPayload); // 확인용
+
+  try {
+    const res = await axios.post("http://localhost:8080/reviews", reviewPayload, {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("리뷰 작성 완료:", res.data);
+    alert("리뷰가 등록되었습니다.");
+    // 작성 후 리뷰 목록 새로 불러오기
+    loadReviews(pronum);
+  } catch (err) {
+    console.error("리뷰 작성 오류:", err.response || err);
+    alert("리뷰 작성에 실패했습니다.");
+  }
+};
 
   // ✅ 리뷰 수정 시작
   const startEdit = (review) => {
@@ -275,7 +298,7 @@ const [revscore, setRevscore] = useState(0);
   if (loading) return <div className="py-10 text-center text-gray-500">불러오는 중…</div>;
   if (err) return <div className="py-10 text-center text-red-600">{err}</div>;
 
-  const { proname, proprice, probrand, prodetail, prodetailimage, status, createdAt, updatedAt } =
+  const { proname, proprice, probrand, prodetail, prodetailimage, status, createdAt, updatedAt, proborrow } =
     product;
 
   return (
@@ -301,7 +324,7 @@ const [revscore, setRevscore] = useState(0);
         <div className="flex flex-col gap-4">
           <h1 className="text-2xl font-bold">{proname}</h1>
           <div className="text-lg font-semibold">
-            {proprice ? Number(proprice).toLocaleString() + "원" : "가격정보 없음"}
+            {proborrow ? Number(proborrow).toLocaleString() + "원" : "가격정보 없음"}
           </div>
           <div>
             <span className="inline-block text-xs px-2 py-1 rounded bg-gray-100">{status}</span>

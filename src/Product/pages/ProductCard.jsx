@@ -120,7 +120,7 @@ export default function ProductCard({ item, onClick }) {
         <div className="ProductCard_reviewOnlyRow__7I5hQ">리뷰 0개</div>
         <div className="ProductCard_priceContainer__lv3Ss">
           <span className="ProductCard_price__9+l+D">
-            {item.proprice != null ? Number(item.proprice).toLocaleString() + "원" : "가격 미정"}
+            {item.proborrow != null ? Number(item.proborrow).toLocaleString() + "원" : "가격 미정"}
           </span>
         </div>
       </div>
