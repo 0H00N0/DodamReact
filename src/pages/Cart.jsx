@@ -37,7 +37,7 @@ const Cart = () => {
   };
 
   const handleContinueShopping = () => navigate('/');
-  const handleProductClick = (productId) => navigate(`/product/${productId}`);
+  const handleProductClick = (productId) => navigate(`/products/${productId}`);
 
   // ✅ 변경: 실제 주문 호출
   const handleCheckout = async () => {
@@ -100,7 +100,11 @@ const Cart = () => {
                 {/* 상품 이미지 */}
                 <div className={styles.itemImage} onClick={() => handleProductClick(item.id)}>
                   {item.image ? (
-                    <img src={item.image} alt={item.name} />
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      onError={(e)=>{ e.currentTarget.style.visibility='hidden'; }}
+                    />
                   ) : (
                     <div className={styles.imagePlaceholder} />
                   )}
