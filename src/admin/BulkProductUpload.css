@@ -1,105 +1,32 @@
-/* BulkProductUpload.css */
+/* BulkProductUpload.css — 테마 친화적 최소 보정 */
 
-.bulk-upload-container {
-  max-width: 800px;
+/* 카드 폭만 살짝 제한 (테마 카드 스타일은 .panel 규칙이 적용됨) */
+.bulk-upload-card {
+  max-width: 880px;
   margin: 0 auto;
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.bulk-upload-container h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  color: #333;
-  font-weight: bold;
+/* 제목과 액션 간 간격 */
+.bulk-upload-card .page-actions {
+  margin-bottom: 10px;
 }
 
-.bulk-upload-container .form-group {
-  margin-bottom: 1.2rem;
+/* 힌트 텍스트는 보조 톤(테마 색상 변수 활용) */
+.bulk-upload-card .hint {
+  margin-top: 6px;
+  color: var(--ap-muted);
+  font-size: 0.92rem;
 }
 
-.bulk-upload-container label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.6rem;
-  color: #444;
+/* 파일 인풋은 테마 인풋 스타일을 그대로 사용하되 높이만 살짝 보정 */
+.bulk-upload-card input[type="file"].m-input {
+  padding: 8px 10px;
 }
 
-.bulk-upload-container input[type="file"] {
-  display: block;
-  width: 100%;
-  padding: 0.4rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-}
-
-.bulk-upload-container input[type="file"]:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
-}
-
-.bulk-upload-container .form-actions {
+/* 버튼을 우측 정렬 */
+.bulk-upload-card .m-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end;  /* 👉 오른쪽 끝 정렬 */
   gap: 10px;
-  margin-top: 1.5rem;
-}
-
-.bulk-upload-container .admin-btn {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-
-.bulk-upload-container .admin-btn.primary {
-  background: #007bff;
-  border: none;
-  color: #fff;
-}
-
-.bulk-upload-container .admin-btn.primary:hover {
-  background: #0069d9;
-}
-
-.bulk-upload-container .admin-btn.secondary {
-  background: #f1f1f1;
-  border: none;
-  color: #333;
-}
-
-.bulk-upload-container .admin-btn.secondary:hover {
-  background: #e2e2e2;
-}
-
-/* 이미지 미리보기 (멀티파일 업로드 시 작은 썸네일) */
-.bulk-upload-container .image-preview-list {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 0.8rem;
-}
-
-.bulk-upload-container .image-preview-item {
-  width: 100px;
-  height: 100px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #fafafa;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.bulk-upload-container .image-preview-item img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  margin-top: 1.2rem;
 }

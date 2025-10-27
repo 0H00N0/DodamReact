@@ -160,10 +160,17 @@ function Dashboard() {
         <div className="chart-container">
           <h2>월별 매출</h2>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={dashboardData.monthlySalesData}>
+            <LineChart
+              data={dashboardData.monthlySalesData}
+              margin={{ left: 28, right: 16, top: 8, bottom: 8 }}  // ← 여백 추가
+            >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis tickFormatter={formatNumber} />
+              <XAxis dataKey="name" tickMargin={8} />
+              <YAxis
+                tickFormatter={formatNumber}
+                width={76}             // ← 축 라벨 폭 확보
+                tickMargin={8}         // ← 눈금·라벨 간격
+              />
               <Tooltip formatter={(value) => formatCurrency(value)} />
               <Legend />
               <Line type="monotone" dataKey="sales" stroke="#8884d8" activeDot={{ r: 8 }} />
