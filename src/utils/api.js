@@ -3,7 +3,7 @@ import axios from "axios";
 
 /** API Base */
 export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE || "http://localhost:8080";
+  process.env.REACT_APP_API_BASE || "http://3.36.41.252:8080";
 
 /** axios instance */
 export const api = axios.create({
