@@ -1,5 +1,6 @@
 let backendHost;
 const hostname = window && window.location && window.location.hostname;
+
 console.log("2222222222222--Hostname detected:", hostname);
 if (hostname === "3.38.29.41") {
   backendHost = "http://3.38.29.41:8080";
