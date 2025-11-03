@@ -22,7 +22,7 @@ export function normalizeImage(url) {
     return u;
   }
 
-  const base = (process.env.REACT_APP_API_BASE || "http://localhost:8080").replace(/\/$/, "");
+  const base = (process.env.REACT_APP_API_BASE || "http://3.38.29.41:8080").replace(/\/$/, "");
   const path = u.startsWith("/") ? u : `/${u}`;
   return base + path;
 }

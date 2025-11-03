@@ -3,13 +3,14 @@ import axios from "axios";
 
 /** API Base */
 export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE || "http://localhost:8080";
+  process.env.REACT_APP_API_BASE || "http://3.38.29.41:8080";
 
 /** axios instance */
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   timeout: 90000,
+  // 아래 두 값은 기본값과 동일하지만, 명시 유지해도 무방
   xsrfCookieName: "XSRF-TOKEN",   // Spring Security 기본 쿠키명
   xsrfHeaderName: "X-XSRF-TOKEN", // 이 헤더로 전송
 });
@@ -20,39 +21,17 @@ api.defaults.headers.put["Content-Type"]   = "application/json;charset=UTF-8";
 api.defaults.headers.patch["Content-Type"] = "application/json;charset=UTF-8";
 
 /* -------------------------------------------------
- * CSRF: 상태 변경 전 쿠키 보장 & 403 시 자동 재시도
+ * CSRF: 서버가 CSRF를 비활성화했어도 안전하게 동작하도록 no-op 처리
  * ------------------------------------------------*/
-let _csrfPromise = null;
-let _csrfStamp = 0;
 
-/** ✅ CSRF 토큰 쿠키(XSRF-TOKEN) 보장 */
-export async function ensureCsrfCookie(force = false) {
-  const hasCookie =
-    typeof document !== "undefined" && document.cookie.includes("XSRF-TOKEN=");
-  const now = Date.now();
-
-  if (!force && hasCookie) return;
-
-  if (_csrfPromise && now - _csrfStamp < 1000) {
-    return _csrfPromise;
-  }
-
-  _csrfStamp = now;
-  _csrfPromise = (async () => {
-    try {
-      // ✔️ 토큰 강제 생성/쿠키 발급 전용 엔드포인트
-      await api.get("/csrf", { params: { u: Date.now() } });
-    } catch {
-      // 무시(목적: 쿠키 발급 유도)
-    }
-  })();
-
-  return _csrfPromise.finally(() => {
-    _csrfPromise = null;
-  });
+/** ✅ (패치) 더 이상 /csrf 엔드포인트를 호출하지 않음 */
+export async function ensureCsrfCookie() {
+  // CSRF 비활성화 환경에서 500을 방지하기 위해 아무 것도 하지 않음
+  console.log("123456123465[api] ensureCsrfCookie CALLED — should be no-op");
+  return;
 }
 
-/** 쿠키에서 XSRF-TOKEN 추출 */
+/** 쿠키에서 XSRF-TOKEN 추출 (있으면 헤더로 실어 보냄) */
 function readCsrfFromCookie() {
   if (typeof document === "undefined") return null;
   const m = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
@@ -60,35 +39,31 @@ function readCsrfFromCookie() {
 }
 
 /* ---------- 요청 인터셉터 ----------
- * - 상태변경(POST/PUT/PATCH/DELETE)인데 헤더가 없으면 토큰 확보 → 헤더 주입
+ * - 상태변경(POST/PUT/PATCH/DELETE)일 때, 쿠키에 토큰이 있으면 헤더 주입
+ * - /csrf 호출은 절대 하지 않음
  */
 api.interceptors.request.use(async (cfg) => {
   cfg.withCredentials = true;
 
   const method = (cfg.method || "get").toUpperCase();
   const isStateChanging = !["GET", "HEAD", "OPTIONS"].includes(method);
+  const token = readCsrfFromCookie();
 
-  // 헤더가 없으면 토큰 확보 시도
-  if (isStateChanging && !cfg.headers?.["X-XSRF-TOKEN"]) {
-    await ensureCsrfCookie(); // 필요하면 발급
-    const token = readCsrfFromCookie();
-    if (token) {
-      cfg.headers = cfg.headers || {};
-      cfg.headers["X-XSRF-TOKEN"] = token;
-    }
-  } else {
-    // 토큰이 이미 있다면 유지, 없으면(읽기요청 등) 그냥 진행
-    const token = readCsrfFromCookie();
-    if (token && !cfg.headers?.["X-XSRF-TOKEN"]) {
-      cfg.headers = cfg.headers || {};
+  if (token) {
+    cfg.headers = cfg.headers || {};
+    // 상태변경/조회 상관없이 있으면 실어 보냄(무해)
+    if (!cfg.headers["X-XSRF-TOKEN"]) {
       cfg.headers["X-XSRF-TOKEN"] = token;
     }
   }
 
+  // ❌ 여기서 /csrf를 호출하거나 재시도하지 않음
   return cfg;
 });
 
-/** 에러 인터셉터: 메시지 표준화 + CSRF 403 자동 재시도(1회) */
+/** 에러 인터셉터: 메시지 표준화
+ *  - (패치) 403을 이유로 /csrf 재시도 로직을 완전히 제거
+ */
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
@@ -96,27 +71,7 @@ api.interceptors.response.use(
     const data = err?.response?.data;
     const cfg = err?.config || {};
 
-    const maybeInvalidCsrf =
-      status === 403 &&
-      !cfg.__retriedForCsrf &&
-      (String(data?.message || data?.error || "").toLowerCase().includes("csrf") ||
-        String(data).toLowerCase().includes("csrf"));
-
-    if (maybeInvalidCsrf) {
-      try {
-        await ensureCsrfCookie(true);
-        cfg.__retriedForCsrf = true;
-        const token = readCsrfFromCookie();
-        if (token) {
-          cfg.headers = cfg.headers || {};
-          cfg.headers["X-XSRF-TOKEN"] = token;
-        }
-        return api.request(cfg);
-      } catch {
-        // 재시도 실패 → 그대로 떨어뜨림
-      }
-    }
-
+    // 표준 메시지 정리
     const serverMsg =
       (typeof data === "string" && data) ||
       data?.error ||
@@ -150,7 +105,7 @@ export async function getWithSession(path, config) {
       typeof sessionStorage !== "undefined" && sessionStorage.getItem("auth_hint");
     if (!hint) {
       return { login: false };
-    }
+      }
   }
 
   try {

@@ -15,7 +15,7 @@ module.exports = function (app) {
       "/products",
     ],
     createProxyMiddleware({
-      target: "http://localhost:8080",
+      target: "http://3.38.29.41:8080",
       changeOrigin: true,
       secure: false,
       // 필요 시 cookieDomainRewrite: "localhost"
